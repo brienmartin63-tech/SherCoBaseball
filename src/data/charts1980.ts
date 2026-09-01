@@ -9,6 +9,7 @@ export interface BallTargetRule {
   coordinate?: Coordinate;
   fielder?: FielderPosition;
   squaresInFront?: number;
+  squaresBehind?: number;
   spray?: SprayRule;
 }
 

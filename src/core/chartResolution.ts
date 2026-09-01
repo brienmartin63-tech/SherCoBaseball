@@ -57,17 +57,37 @@ export function directPitchResult(roll: number, walkStrikeout: string): "WALK" |
   return undefined;
 }
 
-function moveTowardHome(coordinate: Coordinate, squares: number): Coordinate {
+function fieldLane(coordinate: Coordinate): Coordinate {
+  if (coordinate.row === coordinate.column) return { row: 1, column: 1 };
+  return coordinate.row < coordinate.column ? { row: 0, column: 1 } : { row: 1, column: 0 };
+}
+
+/** Move directly toward home on the fielder's RF, CF, or LF lane. */
+export function moveInFrontOfFielder(coordinate: Coordinate, squares: number): Coordinate {
+  const lane = fieldLane(coordinate);
   return {
-    row: Math.max(1, coordinate.row - squares),
-    column: Math.max(1, coordinate.column - squares),
+    row: Math.max(1, coordinate.row - lane.row * squares),
+    column: Math.max(1, coordinate.column - lane.column * squares),
+  };
+}
+
+/** Move directly away from home on the same RF, CF, or LF lane. */
+export function moveBehindFielder(coordinate: Coordinate, squares: number): Coordinate {
+  const lane = fieldLane(coordinate);
+  return {
+    row: Math.min(28, coordinate.row + lane.row * squares),
+    column: Math.min(28, coordinate.column + lane.column * squares),
   };
 }
 
 function targetCoordinate(rule: BallTargetRule, batter: Batter, pitcher: Pitcher, park: Park): Coordinate | undefined {
   const base = rule.coordinate ?? park.fielders.find((fielder) => fielder.position === rule.fielder)?.at;
   if (!base) return undefined;
-  const relative = rule.squaresInFront ? moveTowardHome(base, rule.squaresInFront) : base;
+  const relative = rule.squaresInFront
+    ? moveInFrontOfFielder(base, rule.squaresInFront)
+    : rule.squaresBehind
+      ? moveBehindFielder(base, rule.squaresBehind)
+      : base;
   const hand = effectiveBattingHand(batter.bats, pitcher.throws);
   const shouldMirror = rule.spray === "opposite" ? hand === "R" : rule.spray !== "fixed" && hand === "L";
   return shouldMirror ? mirrorForLeftHandedBatter(relative) : { ...relative };

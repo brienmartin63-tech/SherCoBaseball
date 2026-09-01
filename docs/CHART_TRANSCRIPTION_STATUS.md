@@ -18,6 +18,14 @@ This inventory is the source-of-truth boundary between chart material that the p
 
 The current vertical slice intentionally stops when a chart result requires fielding, runner movement, a count continuation, or another subsystem that has not yet been implemented. The interface labels that boundary instead of silently inventing a result.
 
+## Confirmed coordinate semantics
+
+- Coordinates are always read **row-column**.
+- “In front of” and “behind” follow the straight field lane through the named fielder; they are not automatically diagonal movements.
+- RF occupies `8-19`: one square in front is `8-18`, and one square behind is `8-20`.
+- CF occupies `18-18`: two squares in front is `16-16`, and five squares behind is `23-23`.
+- LF occupies `19-8`: one square in front is `18-8`, and one square behind is `20-8`.
+
 ## Supplied but not yet executable
 
 | Area | Remaining work |

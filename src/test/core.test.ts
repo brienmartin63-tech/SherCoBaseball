@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { rollOneDie, rollTwoDice, shercoNumber } from "../core/dice";
-import { directPitchResult, resolveBasesEmptyBattedBall, resolveBasesEmptySpecialEvent, specialEventPitcherRate, withinHomeRunRating } from "../core/chartResolution";
+import { directPitchResult, moveBehindFielder, moveInFrontOfFielder, resolveBasesEmptyBattedBall, resolveBasesEmptySpecialEvent, specialEventPitcherRate, withinHomeRunRating } from "../core/chartResolution";
 import { advanceTestBatter, canAdvanceTestBatter, createInitialGame, rollPitch, rollResolution } from "../core/game";
 import { mirrorForLeftHandedBatter, nearestFielder, squaresBetween } from "../core/geometry";
 import { classifyPitch, hitNumber, pitchResultLabel } from "../core/pitching";
@@ -64,6 +64,23 @@ describe("1980 bases-empty chart engine", () => {
 
     const pulledFly = resolveBasesEmptyBattedBall("PROBABLE_OUT", 45, philadelphia.lineup[0], kansasCity.starter, park, 0);
     expect(pulledFly.ballAt).toEqual({ row: 20, column: 18 });
+  });
+
+  it("moves in front of and behind fielders on straight field lanes", () => {
+    expect(moveInFrontOfFielder({ row: 8, column: 19 }, 1)).toEqual({ row: 8, column: 18 });
+    expect(moveInFrontOfFielder({ row: 19, column: 8 }, 1)).toEqual({ row: 18, column: 8 });
+    expect(moveInFrontOfFielder({ row: 18, column: 18 }, 2)).toEqual({ row: 16, column: 16 });
+    expect(moveBehindFielder({ row: 18, column: 18 }, 5)).toEqual({ row: 23, column: 23 });
+  });
+
+  it("places relative Probable Out liners on their named straight lanes", () => {
+    const liner = resolveBasesEmptyBattedBall("PROBABLE_OUT", 15, philadelphia.lineup[0], kansasCity.starter, park, 0);
+    const rightFielder = park.fielders.find((fielder) => fielder.position === "RF")!;
+    expect(rightFielder.at).toEqual({ row: 8, column: 19 });
+    expect(liner.ballAt).toEqual({ row: 8, column: 18 });
+
+    const centerLiner = resolveBasesEmptyBattedBall("PROBABLE_OUT", 25, philadelphia.lineup[0], kansasCity.starter, park, 0);
+    expect(centerLiner.ballAt).toEqual({ row: 16, column: 16 });
   });
 
   it("advances deterministically from pitch to chart to a ball on the field", () => {
@@ -241,7 +258,7 @@ describe("complete printed ratings", () => {
 
 describe("imported USBL parks", () => {
   const parks = rawParks as unknown as Park[];
-  const expectedDefense = ["1B:10-4", "2B:10-7", "3B:4-10", "C:2-2", "CF:18-18", "LF:8-19", "P:6-6", "RF:19-8", "SS:7-10"];
+  const expectedDefense = ["1B:10-4", "2B:10-7", "3B:4-10", "C:2-2", "CF:18-18", "LF:19-8", "P:6-6", "RF:8-19", "SS:7-10"];
 
   it("contains five complete 28 by 28 parks", () => {
     expect(parks).toHaveLength(5);
