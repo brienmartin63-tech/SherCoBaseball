@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { hasScoreboardSpacerAfter, inningLabel, scoreboardInnings } from "../core/scoreboard";
+import { hasScoreboardSpacerAfter, inningLabel, scoreboardInnings, scoreboardTeamName } from "../core/scoreboard";
 import type { GameState, Team } from "../core/types";
 
 interface Props {
@@ -28,13 +28,15 @@ export function Scoreboard({ game, away, home }: Props) {
         : <th className="inning-spacer" aria-hidden="true" key={`spacer-${inning}`} />]
       : []),
   ]);
-  const line = (team: Team, score: GameState["away"], isBatting: boolean) => (
+  const line = (team: Team, side: "away" | "home", score: GameState["away"], isBatting: boolean) => (
     <tr>
       <th scope="row" className="team-column">
         <span className={isBatting ? "at-bat-dot active" : "at-bat-dot"} />
-        {team.abbreviation}
+        {scoreboardTeamName(team, side)}
       </th>
+      <td className="team-spacer" aria-hidden="true" />
       {inningCells(score)}
+      <td className="totals-spacer" aria-hidden="true" />
       <td className="total total-runs">{score.runs}</td>
       <td className="total total-hits">{score.hits}</td>
       <td className="total total-errors">{score.errors}</td>
@@ -52,13 +54,15 @@ export function Scoreboard({ game, away, home }: Props) {
           <thead>
             <tr>
               <th className="team-column">Team</th>
+              <th className="team-spacer" aria-hidden="true" />
               {inningCells()}
+              <th className="totals-spacer" aria-hidden="true" />
               <th className="total total-runs">R</th><th className="total total-hits">H</th><th className="total total-errors">E</th>
             </tr>
           </thead>
           <tbody>
-            {line(away, game.away, game.half === "top")}
-            {line(home, game.home, game.half === "bottom")}
+            {line(away, "away", game.away, game.half === "top")}
+            {line(home, "home", game.home, game.half === "bottom")}
           </tbody>
         </table>
       </div>

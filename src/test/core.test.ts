@@ -5,7 +5,7 @@ import { classifyPitch, hitNumber, pitchResultLabel } from "../core/pitching";
 import { normalize1980Ratings } from "../core/players";
 import { formatBatterRating, formatPitcherRating } from "../core/ratings";
 import { actionAllowed, shouldAttemptExtraBase, shouldAutoStealSecond } from "../core/rules";
-import { hasScoreboardSpacerAfter, inningLabel, scoreboardInnings } from "../core/scoreboard";
+import { hasScoreboardSpacerAfter, inningLabel, scoreboardInnings, scoreboardTeamName } from "../core/scoreboard";
 import type { Park } from "../core/types";
 import rawParks from "../data/parks.json";
 import { kansasCity, philadelphia } from "../data/demo";
@@ -119,6 +119,11 @@ describe("imported USBL parks", () => {
 });
 
 describe("scoreboard inning line", () => {
+  it("uses the visiting city and home nickname on the park scoreboard", () => {
+    expect(scoreboardTeamName(philadelphia, "away")).toBe("Philadelphia");
+    expect(scoreboardTeamName(kansasCity, "home")).toBe("Royals");
+  });
+
   it("groups regulation innings with a permanent X column for the tenth", () => {
     expect(scoreboardInnings(1)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     expect(inningLabel(10)).toBe("X");

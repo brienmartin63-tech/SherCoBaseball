@@ -10,6 +10,7 @@ import { loadGame, saveGame } from "./core/storage";
 import type { Park } from "./core/types";
 import { demoGame } from "./data/demo";
 import rawParks from "./data/parks.json";
+import shercoLogo from "./assets/sherco-logo-2026.png";
 
 type View = "game" | "box" | "pbp" | "stats" | "league";
 const parks = rawParks as unknown as Park[];
@@ -61,9 +62,7 @@ export function App() {
     <div className="app-shell">
       <header className="app-header">
         <div className="brand">
-          <div className="brand-ball" aria-hidden="true"><span /></div>
-          <div><p>SherCo</p><h1>Grand Slam</h1></div>
-          <span className="edition">1980 edition</span>
+          <img className="brand-logo" src={shercoLogo} alt="SherCo Grand Slam Baseball Game — Since 1968, The Most Fun To Play" />
         </div>
         <nav className="primary-nav" aria-label="Application sections">
           {nav.map(({ id, label, icon: Icon }) => (
@@ -116,7 +115,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Foundation build 0.1.0 · Five test parks imported</span>
+        <span>Foundation build 0.1.6 · Five test parks imported</span>
       </footer>
     </div>
   );

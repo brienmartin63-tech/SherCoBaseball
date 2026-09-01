@@ -2,7 +2,7 @@
 
 A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, designed for GitHub Pages and long-running SLOBS leagues.
 
-## Foundation build 0.1.4
+## Foundation build 0.1.6
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
 
@@ -41,6 +41,17 @@ Pitch rolls now present the decisive result prominently as `33 — Probable Out`
 - Batter displays now include clutch (`#`), offensive grade, home-run number, triple number, and baserunning stars exactly where applicable.
 - Starting-pitcher and bullpen displays now show the complete printed rating: prefix, pitching rate, innings of effectiveness, fatigued rate, and BB/K range.
 - Probable Hit and its dice-log entry use a brighter green background for faster recognition.
+
+### 0.1.5 home-park scoreboard labels
+
+- A permanent gutter separates the team-name column from the first inning.
+- A second permanent gutter separates the inning line from the R-H-E totals.
+- The visiting club is identified by its full city name; the home club is identified by its full nickname.
+
+### 0.1.6 official program branding
+
+- The supplied 2026 SherCo Grand Slam Baseball Game logo now occupies the upper-left program header.
+- The logo retains its original proportions and transparent background without increasing the header height.
 
 Not yet implemented:
 
