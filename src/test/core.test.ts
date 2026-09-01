@@ -227,6 +227,8 @@ describe("bases-empty fielding and running", () => {
     expect(fielded.outs).toBe(1);
     expect(fielded.awayBatterIndex).toBe(1);
     expect(fielded.events[0].officialText).toContain("Amos Otis");
+    expect(fielded.lastFielding).toMatchObject({ fielderName: "Amos Otis", fieldingDistance: 1, targetBase: "FIRST" });
+    expect(startNextPlateAppearance(fielded).lastFielding).toBeUndefined();
   });
 
   it("charges movement before an infielder throws to first", () => {

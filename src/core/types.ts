@@ -167,4 +167,5 @@ export interface GameState {
   events: PlayEvent[];
   runners: BaseRunners;
   pendingFielding?: FieldingAttempt;
+  lastFielding?: FieldingAttempt;
 }

@@ -4,9 +4,15 @@ A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, des
 
 The durable design decisions, confirmed house rules, scoring requirements, stadium-import conventions, and development priorities are preserved in [Project Checkpoint 0.1.7](docs/PROJECT_CHECKPOINT_0.1.7.md).
 
-## Rules-engine build 0.3.2
+## Rules-engine build 0.3.3
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
+
+### 0.3.3 resolution console
+
+- Recasts the wide-screen resolution wing as a modern dark scorer's console based on Brien's grid sketch.
+- The large call and description sit above a structured fielding board showing the roll, fielder, DEF, movement, base distance, total route, allowance, remainder, and target.
+- The completed fielding calculation remains available until the next batter begins.
 
 ### 0.3.2 side resolution wing
 

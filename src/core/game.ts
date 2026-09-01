@@ -301,6 +301,7 @@ function finishPlateAppearance(
     outs,
     activePitcherRate,
     runners,
+    lastFielding: state.pendingFielding ?? state.lastFielding,
     pendingFielding: undefined,
     ballAt: next.ballAt,
     resolution: {
@@ -452,6 +453,7 @@ export function startNextPlateAppearance(state: GameState, clearBasesForTesting 
     ...state,
     runners,
     ballAt: undefined,
+    lastFielding: undefined,
     pendingFielding: undefined,
     pitchCount: 0,
     lastRoll: undefined,

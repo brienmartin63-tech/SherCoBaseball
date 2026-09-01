@@ -147,7 +147,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Rules-engine build 0.3.2 · Side resolution wing</span>
+        <span>Rules-engine build 0.3.3 · Resolution console</span>
       </footer>
     </div>
   );

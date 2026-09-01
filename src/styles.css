@@ -86,28 +86,31 @@ main { padding: 14px 18px 24px; }
 
 .game-stage { position: relative; max-width: 1144px; margin: 0 auto; }
 .game-workspace { max-width: 1144px; margin: 0; display: grid; grid-template-columns: 320px 480px 320px; justify-content: center; gap: 12px; align-items: start; }
-.play-resolution-wing { display: none; position: absolute; top: 0; width: min(340px, calc((100vw - 1180px) / 2)); min-height: 178px; padding: 17px 18px 18px; border: 1px solid #cbd5df; border-radius: 10px; background: #f7f9fb; box-shadow: var(--shadow); overflow: hidden; }
-.play-resolution-wing.side-away { right: calc(100% + 12px); text-align: right; border-right: 5px solid #64748b; }
-.play-resolution-wing.side-home { left: calc(100% + 12px); text-align: left; border-left: 5px solid #64748b; }
-.play-resolution-wing > p { margin: 0 0 11px; color: #748397; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; }
+.play-resolution-wing { --wing-accent: #6f849a; display: none; position: absolute; top: 0; width: min(360px, calc((100vw - 1180px) / 2)); border: 1px solid #31465b; border-radius: 11px; background: #091522; color: #f4f8fb; box-shadow: 0 16px 42px rgba(4, 14, 25, .24); overflow: hidden; }
+.play-resolution-wing.side-away { right: calc(100% + 12px); }
+.play-resolution-wing.side-home { left: calc(100% + 12px); }
+.wing-header { min-height: 38px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; gap: 9px; border-bottom: 1px solid #31465b; background: #102338; }
+.wing-header span { color: #8ea3b7; font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; }
+.wing-header b { color: #eaf2f8; font: 700 12px "Barlow Condensed", sans-serif; text-transform: uppercase; letter-spacing: .035em; }
+.wing-hero { min-height: 132px; padding: 16px 15px 17px; border-bottom: 4px solid var(--wing-accent); background: linear-gradient(145deg, #14283d 0%, #0c1b2b 68%, #091522 100%); }
 .wing-call { display: flex; align-items: baseline; gap: 10px; }
-.side-away .wing-call { justify-content: flex-end; }
-.wing-call strong { color: #25364a; font: 700 clamp(34px, 2.8vw, 52px)/.9 "Barlow Condensed", sans-serif; }
-.wing-call h2 { margin: 0; color: #25364a; font: 700 clamp(25px, 2vw, 38px)/.95 "Barlow Condensed", sans-serif; text-transform: uppercase; letter-spacing: .015em; }
-.wing-description { margin-top: 12px; color: #27374a; font: 700 clamp(18px, 1.35vw, 25px)/1.08 "Barlow Condensed", sans-serif; }
-.play-resolution-wing small { display: block; margin-top: 13px; color: #8491a1; font-size: 8px; line-height: 1.35; }
-.play-resolution-wing.tone-hit { background: #c9f8d8; border-color: #77d99c; }
-.play-resolution-wing.tone-hit.side-away { border-right-color: #09a94e; }
-.play-resolution-wing.tone-hit.side-home { border-left-color: #09a94e; }
-.play-resolution-wing.tone-hit .wing-call strong, .play-resolution-wing.tone-hit .wing-call h2 { color: #056c38; }
-.play-resolution-wing.tone-event { background: #fff5d8; border-color: #e3c36f; }
-.play-resolution-wing.tone-event.side-away { border-right-color: #d69d12; }
-.play-resolution-wing.tone-event.side-home { border-left-color: #d69d12; }
-.play-resolution-wing.tone-error { background: #c82432; border-color: #89121b; }
-.play-resolution-wing.tone-error.side-away { border-right-color: #89121b; }
-.play-resolution-wing.tone-error.side-home { border-left-color: #89121b; }
-.play-resolution-wing.tone-error > p, .play-resolution-wing.tone-error .wing-call strong, .play-resolution-wing.tone-error .wing-call h2, .play-resolution-wing.tone-error .wing-description, .play-resolution-wing.tone-error small { color: #fff; }
-@media (min-width: 1540px) {
+.side-away .wing-call { justify-content: flex-end; text-align: right; }
+.wing-call strong { color: var(--wing-accent); font: 700 clamp(38px, 3vw, 57px)/.86 "Barlow Condensed", sans-serif; text-shadow: 0 0 24px color-mix(in srgb, var(--wing-accent) 35%, transparent); }
+.wing-call h2 { margin: 0; color: #fff; font: 700 clamp(27px, 2.1vw, 41px)/.92 "Barlow Condensed", sans-serif; text-transform: uppercase; letter-spacing: .015em; }
+.wing-description { margin-top: 12px; color: #dce7ef; font: 700 clamp(17px, 1.3vw, 23px)/1.08 "Barlow Condensed", sans-serif; }
+.side-away .wing-description { text-align: right; }
+.wing-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #30455a; border-bottom: 1px solid #30455a; }
+.wing-cell { min-width: 0; min-height: 53px; padding: 8px 9px; display: flex; flex-direction: column; justify-content: center; gap: 4px; background: #0d1d2d; }
+.wing-cell.span-2 { grid-column: span 2; }
+.wing-cell span { color: #7890a6; font-size: 7px; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; }
+.wing-cell b { overflow: hidden; color: #f2f6f9; font: 700 14px/1.05 "Barlow Condensed", sans-serif; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.wing-cell:not(.span-2) b { color: var(--wing-accent); font-size: 19px; }
+.wing-source { min-height: 31px; padding: 8px 11px; color: #6f8396; background: #08121d; font-size: 7px; line-height: 1.3; }
+.play-resolution-wing.tone-hit { --wing-accent: #35db79; }
+.play-resolution-wing.tone-event { --wing-accent: #f0bd37; }
+.play-resolution-wing.tone-error { --wing-accent: #ff5b68; }
+.play-resolution-wing.tone-error .wing-hero { background: linear-gradient(145deg, #5e1720 0%, #2c1018 68%, #170b10 100%); }
+@media (min-width: 1580px) {
   .play-resolution-wing { display: block; }
   .matchup-card .resolution-strip { display: none; }
 }
