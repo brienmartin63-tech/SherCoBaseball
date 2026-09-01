@@ -15,6 +15,9 @@ This inventory is the source-of-truth boundary between chart material that the p
 | Bases Empty Probable Hit Error | 1980 rulebook, p. 24 | Error check and all six error results |
 | Bases Empty Probable Out Error | 1980 rulebook, p. 25 | All six error results |
 | Coordinate handedness | 1980 rulebook, Rule 2b | Row-column coordinates mirror by effective batting hand |
+| Gopher-ball pitchers | 1980 rulebook, Rule 23 | `+` advances HR and triple ratings one SherCo number |
+| Triple-number option | 1980 rulebook, Rule 21 | Brien profile automatically selects a farthest legal square; official profile exposes a decision boundary |
+| Beyond-fence HR result | 1980 rulebook, Rules 5k and 5q | Fly target is checked against the selected park terrain |
 
 The current vertical slice intentionally stops when a chart result requires fielding, runner movement, a count continuation, or another subsystem that has not yet been implemented. The interface labels that boundary instead of silently inventing a result.
 
@@ -27,6 +30,7 @@ The current vertical slice intentionally stops when a chart result requires fiel
 - RF occupies `19-8`: one square in front is `18-8`, and one square behind is `20-8`.
 - Chart coordinates are written for right-handed batters and mirror across the row-column diagonal for left-handed batters. Thus chart `8-19` is a ball toward LF for a righty and becomes `19-8`, toward RF, for a lefty.
 - Results that name a fielder use the fixed defensive position above and do not undergo handedness mirroring.
+- Brien triple placement maximizes SherCo square-distance from home (`2-2`), excludes `beyondFence` terrain, favors the batter's pull field among equal-distance squares, and then uses radial distance as the final baseball-relevant tie-breaker.
 
 ## Supplied but not yet executable
 

@@ -1,5 +1,6 @@
 import { Dices, RotateCcw, SkipForward } from "lucide-react";
 import { canAdvanceTestBatter } from "../core/game";
+import { effectivePowerRatings } from "../core/chartResolution";
 import { hitNumber } from "../core/pitching";
 import { formatBatterRating, formatPitcherRating } from "../core/ratings";
 import type { Batter, GameState, Pitcher } from "../core/types";
@@ -23,6 +24,7 @@ function nextAction(game: GameState): { label: string; disabled: boolean } {
     case "ERROR_CHART": return { label: "Roll error chart", disabled: false };
     case "BALL_CHECK": return { label: "Roll ball check", disabled: false };
     case "COUNT_PENDING": return { label: "Count continuation pending", disabled: true };
+    case "TRIPLE_DECISION": return { label: "Triple choice pending", disabled: true };
     case "BALL_IN_PLAY": return { label: "Fielding pending", disabled: true };
     case "DIRECT_RESULT": return { label: "Play resolved", disabled: true };
   }
@@ -31,6 +33,8 @@ function nextAction(game: GameState): { label: string; disabled: boolean } {
 export function MatchupPanel({ batter, pitcher, game, onAdvance, onNextTestBatter, onReset }: Props) {
   const currentRate = game.activePitcherRate ?? pitcher.rate;
   const threshold = hitNumber(batter.offensiveGrade, currentRate);
+  const powerRatings = effectivePowerRatings(batter, pitcher);
+  const matchupBatter = powerRatings.gopherAdjusted ? { ...batter, homeRun: powerRatings.homeRun, triple: powerRatings.triple } : batter;
   const action = nextAction(game);
   const canTestAdvance = canAdvanceTestBatter(game);
   return (
@@ -40,7 +44,8 @@ export function MatchupPanel({ batter, pitcher, game, onAdvance, onNextTestBatte
           <p className="eyebrow">At bat</p>
           <h3>{batter.name}</h3>
           <div className="rating-row">
-            <span className="rating-badge full-rating">{formatBatterRating(batter)}</span>
+            <span className="rating-badge full-rating" title={powerRatings.gopherAdjusted ? `Printed ${formatBatterRating(batter)}; adjusted for + pitcher` : undefined}>{formatBatterRating(matchupBatter)}</span>
+            {powerRatings.gopherAdjusted && <span className="power-adjustment">vs +</span>}
             <span>{batter.bats}HB</span>
             <span>AVG <b>{batter.average.toFixed(3).replace(/^0/, "")}</b></span>
             <span>OPS <b>{batter.ops.toFixed(3).replace(/^0/, "")}</b></span>

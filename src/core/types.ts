@@ -68,8 +68,9 @@ export interface Team {
 
 export type DiceKind = "pitch" | "chart" | "fielding" | "throw" | "steal" | "umpire";
 export type BaseState = "EMPTY" | "FIRST" | "SECOND" | "THIRD" | "FIRST_SECOND" | "FIRST_THIRD" | "SECOND_THIRD" | "LOADED";
-export type PlateAppearancePhase = "PITCH" | "BATTED_BALL_CHART" | "SPECIAL_EVENT" | "HIT_ERROR_CHECK" | "PITCHER_ERROR_CHECK" | "ERROR_CHART" | "BALL_CHECK" | "COUNT_PENDING" | "BALL_IN_PLAY" | "DIRECT_RESULT";
+export type PlateAppearancePhase = "PITCH" | "BATTED_BALL_CHART" | "SPECIAL_EVENT" | "HIT_ERROR_CHECK" | "PITCHER_ERROR_CHECK" | "ERROR_CHART" | "BALL_CHECK" | "COUNT_PENDING" | "TRIPLE_DECISION" | "BALL_IN_PLAY" | "DIRECT_RESULT";
 export type ChartFamily = "PROBABLE_HIT" | "PROBABLE_OUT" | "SPECIAL_EVENT" | "HIT_ERROR" | "OUT_ERROR";
+export type TerminalOutcome = "HOME_RUN" | "WALK" | "STRIKEOUT" | "HIT_BY_PITCH" | "ERROR";
 
 export interface PlateAppearanceResolution {
   phase: PlateAppearancePhase;
@@ -79,6 +80,7 @@ export interface PlateAppearanceResolution {
   source?: string;
   battedBallType?: BattedBallType;
   ballAt?: Coordinate;
+  terminalOutcome?: TerminalOutcome;
 }
 
 export interface DiceRoll {

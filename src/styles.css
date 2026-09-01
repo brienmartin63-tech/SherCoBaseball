@@ -146,6 +146,7 @@ main { padding: 14px 18px 24px; }
 .pitcher .rating-row { justify-content: flex-end; }
 .rating-badge { min-width: 27px; height: 22px; padding: 0 5px; display: inline-grid; place-items: center; background: var(--navy); color: #fff; border-radius: 5px; font: 700 12px "Barlow Condensed", sans-serif; }
 .rating-badge.full-rating { min-width: auto; padding: 0 7px; white-space: nowrap; font-size: 11px; letter-spacing: .015em; }
+.power-adjustment { margin-left: -4px; color: #a76400; font-size: 7px; font-weight: 800; text-transform: uppercase; white-space: nowrap; }
 .matchup-number { background: #edf4fa; border-left: 1px solid #d8e6f1; border-right: 1px solid #d8e6f1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
 .matchup-number span, .matchup-number small { color: #75879a; font-size: 8px; text-transform: uppercase; letter-spacing: .08em; }
 .matchup-number strong { font: 700 36px/1 "Barlow Condensed", sans-serif; color: #0e5ca5; margin: 2px 0; }

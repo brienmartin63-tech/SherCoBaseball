@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { rollOneDie, rollTwoDice, shercoNumber } from "../core/dice";
-import { directPitchResult, moveBehindFielder, moveInFrontOfFielder, resolveBasesEmptyBattedBall, resolveBasesEmptySpecialEvent, specialEventPitcherRate, withinHomeRunRating } from "../core/chartResolution";
+import { directPitchResult, effectivePowerRatings, moveBehindFielder, moveInFrontOfFielder, resolveBasesEmptyBattedBall, resolveBasesEmptySpecialEvent, specialEventPitcherRate, withinHomeRunRating } from "../core/chartResolution";
 import { advanceTestBatter, canAdvanceTestBatter, createInitialGame, rollPitch, rollResolution } from "../core/game";
-import { mirrorForLeftHandedBatter, nearestFielder, squaresBetween } from "../core/geometry";
+import { farthestInPlaySquare, HOME_PLATE_SQUARE, mirrorForLeftHandedBatter, nearestFielder, squaresBetween } from "../core/geometry";
 import { classifyPitch, hitNumber, pitchResultLabel } from "../core/pitching";
 import { normalize1980Ratings } from "../core/players";
 import { formatBatterRating, formatPitcherRating } from "../core/ratings";
@@ -60,10 +60,47 @@ describe("1980 bases-empty chart engine", () => {
     expect(withinHomeRunRating(22, 16)).toBe(false);
     const homeRun = resolveBasesEmptyBattedBall("PROBABLE_HIT", 16, philadelphia.lineup[2], kansasCity.starter, park, 0);
     expect(homeRun.ballAt).toEqual({ row: 3, column: 26 });
-    expect(homeRun.description).toContain("Probable home run");
+    expect(homeRun).toMatchObject({ phase: "DIRECT_RESULT", terminalOutcome: "HOME_RUN" });
 
     const pulledFly = resolveBasesEmptyBattedBall("PROBABLE_OUT", 45, philadelphia.lineup[0], kansasCity.starter, park, 0);
     expect(pulledFly.ballAt).toEqual({ row: 20, column: 18 });
+  });
+
+  it("raises HR and triple numbers one SherCo step against a + pitcher", () => {
+    const mcBride = philadelphia.lineup[1];
+    expect(effectivePowerRatings(mcBride, kansasCity.starter)).toEqual({ homeRun: 12, triple: 13, gopherAdjusted: true });
+    expect(effectivePowerRatings(kansasCity.lineup[0], kansasCity.starter)).toEqual({ homeRun: 11, triple: 12, gopherAdjusted: true });
+    expect(effectivePowerRatings(mcBride, { ...kansasCity.starter, ratingPrefix: undefined })).toEqual({ homeRun: 11, triple: 12, gopherAdjusted: false });
+  });
+
+  it("treats McBride's PH 12 as a gopher-adjusted HR result, not his printed triple number", () => {
+    const mcBride = philadelphia.lineup[1];
+    const resolution = resolveBasesEmptyBattedBall("PROBABLE_HIT", 12, mcBride, kansasCity.starter, park, 0, true);
+    expect(resolution).toMatchObject({ phase: "DIRECT_RESULT", terminalOutcome: "HOME_RUN" });
+    expect(resolution.ballAt).toEqual({ row: 27, column: 12 });
+    expect(resolution.description).toContain("HR 11→12, triple 12→13");
+    expect(resolution.description).toContain("beyond the fence");
+  });
+
+  it("calls Schmidt's gopher-adjusted PH 13 a home run at 14-28", () => {
+    const schmidt = philadelphia.lineup[2];
+    expect(effectivePowerRatings(schmidt, kansasCity.starter)).toEqual({ homeRun: 22, triple: 23, gopherAdjusted: true });
+    const resolution = resolveBasesEmptyBattedBall("PROBABLE_HIT", 13, schmidt, kansasCity.starter, park, 0, true);
+    expect(resolution).toMatchObject({ phase: "DIRECT_RESULT", terminalOutcome: "HOME_RUN", ballAt: { row: 14, column: 28 } });
+  });
+
+  it("invokes Brien's farthest-square triple option on McBride's adjusted 13", () => {
+    const mcBride = philadelphia.lineup[1];
+    const triplePark = rawParks[1] as unknown as Park;
+    expect(farthestInPlaySquare(triplePark, "L")).toEqual({ row: 26, column: 18 });
+    expect(farthestInPlaySquare(triplePark, "R")).toEqual({ row: 16, column: 26 });
+    const resolution = resolveBasesEmptyBattedBall("PROBABLE_HIT", 13, mcBride, kansasCity.starter, triplePark, 0, true);
+    expect(resolution).toMatchObject({ phase: "BALL_IN_PLAY", ballAt: { row: 26, column: 18 } });
+    expect(squaresBetween(HOME_PLATE_SQUARE, resolution.ballAt!)).toBe(24);
+    expect(resolution.description).toContain("possible triple");
+
+    const officialChoice = resolveBasesEmptyBattedBall("PROBABLE_HIT", 13, mcBride, kansasCity.starter, triplePark, 0, false);
+    expect(officialChoice.phase).toBe("TRIPLE_DECISION");
   });
 
   it("moves in front of and behind fielders on straight field lanes", () => {

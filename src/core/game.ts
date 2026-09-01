@@ -107,7 +107,7 @@ export function rollResolution(state: GameState, batter: Batter, pitcher: Pitche
   const { phase, chartFamily } = state.resolution;
   if (phase === "BATTED_BALL_CHART" && (chartFamily === "PROBABLE_HIT" || chartFamily === "PROBABLE_OUT")) {
     const result = rollTwoDice(state.seed, "chart", `${chartFamily === "PROBABLE_HIT" ? "Probable Hit" : "Probable Out"} chart roll`);
-    let resolution = resolveBasesEmptyBattedBall(chartFamily, result.roll.sherco, batter, pitcher, park, state.outs);
+    let resolution = resolveBasesEmptyBattedBall(chartFamily, result.roll.sherco, batter, pitcher, park, state.outs, state.rulesProfileId === "brien");
     const currentRate = state.activePitcherRate ?? pitcher.rate;
     const adjustedRate = resolution.phase === "SPECIAL_EVENT" ? specialEventPitcherRate(currentRate) : undefined;
     if (adjustedRate) {
@@ -116,8 +116,8 @@ export function rollResolution(state: GameState, batter: Batter, pitcher: Pitche
     const roll: DiceRoll = {
       ...result.roll,
       explanation: resolution.description ?? "Chart result",
-      resultLabel: adjustedRate ? `${currentRate} → ${adjustedRate}` : resolution.phase === "BALL_IN_PLAY" ? "Ball in Play" : resolution.phase === "SPECIAL_EVENT" ? "Special Event" : resolution.phase.includes("ERROR_CHECK") ? "Error Check" : "Chart Result",
-      resultTone: adjustedRate ? "event" : resolution.phase === "BALL_IN_PLAY" ? (chartFamily === "PROBABLE_HIT" ? "hit" : "out") : resolution.phase === "SPECIAL_EVENT" ? "event" : "error",
+      resultLabel: adjustedRate ? `${currentRate} → ${adjustedRate}` : resolution.terminalOutcome === "HOME_RUN" ? "Home Run" : resolution.phase === "BALL_IN_PLAY" ? "Ball in Play" : resolution.phase === "SPECIAL_EVENT" ? "Special Event" : resolution.phase.includes("ERROR_CHECK") ? "Error Check" : "Chart Result",
+      resultTone: adjustedRate ? "event" : resolution.terminalOutcome === "HOME_RUN" ? "hit" : resolution.phase === "BALL_IN_PLAY" ? (chartFamily === "PROBABLE_HIT" ? "hit" : "out") : resolution.phase === "SPECIAL_EVENT" ? "event" : "error",
     };
     const next = appendRollEvent(state, roll, adjustedRate ? `${pitcher.name}'s rate changes; pitch again.` : `${batter.name} puts the ball in play; resolution pending.`, resolution, result.state);
     return adjustedRate ? { ...next, activePitcherRate: adjustedRate } : next;
@@ -180,7 +180,7 @@ export function rollResolution(state: GameState, batter: Batter, pitcher: Pitche
   return state;
 }
 
-const TEST_BATTER_BOUNDARIES = new Set<GameState["resolution"]["phase"]>(["BALL_IN_PLAY", "DIRECT_RESULT", "COUNT_PENDING"]);
+const TEST_BATTER_BOUNDARIES = new Set<GameState["resolution"]["phase"]>(["BALL_IN_PLAY", "DIRECT_RESULT", "COUNT_PENDING", "TRIPLE_DECISION"]);
 
 export function canAdvanceTestBatter(state: GameState): boolean {
   return TEST_BATTER_BOUNDARIES.has(state.resolution.phase);

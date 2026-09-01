@@ -1,4 +1,4 @@
-import { mirrorForLeftHandedBatter } from "./geometry";
+import { farthestInPlaySquare, HOME_PLATE_SQUARE, mirrorForLeftHandedBatter, parkTerrainAt, squaresBetween } from "./geometry";
 import type { Batter, Coordinate, GameState, Hand, Park, Pitcher, PitcherRate, PlateAppearanceResolution } from "./types";
 import {
   BASES_EMPTY_HIT_ERROR,
@@ -36,6 +36,26 @@ export function specialEventPitcherRate(rate: PitcherRate): PitcherRate | undefi
 export function withinHomeRunRating(roll: ShercoChartRoll, homeRunRating?: number): boolean {
   if (!homeRunRating || !isShercoChartRoll(homeRunRating)) return false;
   return (shercoIndex.get(roll) ?? Number.POSITIVE_INFINITY) <= (shercoIndex.get(homeRunRating) ?? -1);
+}
+
+function advanceShercoRating(rating?: number): ShercoChartRoll {
+  if (!rating || !isShercoChartRoll(rating)) return 11;
+  return SHERCO_CHART_ROLLS[Math.min(SHERCO_CHART_ROLLS.indexOf(rating) + 1, SHERCO_CHART_ROLLS.length - 1)];
+}
+
+export function effectivePowerRatings(batter: Batter, pitcher: Pitcher): { homeRun?: ShercoChartRoll; triple?: ShercoChartRoll; gopherAdjusted: boolean } {
+  const homeRun = batter.homeRun && isShercoChartRoll(batter.homeRun) ? batter.homeRun : undefined;
+  const triple = batter.triple && isShercoChartRoll(batter.triple) ? batter.triple : undefined;
+  if (pitcher.ratingPrefix !== "+") return { homeRun, triple, gopherAdjusted: false };
+  return {
+    homeRun: advanceShercoRating(homeRun),
+    triple: triple ? advanceShercoRating(triple) : undefined,
+    gopherAdjusted: true,
+  };
+}
+
+export function isTripleRatingRoll(roll: ShercoChartRoll, tripleRating?: number): boolean {
+  return Boolean(tripleRating) && roll === tripleRating;
 }
 
 function parseRatingBoundary(value: string): ShercoChartRoll | undefined {
@@ -100,6 +120,7 @@ export function resolveBasesEmptyBattedBall(
   pitcher: Pitcher,
   park: Park,
   outs: GameState["outs"],
+  automaticTripleOption = false,
 ): PlateAppearanceResolution {
   if (!isShercoChartRoll(roll)) throw new Error(`Invalid SherCo chart roll: ${roll}`);
   const entry: BattedBallChartEntry = chartFamily === "PROBABLE_HIT"
@@ -109,10 +130,52 @@ export function resolveBasesEmptyBattedBall(
   if (entry.route === "ERROR") return { phase: "ERROR_CHART", baseState: "EMPTY", chartFamily: "OUT_ERROR", description: entry.description, source: "1980 rulebook p.25" };
   if (entry.route === "HIT_ERROR_CHECK") return { phase: "HIT_ERROR_CHECK", baseState: "EMPTY", chartFamily: "HIT_ERROR", description: entry.description, source: "1980 rulebook p.24" };
 
+  const powerRatings = effectivePowerRatings(batter, pitcher);
+  const ratingAdjustment = powerRatings.gopherAdjusted
+    ? `Gopher-ball adjustment: HR ${batter.homeRun ?? "none"}→${powerRatings.homeRun}${batter.triple ? `, triple ${batter.triple}→${powerRatings.triple}` : ""}. `
+    : "";
+  const tripleTriggered = chartFamily === "PROBABLE_HIT" && isTripleRatingRoll(roll, powerRatings.triple);
+  if (tripleTriggered && !automaticTripleOption) {
+    return {
+      phase: "TRIPLE_DECISION",
+      baseState: "EMPTY",
+      chartFamily,
+      description: `${ratingAdjustment}Triple rating ${powerRatings.triple}: choose the printed play or relocate the ball in fair territory.`,
+      source: "1980 rulebook Rule 21e",
+    };
+  }
+  if (tripleTriggered) {
+    const battingHand = effectiveBattingHand(batter.bats, pitcher.throws);
+    const tripleTarget = farthestInPlaySquare(park, battingHand);
+    if (tripleTarget) {
+      return {
+        phase: "BALL_IN_PLAY",
+        baseState: "EMPTY",
+        chartFamily,
+        description: `${ratingAdjustment}Triple rating ${powerRatings.triple}: Brien's Rules moves the ball to ${tripleTarget.row}-${tripleTarget.column}, a farthest legal square (${squaresBetween(HOME_PLATE_SQUARE, tripleTarget)} from home), for a possible triple.`,
+        source: "1980 rulebook Rule 21e; Brien automatic offensive choice",
+        battedBallType: entry.ball?.type,
+        ballAt: tripleTarget,
+      };
+    }
+  }
+
   const normalRule = entry.alternateByOuts?.[outs as 0 | 1 | 2] ?? entry.ball;
-  const isProbableHomeRun = chartFamily === "PROBABLE_HIT" && Boolean(entry.homeRunBall) && withinHomeRunRating(roll, batter.homeRun);
+  const isProbableHomeRun = chartFamily === "PROBABLE_HIT" && Boolean(entry.homeRunBall) && withinHomeRunRating(roll, powerRatings.homeRun);
   const ballRule = isProbableHomeRun ? entry.homeRunBall : normalRule;
   const ballAt = ballRule ? targetCoordinate(ballRule, batter, pitcher, park) : undefined;
+  if (isProbableHomeRun && ballAt && parkTerrainAt(park, ballAt) === "beyondFence") {
+    return {
+      phase: "DIRECT_RESULT",
+      baseState: "EMPTY",
+      chartFamily,
+      terminalOutcome: "HOME_RUN",
+      description: `${ratingAdjustment}Home run: the adjusted HR result sends the fly to ${ballAt.row}-${ballAt.column}, beyond the fence.`,
+      source: "1980 rulebook Rules 5k and 5q",
+      battedBallType: "fly",
+      ballAt,
+    };
+  }
   if (chartFamily === "PROBABLE_OUT" && entry.pitcherErrorCheckWithRunnersOut && outs > 0) {
     return {
       phase: "PITCHER_ERROR_CHECK",
@@ -128,7 +191,7 @@ export function resolveBasesEmptyBattedBall(
     phase: "BALL_IN_PLAY",
     baseState: "EMPTY",
     chartFamily,
-    description: `${isProbableHomeRun ? "Probable home run. " : ""}${entry.description}`,
+    description: `${ratingAdjustment}${isProbableHomeRun ? "Probable home run. " : ""}${entry.description}`,
     source: chartFamily === "PROBABLE_HIT" ? "1980 rulebook p.24" : "1980 rulebook p.25",
     battedBallType: ballRule?.type,
     ballAt,
