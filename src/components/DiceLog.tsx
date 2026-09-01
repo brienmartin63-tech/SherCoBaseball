@@ -14,7 +14,7 @@ export function DiceLog({ game }: { game: GameState }) {
           {game.events.slice(0, 5).map((event) => (
             <li key={event.id}>
               <div className="dice-pair">
-                <b>{event.roll?.dice[0]}</b><b>{event.roll?.dice[1]}</b>
+                {event.roll?.dice.map((die, index) => <b key={`${event.roll?.id}-${index}`}>{die}</b>)}
               </div>
               <div><strong>{event.roll?.label}</strong><p>{event.auditText}</p></div>
               <span className={`roll-result tone-${event.roll?.resultTone ?? "neutral"}`}>

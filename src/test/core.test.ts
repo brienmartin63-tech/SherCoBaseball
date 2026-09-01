@@ -1,14 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { rollTwoDice, shercoNumber } from "../core/dice";
+import { rollOneDie, rollTwoDice, shercoNumber } from "../core/dice";
+import { directPitchResult, resolveBasesEmptyBattedBall, resolveBasesEmptySpecialEvent, specialEventPitcherRate, withinHomeRunRating } from "../core/chartResolution";
+import { createInitialGame, rollPitch, rollResolution } from "../core/game";
 import { mirrorForLeftHandedBatter, nearestFielder, squaresBetween } from "../core/geometry";
 import { classifyPitch, hitNumber, pitchResultLabel } from "../core/pitching";
 import { normalize1980Ratings } from "../core/players";
 import { formatBatterRating, formatPitcherRating } from "../core/ratings";
 import { actionAllowed, shouldAttemptExtraBase, shouldAutoStealSecond } from "../core/rules";
 import { hasScoreboardSpacerAfter, inningLabel, scoreboardInnings, scoreboardTeamName } from "../core/scoreboard";
+import { migrateGameState } from "../core/storage";
 import type { Park } from "../core/types";
 import rawParks from "../data/parks.json";
 import { kansasCity, philadelphia } from "../data/demo";
+import { BASES_EMPTY_PROBABLE_HIT, BASES_EMPTY_PROBABLE_OUT, SHERCO_CHART_ROLLS } from "../data/charts1980";
 
 describe("SherCo dice", () => {
   it("reads the lower die first", () => {
@@ -18,6 +22,7 @@ describe("SherCo dice", () => {
 
   it("replays exactly from the same seed", () => {
     expect(rollTwoDice(19801021, "pitch", "Pitch")).toEqual(rollTwoDice(19801021, "pitch", "Pitch"));
+    expect(rollOneDie(19801021, "chart", "Special")).toEqual(rollOneDie(19801021, "chart", "Special"));
   });
 });
 
@@ -30,6 +35,85 @@ describe("1980 pitching chart", () => {
     expect(pitchResultLabel(classifyPitch(33, 44))).toBe("Probable Out");
     expect(pitchResultLabel(classifyPitch(56, 44))).toBe("Probable Hit");
     expect(pitchResultLabel(classifyPitch(66, 44))).toBe("Special Event");
+  });
+
+  it("checks BB/K only after a probable out", () => {
+    expect(directPitchResult(11, "11–14")).toBe("WALK");
+    expect(directPitchResult(12, "11–14")).toBe("STRIKEOUT");
+    expect(directPitchResult(14, "11–14")).toBe("STRIKEOUT");
+    expect(directPitchResult(15, "11–14")).toBeUndefined();
+    expect(directPitchResult(11, "n–11")).toBe("STRIKEOUT");
+    expect(directPitchResult(11, "11–n")).toBe("WALK");
+  });
+});
+
+describe("1980 bases-empty chart engine", () => {
+  const park = rawParks[0] as unknown as Park;
+
+  it("contains every valid two-die result in both batted-ball charts", () => {
+    expect(Object.keys(BASES_EMPTY_PROBABLE_HIT).map(Number)).toEqual(SHERCO_CHART_ROLLS);
+    expect(Object.keys(BASES_EMPTY_PROBABLE_OUT).map(Number)).toEqual(SHERCO_CHART_ROLLS);
+  });
+
+  it("uses the HR clause and mirrors switch hitters against right-handed pitchers", () => {
+    expect(withinHomeRunRating(16, 16)).toBe(true);
+    expect(withinHomeRunRating(22, 16)).toBe(false);
+    const homeRun = resolveBasesEmptyBattedBall("PROBABLE_HIT", 16, philadelphia.lineup[2], kansasCity.starter, park, 0);
+    expect(homeRun.ballAt).toEqual({ row: 3, column: 26 });
+    expect(homeRun.description).toContain("Probable home run");
+
+    const pulledFly = resolveBasesEmptyBattedBall("PROBABLE_OUT", 45, philadelphia.lineup[0], kansasCity.starter, park, 0);
+    expect(pulledFly.ballAt).toEqual({ row: 20, column: 18 });
+  });
+
+  it("advances deterministically from pitch to chart to a ball on the field", () => {
+    const initial = createInitialGame(park.id, 2690);
+    const pitched = rollPitch(initial, philadelphia.lineup[0], kansasCity.starter);
+    expect(pitched.lastRoll?.sherco).toBe(23);
+    expect(pitched.resolution).toMatchObject({ phase: "BATTED_BALL_CHART", chartFamily: "PROBABLE_OUT" });
+    const charted = rollResolution(pitched, philadelphia.lineup[0], kansasCity.starter, park);
+    expect(charted.lastRoll?.sherco).toBe(12);
+    expect(charted.resolution.phase).toBe("BALL_IN_PLAY");
+    expect(charted.ballAt).toEqual({ row: 22, column: 7 });
+  });
+
+  it("stops a BB/K strikeout before any batted-ball chart roll", () => {
+    const initial = createInitialGame(park.id, 19801021);
+    const pitched = rollPitch(initial, philadelphia.lineup[0], kansasCity.starter);
+    expect(pitched.lastRoll?.sherco).toBe(13);
+    expect(pitched.lastRoll?.resultLabel).toBe("Strikeout");
+    expect(pitched.resolution.phase).toBe("DIRECT_RESULT");
+  });
+
+  it("changes J/K/Y/Z pitcher rates instead of rolling a Special Event", () => {
+    expect(["J", "K", "Y", "Z"].map((rate) => specialEventPitcherRate(rate as "J" | "K" | "Y" | "Z"))).toEqual(["K", "L", "X", "Y"]);
+    expect(specialEventPitcherRate("M")).toBeUndefined();
+    const initial = createInitialGame(park.id, 13328);
+    const jPitcher = { ...kansasCity.starter, rate: "J" as const };
+    const pitched = rollPitch(initial, philadelphia.lineup[0], jPitcher);
+    expect(pitched.lastRoll?.sherco).toBe(66);
+    expect(pitched.activePitcherRate).toBe("K");
+    expect(pitched.resolution.phase).toBe("PITCH");
+  });
+
+  it("routes the one-or-two-out result 26 through its pitcher-error check", () => {
+    const resolution = resolveBasesEmptyBattedBall("PROBABLE_OUT", 26, philadelphia.lineup[0], kansasCity.starter, park, 1);
+    expect(resolution).toMatchObject({ phase: "PITCHER_ERROR_CHECK", ballAt: { row: 6, column: 6 } });
+  });
+
+  it("stops a called-strike Special Event at the unimplemented count boundary", () => {
+    const resolution = resolveBasesEmptySpecialEvent(4, philadelphia.lineup[0], kansasCity.starter, park);
+    expect(resolution.phase).toBe("COUNT_PENDING");
+  });
+});
+
+describe("saved-game schema", () => {
+  it("migrates a 0.1.x game into the version-two plate-appearance state", () => {
+    const current = createInitialGame("test-park");
+    const { schemaVersion: _schemaVersion, resolution: _resolution, ...legacy } = current;
+    const migrated = migrateGameState(legacy);
+    expect(migrated.schemaVersion).toBe(2);
+    expect(migrated.resolution).toEqual({ phase: "PITCH", baseState: "EMPTY" });
   });
 });
 

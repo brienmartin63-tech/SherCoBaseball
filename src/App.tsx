@@ -5,7 +5,7 @@ import { LineupPanel } from "./components/LineupPanel";
 import { MatchupPanel } from "./components/MatchupPanel";
 import { Scoreboard } from "./components/Scoreboard";
 import { Stadium } from "./components/Stadium";
-import { createInitialGame, rollPitch, selectPark, toggleRulesProfile } from "./core/game";
+import { createInitialGame, rollPitch, rollResolution, selectPark, toggleRulesProfile } from "./core/game";
 import { loadGame, saveGame } from "./core/storage";
 import type { Park } from "./core/types";
 import { demoGame } from "./data/demo";
@@ -58,6 +58,12 @@ export function App() {
     setGame(createInitialGame(game.selectedParkId));
   }
 
+  function advanceResolution() {
+    setGame((current) => current.resolution.phase === "PITCH"
+      ? rollPitch(current, batter, pitcher)
+      : rollResolution(current, batter, pitcher, park));
+  }
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -79,6 +85,9 @@ export function App() {
 
       <div className="status-bar">
         <div className="game-title"><b>{demoGame.away.city}</b><span>at</span><b>{demoGame.home.city}</b><em>October 21, 1980 · Exhibition build</em></div>
+        <div className="park-context">
+          <span>Current park</span><b>{park.name}</b><small>{park.location}</small>
+        </div>
         <div className="game-settings">
           <label>
             <span>Park</span>
@@ -101,8 +110,8 @@ export function App() {
           <div className="game-workspace">
             <LineupPanel team={demoGame.away} activeIndex={game.awayBatterIndex} side="away" />
             <div className="center-column">
-              <Stadium park={park} showCoordinates={showCoordinates} />
-              <MatchupPanel batter={batter} pitcher={pitcher} game={game} onRoll={() => setGame((current) => rollPitch(current, batter, pitcher))} onReset={resetDemo} />
+              <Stadium park={park} ballAt={game.ballAt} showCoordinates={showCoordinates} />
+              <MatchupPanel batter={batter} pitcher={pitcher} game={game} onAdvance={advanceResolution} onReset={resetDemo} />
               <DiceLog game={game} />
             </div>
             <LineupPanel team={demoGame.home} activeIndex={game.homeBatterIndex} side="home" />
@@ -115,7 +124,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Foundation build 0.1.7 · Five test parks imported</span>
+        <span>Rules-engine build 0.2.0 · Five test parks imported</span>
       </footer>
     </div>
   );

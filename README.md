@@ -2,7 +2,9 @@
 
 A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, designed for GitHub Pages and long-running SLOBS leagues.
 
-## Foundation build 0.1.7
+The durable design decisions, confirmed house rules, scoring requirements, stadium-import conventions, and development priorities are preserved in [Project Checkpoint 0.1.7](docs/PROJECT_CHECKPOINT_0.1.7.md).
+
+## Rules-engine build 0.2.0
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
 
@@ -18,6 +20,17 @@ Implemented:
 - modern game dashboard with score, lineups, bullpen, matchup, live dice audit, official play-by-play view, box-score shell, stats/splits shell, and SLOBS workspace;
 - automatic device-local saves through IndexedDB and portable JSON game exports;
 - automated regression tests for the confirmed rules above.
+
+### 0.2.0 first executable chart sequence
+
+- A plate appearance now advances one visible, audited roll at a time from the pitching matrix into the correct Bases Empty chart.
+- Probable Outs apply the pitcher's printed BB/K range before any batted-ball chart roll.
+- The complete Bases Empty Probable Hit, Probable Out, Special Event, Probable Hit Error, and Probable Out Error charts are typed game data rather than interface text.
+- Coordinate results mirror for the batter's effective batting hand; switch hitters bat opposite the pitcher's throwing hand while retaining their printed offensive grade.
+- Resolved batted balls appear as a white ball square on the stadium grid.
+- Saved 0.1.x games migrate safely into the version-two plate-appearance state model.
+- The official logo has a white backing, stadium information has moved into the header, and the matchup area is shorter and more compact.
+- The executable chart inventory and remaining transcription work are maintained in [Chart Transcription Status](docs/CHART_TRANSCRIPTION_STATUS.md).
 
 ### 0.1.1 display refinement
 
@@ -59,9 +72,9 @@ Pitch rolls now present the decisive result prominently as `33 — Probable Out`
 - The supplied Rose, McBride, and Schmidt statistical examples are retained as regression-tested demo values.
 - Wider lineup panels and a 480-pixel stadium reduce vertical scrolling while preserving the full three-column game workspace.
 
-Not yet implemented:
+Not yet implemented after 0.2.0:
 
-- transcription and executable resolution of all 32 base-state outcome tables;
+- executable outcome tables for the seven occupied-base states;
 - complete ball movement, fielding, throws, baserunner advancement, substitutions, and official scoring;
 - live derived season/career statistics and all split accumulators;
 - roster/lineup imports and the six final USBL parks;

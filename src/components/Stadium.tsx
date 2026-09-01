@@ -14,13 +14,6 @@ export function Stadium({ park, ballAt, showCoordinates }: Props) {
 
   return (
     <section className="stadium-card" aria-label={`${park.name} playing field`}>
-      <div className="stadium-title">
-        <div>
-          <p className="eyebrow">Current park</p>
-          <h2>{park.name}</h2>
-        </div>
-        <span>{park.location}</span>
-      </div>
       <div className="stadium-frame">
         <div className="stadium-grid">
           {park.cells.flatMap((row, visualRow) => row.map((terrain, visualColumn) => {

@@ -1,5 +1,9 @@
 import type { GameState } from "./types";
 
+type LegacyGameState = Omit<GameState, "schemaVersion" | "resolution"> & {
+  schemaVersion?: 1;
+};
+
 const DATABASE = "sherco-grand-slam";
 const STORE = "game-state";
 const CURRENT_GAME = "current";
@@ -30,11 +34,22 @@ export async function saveGame(game: GameState): Promise<void> {
 export async function loadGame(): Promise<GameState | undefined> {
   if (typeof indexedDB === "undefined") return undefined;
   const database = await openDatabase();
-  const game = await new Promise<GameState | undefined>((resolve, reject) => {
+  const game = await new Promise<GameState | LegacyGameState | undefined>((resolve, reject) => {
     const request = database.transaction(STORE, "readonly").objectStore(STORE).get(CURRENT_GAME);
-    request.onsuccess = () => resolve(request.result as GameState | undefined);
+    request.onsuccess = () => resolve(request.result as GameState | LegacyGameState | undefined);
     request.onerror = () => reject(request.error);
   });
   database.close();
-  return game;
+  if (!game) return undefined;
+  return migrateGameState(game);
+}
+
+export function migrateGameState(game: GameState | LegacyGameState): GameState {
+  if (game.schemaVersion === 2 && game.resolution) return game;
+  return {
+    ...game,
+    schemaVersion: 2,
+    resolution: { phase: "PITCH", baseState: "EMPTY" },
+    ballAt: undefined,
+  };
 }

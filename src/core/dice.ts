@@ -29,3 +29,19 @@ export function rollTwoDice(state: number, kind: DiceKind, label: string, explan
     },
   };
 }
+
+export function rollOneDie(state: number, kind: DiceKind, label: string, explanation = ""): RollResult {
+  const result = randomDie(state);
+  return {
+    state: result.state,
+    roll: {
+      id: `${kind}-${result.state.toString(16)}`,
+      kind,
+      dice: [result.die],
+      sherco: result.die,
+      total: result.die,
+      label,
+      explanation,
+    },
+  };
+}

@@ -67,11 +67,24 @@ export interface Team {
 }
 
 export type DiceKind = "pitch" | "chart" | "fielding" | "throw" | "steal" | "umpire";
+export type BaseState = "EMPTY" | "FIRST" | "SECOND" | "THIRD" | "FIRST_SECOND" | "FIRST_THIRD" | "SECOND_THIRD" | "LOADED";
+export type PlateAppearancePhase = "PITCH" | "BATTED_BALL_CHART" | "SPECIAL_EVENT" | "HIT_ERROR_CHECK" | "PITCHER_ERROR_CHECK" | "ERROR_CHART" | "BALL_CHECK" | "COUNT_PENDING" | "BALL_IN_PLAY" | "DIRECT_RESULT";
+export type ChartFamily = "PROBABLE_HIT" | "PROBABLE_OUT" | "SPECIAL_EVENT" | "HIT_ERROR" | "OUT_ERROR";
+
+export interface PlateAppearanceResolution {
+  phase: PlateAppearancePhase;
+  baseState: BaseState;
+  chartFamily?: ChartFamily;
+  description?: string;
+  source?: string;
+  battedBallType?: BattedBallType;
+  ballAt?: Coordinate;
+}
 
 export interface DiceRoll {
   id: string;
   kind: DiceKind;
-  dice: [number, number];
+  dice: [number] | [number, number];
   sherco: number;
   total: number;
   label: string;
@@ -98,6 +111,7 @@ export interface PlayEvent {
 }
 
 export interface GameState {
+  schemaVersion: 2;
   seed: number;
   inning: number;
   half: "top" | "bottom";
@@ -107,6 +121,9 @@ export interface GameState {
   awayBatterIndex: number;
   homeBatterIndex: number;
   pitchCount: number;
+  activePitcherRate?: PitcherRate;
+  resolution: PlateAppearanceResolution;
+  ballAt?: Coordinate;
   selectedParkId: string;
   rulesProfileId: "official-1980" | "brien";
   lastRoll?: DiceRoll;
