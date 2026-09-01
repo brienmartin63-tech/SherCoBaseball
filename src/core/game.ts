@@ -1,11 +1,12 @@
 import { rollOneDie, rollTwoDice } from "./dice";
 import { directPitchResult, resolveBasesEmptyBattedBall, resolveBasesEmptyError, resolveBasesEmptySpecialEvent, specialEventPitcherRate } from "./chartResolution";
 import { classifyPitch, hitNumber, pitchResultLabel } from "./pitching";
-import type { Batter, DiceRoll, GameState, Park, Pitcher, PlateAppearanceResolution, PlayEvent } from "./types";
+import { automaticUmpireCall, buildRatedDefense, createFieldingAttempt, isAirborneCatch, positionName, resolveThrow } from "./fielding";
+import type { BaseRunners, BaseState, Batter, DiceRoll, GameState, Park, Pitcher, PlateAppearanceResolution, PlayEvent, ScoreLine, Team } from "./types";
 
 export function createInitialGame(selectedParkId: string, seed = 198010210): GameState {
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     seed,
     inning: 1,
     half: "top",
@@ -19,6 +20,7 @@ export function createInitialGame(selectedParkId: string, seed = 198010210): Gam
     selectedParkId,
     rulesProfileId: "brien",
     events: [],
+    runners: {},
   };
 }
 
@@ -49,7 +51,7 @@ export function rollPitch(state: GameState, batter: Batter, pitcher: Pitcher): G
   const resolution: PlateAppearanceResolution = adjustedRate
     ? { phase: "PITCH", baseState: "EMPTY", description: `Pitcher rate changed from ${currentRate} to ${adjustedRate}; pitch again.`, source: "1980 rulebook p.25 Special Events note" }
     : directResult
-    ? { phase: "DIRECT_RESULT", baseState: "EMPTY", description: directResult === "WALK" ? "Base on balls." : "Strikeout.", source: "1980 rulebook Rule 5h" }
+    ? { phase: "DIRECT_RESULT", baseState: "EMPTY", terminalOutcome: directResult, description: directResult === "WALK" ? "Base on balls." : "Strikeout.", source: "1980 rulebook Rule 5h" }
     : classification === "SPECIAL_EVENT"
       ? { phase: "SPECIAL_EVENT", baseState: "EMPTY", chartFamily: "SPECIAL_EVENT", description: "Roll one die on the Bases Empty Special Events Chart.", source: "1980 rulebook Rule 5n and p.25" }
       : { phase: "BATTED_BALL_CHART", baseState: "EMPTY", chartFamily: classification, description: `Roll on the Bases Empty ${pitchResultLabel(classification)} chart.`, source: classification === "PROBABLE_HIT" ? "1980 rulebook p.24" : "1980 rulebook p.25" };
@@ -150,7 +152,7 @@ export function rollResolution(state: GameState, batter: Batter, pitcher: Pitche
     const result = rollOneDie(state.seed, "fielding", "Pitcher error check");
     const isError = result.roll.sherco === 1;
     const resolution: PlateAppearanceResolution = isError
-      ? { phase: "DIRECT_RESULT", baseState: "EMPTY", chartFamily: "OUT_ERROR", description: "Pitcher error; batter safe at first.", source: "1980 rulebook p.25" }
+      ? { phase: "DIRECT_RESULT", baseState: "EMPTY", chartFamily: "OUT_ERROR", terminalOutcome: "ERROR", awardedBase: "FIRST", description: "Pitcher error; batter safe at first.", source: "1980 rulebook p.25" }
       : { phase: "BALL_IN_PLAY", baseState: "EMPTY", chartFamily: "PROBABLE_OUT", description: "No pitcher error; field the grounder at 6-6.", source: "1980 rulebook p.25", battedBallType: "ground", ballAt: state.resolution.ballAt };
     const roll: DiceRoll = { ...result.roll, explanation: resolution.description!, resultLabel: isError ? "Error" : "No Error", resultTone: isError ? "error" : "out" };
     return appendRollEvent(state, roll, resolution.description!, resolution, result.state);
@@ -170,6 +172,7 @@ export function rollResolution(state: GameState, batter: Batter, pitcher: Pitche
       phase: isWalk ? "DIRECT_RESULT" : "COUNT_PENDING",
       baseState: "EMPTY",
       chartFamily: "SPECIAL_EVENT",
+      terminalOutcome: isWalk ? "WALK" : undefined,
       description: isWalk ? "Ball four; batter walks." : `Ball ${result.roll.sherco}; count continuation will be connected with the count engine.`,
       source: "1980 rulebook p.25",
     };
@@ -180,7 +183,288 @@ export function rollResolution(state: GameState, batter: Batter, pitcher: Pitche
   return state;
 }
 
-const TEST_BATTER_BOUNDARIES = new Set<GameState["resolution"]["phase"]>(["BALL_IN_PLAY", "DIRECT_RESULT", "COUNT_PENDING", "TRIPLE_DECISION"]);
+function baseStateFromRunners(runners: BaseRunners): BaseState {
+  const first = Boolean(runners.first);
+  const second = Boolean(runners.second);
+  const third = Boolean(runners.third);
+  if (first && second && third) return "LOADED";
+  if (first && second) return "FIRST_SECOND";
+  if (first && third) return "FIRST_THIRD";
+  if (second && third) return "SECOND_THIRD";
+  if (first) return "FIRST";
+  if (second) return "SECOND";
+  if (third) return "THIRD";
+  return "EMPTY";
+}
+
+function updateLine(line: ScoreLine, inning: number, changes: Partial<Pick<ScoreLine, "runs" | "hits" | "errors">>): ScoreLine {
+  const innings = [...line.innings];
+  while (innings.length < inning) innings.push(0);
+  if (changes.runs) innings[inning - 1] += changes.runs;
+  return {
+    innings,
+    runs: line.runs + (changes.runs ?? 0),
+    hits: line.hits + (changes.hits ?? 0),
+    errors: line.errors + (changes.errors ?? 0),
+  };
+}
+
+function withBattingLine(state: GameState, changes: Partial<Pick<ScoreLine, "runs" | "hits">>): GameState {
+  return state.half === "top"
+    ? { ...state, away: updateLine(state.away, state.inning, changes) }
+    : { ...state, home: updateLine(state.home, state.inning, changes) };
+}
+
+function withFieldingError(state: GameState): GameState {
+  return state.half === "top"
+    ? { ...state, home: updateLine(state.home, state.inning, { errors: 1 }) }
+    : { ...state, away: updateLine(state.away, state.inning, { errors: 1 }) };
+}
+
+function advanceBattingOrder(state: GameState, awayLineupSize: number, homeLineupSize: number): GameState {
+  return state.half === "top"
+    ? { ...state, awayBatterIndex: (state.awayBatterIndex + 1) % awayLineupSize }
+    : { ...state, homeBatterIndex: (state.homeBatterIndex + 1) % homeLineupSize };
+}
+
+function appendPlayEvent(state: GameState, officialText: string, auditText: string, roll?: DiceRoll): GameState {
+  const event: PlayEvent = {
+    id: `event-${state.events.length + 1}`,
+    inning: state.inning,
+    half: state.half,
+    outsBefore: state.outs,
+    officialText,
+    auditText,
+    roll,
+  };
+  return { ...state, events: [event, ...state.events].slice(0, 100), lastRoll: roll ?? state.lastRoll };
+}
+
+function finishPlateAppearance(
+  state: GameState,
+  batter: Batter,
+  awayLineupSize: number,
+  homeLineupSize: number,
+  result: "OUT" | "SINGLE" | "WALK" | "HIT_BY_PITCH" | "ERROR" | "HOME_RUN",
+  officialText: string,
+  auditText: string,
+  roll?: DiceRoll,
+  errorAward?: { base: "FIRST" | "SECOND" | "THIRD"; creditedHit: boolean },
+): GameState {
+  let next = state;
+  let runners = { ...state.runners };
+  let outs = state.outs;
+  let half = state.half;
+  let inning = state.inning;
+  let activePitcherRate = state.activePitcherRate;
+
+  if (result === "OUT") {
+    outs += 1;
+  } else if (result === "HOME_RUN") {
+    next = withBattingLine(next, { hits: 1, runs: 1 });
+  } else {
+    if (result === "ERROR" && errorAward?.base === "SECOND") runners.second = batter.id;
+    else if (result === "ERROR" && errorAward?.base === "THIRD") runners.third = batter.id;
+    else runners.first = batter.id;
+    if (result === "SINGLE") next = withBattingLine(next, { hits: 1 });
+    if (result === "ERROR") {
+      if (errorAward?.creditedHit) next = withBattingLine(next, { hits: 1 });
+      next = withFieldingError(next);
+    }
+  }
+
+  next = advanceBattingOrder(next, awayLineupSize, homeLineupSize);
+  next = appendPlayEvent(next, officialText, auditText, roll);
+
+  if (outs === 3) {
+    runners = {};
+    outs = 0;
+    if (half === "top") {
+      half = "bottom";
+    } else {
+      half = "top";
+      inning += 1;
+      next = {
+        ...next,
+        away: updateLine(next.away, inning, {}),
+        home: updateLine(next.home, inning, {}),
+      };
+    }
+    activePitcherRate = undefined;
+  }
+
+  const baseState = baseStateFromRunners(runners);
+  return {
+    ...next,
+    inning,
+    half,
+    outs,
+    activePitcherRate,
+    runners,
+    pendingFielding: undefined,
+    ballAt: next.ballAt,
+    resolution: {
+      phase: "PLAY_COMPLETE",
+      baseState,
+      terminalOutcome: result === "HOME_RUN" ? "HOME_RUN" : result === "WALK" ? "WALK" : result === "HIT_BY_PITCH" ? "HIT_BY_PITCH" : result === "ERROR" ? "ERROR" : undefined,
+      description: officialText,
+      source: "1980 Rule 6 fielding and scoring sequence",
+    },
+  };
+}
+
+export function resolveFielding(
+  state: GameState,
+  batter: Batter,
+  pitcher: Pitcher,
+  park: Park,
+  defensiveTeam: Team,
+  awayLineupSize: number,
+  homeLineupSize: number,
+): GameState {
+  if (state.resolution.phase === "UMPIRE_CHECK" && state.pendingFielding) {
+    const result = rollTwoDice(state.seed, "umpire", "Automatic umpire roll");
+    const call = automaticUmpireCall(result.roll.sherco, state.pendingFielding.arm, batter.speed);
+    const roll: DiceRoll = {
+      ...result.roll,
+      explanation: `${state.pendingFielding.arm}${state.pendingFielding.range} defense versus ${batter.speed === "REGULAR" ? "regular" : batter.speed} speed: ${call.toLowerCase()}.`,
+      resultLabel: call,
+      resultTone: call === "OUT" ? "out" : "hit",
+    };
+    const seeded = { ...state, seed: result.state, lastRoll: roll };
+    return finishPlateAppearance(
+      seeded,
+      batter,
+      awayLineupSize,
+      homeLineupSize,
+      call === "OUT" ? "OUT" : "SINGLE",
+      call === "OUT"
+        ? `${batter.name} is out at first on a close play, ${state.pendingFielding.fielderName} making the throw.`
+        : `${batter.name} beats the throw by ${state.pendingFielding.fielderName} for a single.`,
+      `The throw reached first by exact count. Automatic Umpire: ${roll.dice.join(" and ")} → ${roll.sherco}, ${call}.`,
+      roll,
+    );
+  }
+
+  if (state.resolution.phase !== "BALL_IN_PLAY" || !state.resolution.ballAt || !state.resolution.battedBallType) return state;
+  const defense = buildRatedDefense(defensiveTeam, pitcher, park);
+  const catchAttempt = createFieldingAttempt(batter, park, defense, state.resolution.ballAt, state.resolution.battedBallType);
+
+  if (isAirborneCatch(catchAttempt)) {
+    const verb = catchAttempt.battedBallType === "pop" ? "pops out" : catchAttempt.battedBallType === "line" ? "lines out" : "flies out";
+    return finishPlateAppearance(
+      { ...state, pendingFielding: catchAttempt },
+      batter,
+      awayLineupSize,
+      homeLineupSize,
+      "OUT",
+      `${batter.name} ${verb} to ${catchAttempt.fielderName}.`,
+      `${catchAttempt.fielderName} (${catchAttempt.range} range) is ${catchAttempt.fieldingDistance} square${catchAttempt.fieldingDistance === 1 ? "" : "s"} from the ball and makes the catch.`,
+    );
+  }
+
+  // Once an airborne ball drops, Rule 6 treats it as a grounder; arm breaks any fielding-distance tie.
+  const attempt = state.resolution.battedBallType === "ground"
+    ? catchAttempt
+    : { ...createFieldingAttempt(batter, park, defense, state.resolution.ballAt, "ground"), battedBallType: state.resolution.battedBallType };
+
+  const result = rollTwoDice(state.seed, "fielding", `${attempt.fielderPosition} fielding throw`);
+  const thrown = resolveThrow(attempt, result.roll.total);
+  const updatedAttempt = { ...attempt, throwingAllowance: thrown.allowance, throwingRemainder: thrown.remaining };
+  const roll: DiceRoll = {
+    ...result.roll,
+    displayValue: result.roll.total,
+    explanation: `${attempt.fielderName}: max of arm ${attempt.arm} or dice total ${result.roll.total} = ${thrown.allowance}; ${attempt.fieldingDistance} to field, ${thrown.remaining} left for a ${attempt.targetDistance}-square throw to first.`,
+    resultLabel: thrown.result === "TIE" ? "Tie at first" : thrown.result,
+    resultTone: thrown.result === "OUT" ? "out" : thrown.result === "SAFE" ? "hit" : "event",
+  };
+  const seeded = appendPlayEvent(
+    { ...state, seed: result.state, ballAt: thrown.ballAt, pendingFielding: updatedAttempt },
+    `${attempt.fielderName} fields the ball and throws to first.`,
+    `${roll.label}: ${roll.dice.join(" plus ")} = ${roll.total}. ${roll.explanation}`,
+    roll,
+  );
+
+  if (thrown.result === "TIE") {
+    return {
+      ...seeded,
+      resolution: {
+        phase: "UMPIRE_CHECK",
+        baseState: "EMPTY",
+        description: `The throw reaches first by exact count. Consult the Automatic Umpire (${attempt.arm}${attempt.range} DEF vs ${batter.speed === "REGULAR" ? "regular" : batter.speed} runner).`,
+        source: "1980 Rule 6c(13) and Rule 16",
+      },
+    };
+  }
+
+  return finishPlateAppearance(
+    seeded,
+    batter,
+    awayLineupSize,
+    homeLineupSize,
+    thrown.result === "OUT" ? "OUT" : "SINGLE",
+    thrown.result === "OUT"
+      ? `${batter.name} grounds out, ${positionName(attempt.fielderPosition)} to first.`
+      : `${batter.name} beats the throw by ${attempt.fielderName} for a single.`,
+    `${attempt.fielderName} had ${thrown.remaining} square${thrown.remaining === 1 ? "" : "s"} after fielding; first base was ${attempt.targetDistance} away.`,
+  );
+}
+
+export function scoreDirectResult(
+  state: GameState,
+  batter: Batter,
+  awayLineupSize: number,
+  homeLineupSize: number,
+): GameState {
+  if (state.resolution.phase !== "DIRECT_RESULT" || !state.resolution.terminalOutcome) return state;
+  const outcome = state.resolution.terminalOutcome;
+  const result = outcome === "STRIKEOUT" ? "OUT" : outcome;
+  const errorBase = state.resolution.awardedBase ?? "FIRST";
+  const errorBaseLabel = errorBase === "FIRST" ? "first" : errorBase === "SECOND" ? "second" : "third";
+  const officialText = outcome === "STRIKEOUT" ? `${batter.name} strikes out.`
+    : outcome === "WALK" ? `${batter.name} walks.`
+      : outcome === "HIT_BY_PITCH" ? `${batter.name} is hit by a pitch.`
+        : outcome === "HOME_RUN" ? `${batter.name} hits a home run.`
+          : state.resolution.creditedHit
+            ? `${batter.name} singles and reaches ${errorBaseLabel} on an error.`
+            : `${batter.name} reaches ${errorBaseLabel} on an error.`;
+  return finishPlateAppearance(
+    state,
+    batter,
+    awayLineupSize,
+    homeLineupSize,
+    result,
+    officialText,
+    state.resolution.description ?? officialText,
+    undefined,
+    outcome === "ERROR" ? { base: errorBase, creditedHit: Boolean(state.resolution.creditedHit) } : undefined,
+  );
+}
+
+export function canStartNextPlateAppearance(state: GameState): boolean {
+  return state.resolution.phase === "PLAY_COMPLETE";
+}
+
+export function startNextPlateAppearance(state: GameState, clearBasesForTesting = false): GameState {
+  if (!canStartNextPlateAppearance(state)) return state;
+  const runners = clearBasesForTesting ? {} : state.runners;
+  return {
+    ...state,
+    runners,
+    ballAt: undefined,
+    pendingFielding: undefined,
+    pitchCount: 0,
+    lastRoll: undefined,
+    resolution: {
+      phase: "PITCH",
+      baseState: baseStateFromRunners(runners),
+      description: clearBasesForTesting ? "Bases cleared for continued bases-empty testing." : undefined,
+      source: clearBasesForTesting ? "Temporary bases-empty validation loop" : undefined,
+    },
+  };
+}
+
+const TEST_BATTER_BOUNDARIES = new Set<GameState["resolution"]["phase"]>(["COUNT_PENDING", "TRIPLE_DECISION"]);
 
 export function canAdvanceTestBatter(state: GameState): boolean {
   return TEST_BATTER_BOUNDARIES.has(state.resolution.phase);

@@ -210,16 +210,23 @@ export function resolveBasesEmptySpecialEvent(roll: OneDieRoll, batter: Batter, 
     source: "1980 rulebook p.25",
     battedBallType: entry.ball?.type,
     ballAt: coordinate,
+    terminalOutcome: roll === 1 ? "WALK" : roll === 5 ? "HIT_BY_PITCH" : roll === 6 ? "STRIKEOUT" : undefined,
   };
 }
 
 export function resolveBasesEmptyError(chartFamily: "HIT_ERROR" | "OUT_ERROR", roll: OneDieRoll): PlateAppearanceResolution {
   const entry = chartFamily === "HIT_ERROR" ? BASES_EMPTY_HIT_ERROR[roll] : BASES_EMPTY_OUT_ERROR[roll];
+  const awardedBase = chartFamily === "HIT_ERROR"
+    ? roll === 6 ? "THIRD" : "SECOND"
+    : roll === 3 ? "SECOND" : "FIRST";
   return {
     phase: "DIRECT_RESULT",
     baseState: "EMPTY",
     chartFamily,
     description: entry.description,
     source: chartFamily === "HIT_ERROR" ? "1980 rulebook p.24" : "1980 rulebook p.25",
+    terminalOutcome: "ERROR",
+    awardedBase,
+    creditedHit: chartFamily === "HIT_ERROR" && (roll === 1 || roll === 5),
   };
 }

@@ -5,7 +5,7 @@ import { LineupPanel } from "./components/LineupPanel";
 import { MatchupPanel } from "./components/MatchupPanel";
 import { Scoreboard } from "./components/Scoreboard";
 import { Stadium } from "./components/Stadium";
-import { advanceTestBatter, createInitialGame, rollPitch, rollResolution, selectPark, toggleRulesProfile } from "./core/game";
+import { advanceTestBatter, createInitialGame, resolveFielding, rollPitch, rollResolution, scoreDirectResult, selectPark, startNextPlateAppearance, toggleRulesProfile } from "./core/game";
 import { loadGame, saveGame } from "./core/storage";
 import type { Park } from "./core/types";
 import { demoGame } from "./data/demo";
@@ -59,9 +59,24 @@ export function App() {
   }
 
   function advanceResolution() {
-    setGame((current) => current.resolution.phase === "PITCH"
-      ? rollPitch(current, batter, pitcher)
-      : rollResolution(current, batter, pitcher, park));
+    setGame((current) => {
+      const activeBatter = current.half === "top"
+        ? demoGame.away.lineup[current.awayBatterIndex]
+        : demoGame.home.lineup[current.homeBatterIndex];
+      const activePitcher = current.half === "top" ? demoGame.home.starter : demoGame.away.starter;
+      const defensiveTeam = current.half === "top" ? demoGame.home : demoGame.away;
+      if (current.resolution.phase === "PITCH") return rollPitch(current, activeBatter, activePitcher);
+      if (current.resolution.phase === "BALL_IN_PLAY" || current.resolution.phase === "UMPIRE_CHECK") {
+        return resolveFielding(current, activeBatter, activePitcher, park, defensiveTeam, demoGame.away.lineup.length, demoGame.home.lineup.length);
+      }
+      if (current.resolution.phase === "DIRECT_RESULT") {
+        return scoreDirectResult(current, activeBatter, demoGame.away.lineup.length, demoGame.home.lineup.length);
+      }
+      if (current.resolution.phase === "PLAY_COMPLETE") {
+        return startNextPlateAppearance(current, current.resolution.baseState !== "EMPTY");
+      }
+      return rollResolution(current, activeBatter, activePitcher, park);
+    });
   }
 
   function moveToNextTestBatter() {
@@ -114,7 +129,7 @@ export function App() {
           <div className="game-workspace">
             <LineupPanel team={demoGame.away} activeIndex={game.awayBatterIndex} side="away" />
             <div className="center-column">
-              <Stadium park={park} ballAt={game.ballAt} showCoordinates={showCoordinates} />
+              <Stadium park={park} ballAt={game.ballAt} runners={game.runners} showCoordinates={showCoordinates} />
               <MatchupPanel batter={batter} pitcher={pitcher} game={game} onAdvance={advanceResolution} onNextTestBatter={moveToNextTestBatter} onReset={resetDemo} />
               <DiceLog game={game} />
             </div>
@@ -128,7 +143,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Rules-engine build 0.2.5 · Neutral triple placement</span>
+        <span>Rules-engine build 0.3.0 · Bases-empty fielding</span>
       </footer>
     </div>
   );

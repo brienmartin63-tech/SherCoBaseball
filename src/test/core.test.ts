@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { rollOneDie, rollTwoDice, shercoNumber } from "../core/dice";
-import { directPitchResult, effectivePowerRatings, moveBehindFielder, moveInFrontOfFielder, resolveBasesEmptyBattedBall, resolveBasesEmptySpecialEvent, specialEventPitcherRate, withinHomeRunRating } from "../core/chartResolution";
-import { advanceTestBatter, canAdvanceTestBatter, createInitialGame, rollPitch, rollResolution } from "../core/game";
-import { farthestInPlaySquare, HOME_PLATE_SQUARE, mirrorForLeftHandedBatter, nearestFielder, squaresBetween } from "../core/geometry";
+import { directPitchResult, effectivePowerRatings, moveBehindFielder, moveInFrontOfFielder, resolveBasesEmptyBattedBall, resolveBasesEmptyError, resolveBasesEmptySpecialEvent, specialEventPitcherRate, withinHomeRunRating } from "../core/chartResolution";
+import { createInitialGame, resolveFielding, rollPitch, rollResolution, scoreDirectResult, startNextPlateAppearance } from "../core/game";
+import { automaticUmpireCall, buildRatedDefense, createFieldingAttempt, resolveThrow } from "../core/fielding";
+import { distanceToBase, farthestInPlaySquare, HOME_PLATE_SQUARE, mirrorForLeftHandedBatter, nearestFielder, squaresBetween } from "../core/geometry";
 import { classifyPitch, hitNumber, pitchResultLabel } from "../core/pitching";
 import { normalize1980Ratings } from "../core/players";
 import { formatBatterRating, formatPitcherRating } from "../core/ratings";
@@ -168,61 +169,138 @@ describe("1980 bases-empty chart engine", () => {
 });
 
 describe("saved-game schema", () => {
-  it("migrates a 0.1.x game into the version-two plate-appearance state", () => {
+  it("migrates a 0.1.x game into the version-three fielding state", () => {
     const current = createInitialGame("test-park");
-    const { schemaVersion: _schemaVersion, resolution: _resolution, ...legacy } = current;
+    const { schemaVersion: _schemaVersion, resolution: _resolution, runners: _runners, ...legacy } = current;
     const migrated = migrateGameState(legacy);
-    expect(migrated.schemaVersion).toBe(2);
+    expect(migrated.schemaVersion).toBe(3);
     expect(migrated.resolution).toEqual({ phase: "PITCH", baseState: "EMPTY" });
+    expect(migrated.runners).toEqual({});
   });
 });
 
-describe("temporary multi-at-bat validation", () => {
+describe("bases-empty fielding and running", () => {
   const park = rawParks[0] as unknown as Park;
 
-  it("advances only after reaching an honest engine boundary", () => {
-    const initial = createInitialGame(park.id, 2690);
-    expect(canAdvanceTestBatter(initial)).toBe(false);
-    expect(advanceTestBatter(initial, 9, 9)).toBe(initial);
-
-    const pitched = rollPitch(initial, philadelphia.lineup[0], kansasCity.starter);
-    const charted = rollResolution(pitched, philadelphia.lineup[0], kansasCity.starter, park);
-    expect(canAdvanceTestBatter(charted)).toBe(true);
-
-    const next = advanceTestBatter(charted, philadelphia.lineup.length, kansasCity.lineup.length);
-    expect(next.awayBatterIndex).toBe(1);
-    expect(next.resolution).toMatchObject({ phase: "PITCH", baseState: "EMPTY" });
-    expect(next.seed).toBe(charted.seed);
-    expect(next.events).toEqual(charted.events);
-    expect(next.ballAt).toBeUndefined();
-    expect(next.lastRoll).toBeUndefined();
+  it("uses the four-number workbook distances without including fielder movement", () => {
+    expect(distanceToBase({ row: 9, column: 6 }, "FIRST")).toBe(6);
+    expect(distanceToBase({ row: 23, column: 8 }, "SECOND")).toBe(15);
+    const attempt = {
+      batterId: "batter",
+      ballAt: { row: 23, column: 8 },
+      battedBallType: "ground" as const,
+      fielderPosition: "CF" as const,
+      fielderName: "Center Fielder",
+      fielderAt: { row: 18, column: 8 },
+      arm: 9 as const,
+      range: 5 as const,
+      fieldingDistance: 5,
+      targetBase: "SECOND" as const,
+      targetDistance: 23,
+    };
+    const throwResult = resolveThrow(attempt, 12);
+    expect(throwResult.allowance).toBe(12);
+    expect(throwResult.remaining).toBe(7);
+    expect(throwResult.result).toBe("SAFE");
   });
 
-  it("cycles from the ninth hitter back to the leadoff hitter", () => {
-    const terminal = { ...createInitialGame(park.id), awayBatterIndex: 8, resolution: { phase: "DIRECT_RESULT" as const, baseState: "EMPTY" as const } };
-    expect(advanceTestBatter(terminal, 9, 9).awayBatterIndex).toBe(0);
+  it("loads the season-set defense at the fixed park positions", () => {
+    const defense = buildRatedDefense(kansasCity, kansasCity.starter, park);
+    expect(defense.find((fielder) => fielder.position === "2B")).toMatchObject({ name: "Frank White", arm: 9, range: 5, at: { row: 10, column: 7 } });
+    expect(defense.find((fielder) => fielder.position === "1B")).toMatchObject({ name: "Willie Aikens", arm: 8, range: 4, at: { row: 10, column: 4 } });
   });
 
-  it("runs an entire test lineup through independent deterministic plate appearances", () => {
-    let game = createInitialGame(park.id);
-    const seenResults = new Set<string>();
-    for (let plateAppearance = 0; plateAppearance < philadelphia.lineup.length; plateAppearance += 1) {
-      let rolls = 0;
-      while (!canAdvanceTestBatter(game) && rolls < 8) {
-        const batter = philadelphia.lineup[game.awayBatterIndex];
-        game = game.resolution.phase === "PITCH"
-          ? rollPitch(game, batter, kansasCity.starter)
-          : rollResolution(game, batter, kansasCity.starter, park);
-        if (game.lastRoll?.resultLabel) seenResults.add(game.lastRoll.resultLabel);
-        rolls += 1;
-      }
-      expect(canAdvanceTestBatter(game)).toBe(true);
-      game = advanceTestBatter(game, philadelphia.lineup.length, kansasCity.lineup.length);
-    }
-    expect(game.awayBatterIndex).toBe(0);
-    expect(seenResults.has("Probable Out")).toBe(true);
-    expect(seenResults.has("Probable Hit")).toBe(true);
-    expect(seenResults.size).toBeGreaterThanOrEqual(4);
+  it("records an airborne out when the nearest fielder is within range", () => {
+    const state = {
+      ...createInitialGame(park.id),
+      ballAt: { row: 18, column: 8 },
+      resolution: { phase: "BALL_IN_PLAY" as const, baseState: "EMPTY" as const, battedBallType: "fly" as const, ballAt: { row: 18, column: 8 } },
+    };
+    const fielded = resolveFielding(state, philadelphia.lineup[0], kansasCity.starter, park, kansasCity, 9, 9);
+    expect(fielded.resolution.phase).toBe("PLAY_COMPLETE");
+    expect(fielded.outs).toBe(1);
+    expect(fielded.awayBatterIndex).toBe(1);
+    expect(fielded.events[0].officialText).toContain("Amos Otis");
+  });
+
+  it("charges movement before an infielder throws to first", () => {
+    const defense = buildRatedDefense(kansasCity, kansasCity.starter, park);
+    const attempt = createFieldingAttempt(philadelphia.lineup[0], park, defense, { row: 10, column: 6 }, "ground");
+    expect(attempt).toMatchObject({ fielderName: "Frank White", fieldingDistance: 1, targetDistance: 7, arm: 9 });
+    expect(resolveThrow(attempt, 6)).toMatchObject({ allowance: 9, remaining: 8, result: "OUT" });
+  });
+
+  it("sends exact-count throws to the automatic umpire", () => {
+    const state = {
+      ...createInitialGame(park.id, 1),
+      ballAt: { row: 4, column: 1 },
+      resolution: { phase: "BALL_IN_PLAY" as const, baseState: "EMPTY" as const, battedBallType: "ground" as const, ballAt: { row: 4, column: 1 } },
+    };
+    const tied = resolveFielding(state, philadelphia.lineup[0], kansasCity.starter, park, kansasCity, 9, 9);
+    expect(tied.resolution.phase).toBe("UMPIRE_CHECK");
+    expect(tied.pendingFielding).toMatchObject({ fielderPosition: "C", fieldingDistance: 2, targetDistance: 7, throwingAllowance: 9, throwingRemainder: 7 });
+    expect(automaticUmpireCall(33, 9, "REGULAR")).toBe("OUT");
+    expect(automaticUmpireCall(34, 9, "REGULAR")).toBe("SAFE");
+    expect(automaticUmpireCall(66, 9, "REGULAR")).toBe("OUT");
+  });
+
+  it("scores a strikeout and advances cleanly to the next batter", () => {
+    const direct = { ...createInitialGame(park.id), resolution: { phase: "DIRECT_RESULT" as const, baseState: "EMPTY" as const, terminalOutcome: "STRIKEOUT" as const } };
+    const scored = scoreDirectResult(direct, philadelphia.lineup[0], 9, 9);
+    expect(scored).toMatchObject({ outs: 1, awayBatterIndex: 1, resolution: { phase: "PLAY_COMPLETE", baseState: "EMPTY" } });
+    expect(startNextPlateAppearance(scored).resolution.phase).toBe("PITCH");
+  });
+
+  it("places a batter on first and can clear the bases only for continued testing", () => {
+    const direct = { ...createInitialGame(park.id), resolution: { phase: "DIRECT_RESULT" as const, baseState: "EMPTY" as const, terminalOutcome: "WALK" as const } };
+    const scored = scoreDirectResult(direct, philadelphia.lineup[0], 9, 9);
+    expect(scored.runners.first).toBe(philadelphia.lineup[0].id);
+    expect(scored.resolution.baseState).toBe("FIRST");
+    const continued = startNextPlateAppearance(scored, true);
+    expect(continued.runners).toEqual({});
+    expect(continued.resolution).toMatchObject({ phase: "PITCH", baseState: "EMPTY" });
+  });
+
+  it("scores a bases-empty home run in the current inning", () => {
+    const direct = { ...createInitialGame(park.id), resolution: { phase: "DIRECT_RESULT" as const, baseState: "EMPTY" as const, terminalOutcome: "HOME_RUN" as const } };
+    const scored = scoreDirectResult(direct, philadelphia.lineup[2], 9, 9);
+    expect(scored.away).toMatchObject({ innings: [1], runs: 1, hits: 1, errors: 0 });
+    expect(scored.runners).toEqual({});
+  });
+
+  it("charges a bases-empty error to the fielding team", () => {
+    const direct = { ...createInitialGame(park.id), resolution: { phase: "DIRECT_RESULT" as const, baseState: "EMPTY" as const, terminalOutcome: "ERROR" as const } };
+    const scored = scoreDirectResult(direct, philadelphia.lineup[0], 9, 9);
+    expect(scored.home.errors).toBe(1);
+    expect(scored.away.hits).toBe(0);
+    expect(scored.runners.first).toBe(philadelphia.lineup[0].id);
+  });
+
+  it("honors printed extra-base and hit credits on the bases-empty error charts", () => {
+    const singleAndError = {
+      ...createInitialGame(park.id),
+      resolution: resolveBasesEmptyError("HIT_ERROR", 1),
+    };
+    const scoredSingle = scoreDirectResult(singleAndError, philadelphia.lineup[0], 9, 9);
+    expect(scoredSingle.runners.second).toBe(philadelphia.lineup[0].id);
+    expect(scoredSingle.away.hits).toBe(1);
+    expect(scoredSingle.home.errors).toBe(1);
+
+    const threeBaseError = {
+      ...createInitialGame(park.id),
+      resolution: resolveBasesEmptyError("HIT_ERROR", 6),
+    };
+    const scoredError = scoreDirectResult(threeBaseError, philadelphia.lineup[0], 9, 9);
+    expect(scoredError.runners.third).toBe(philadelphia.lineup[0].id);
+    expect(scoredError.away.hits).toBe(0);
+    expect(scoredError.home.errors).toBe(1);
+  });
+
+  it("changes sides after the third out and preserves the next visiting hitter", () => {
+    const direct = { ...createInitialGame(park.id), outs: 2, awayBatterIndex: 8, resolution: { phase: "DIRECT_RESULT" as const, baseState: "EMPTY" as const, terminalOutcome: "STRIKEOUT" as const } };
+    const scored = scoreDirectResult(direct, philadelphia.lineup[8], 9, 9);
+    expect(scored).toMatchObject({ inning: 1, half: "bottom", outs: 0, awayBatterIndex: 0 });
+    expect(scored.runners).toEqual({});
   });
 });
 

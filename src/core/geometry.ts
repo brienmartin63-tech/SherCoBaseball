@@ -1,4 +1,4 @@
-import type { BattedBallType, Coordinate, FielderLocation, Park } from "./types";
+import type { BaseName, BattedBallType, Coordinate, FielderLocation, Park } from "./types";
 
 export interface RatedFielder extends FielderLocation {
   arm: number;
@@ -18,6 +18,30 @@ export function resolvePullCoordinate(at: Coordinate, battingSide: "L" | "R"): C
 }
 
 export const HOME_PLATE_SQUARE: Coordinate = { row: 2, column: 2 };
+
+/**
+ * Reference squares used by Brien's four-number distance workbook.
+ * The workbook places the values like a diamond: 3B / 2B / 1B / home.
+ */
+export const BASE_REFERENCE_SQUARES: Record<BaseName, Coordinate> = {
+  HOME: { row: 3, column: 3 },
+  FIRST: { row: 3, column: 8 },
+  SECOND: { row: 8, column: 8 },
+  THIRD: { row: 8, column: 3 },
+};
+
+export function distanceToBase(at: Coordinate, base: BaseName): number {
+  return squaresBetween(at, BASE_REFERENCE_SQUARES[base]);
+}
+
+export function moveToward(from: Coordinate, to: Coordinate, squares: number): Coordinate {
+  const step = (current: number, target: number) => current === target ? current : current + Math.sign(target - current);
+  let current = { ...from };
+  for (let index = 0; index < squares && (current.row !== to.row || current.column !== to.column); index += 1) {
+    current = { row: step(current.row, to.row), column: step(current.column, to.column) };
+  }
+  return current;
+}
 
 export function parkTerrainAt(park: Park, at: Coordinate) {
   return park.cells[28 - at.row]?.[28 - at.column];

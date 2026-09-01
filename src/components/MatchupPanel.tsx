@@ -25,8 +25,10 @@ function nextAction(game: GameState): { label: string; disabled: boolean } {
     case "BALL_CHECK": return { label: "Roll ball check", disabled: false };
     case "COUNT_PENDING": return { label: "Count continuation pending", disabled: true };
     case "TRIPLE_DECISION": return { label: "Triple choice pending", disabled: true };
-    case "BALL_IN_PLAY": return { label: "Fielding pending", disabled: true };
-    case "DIRECT_RESULT": return { label: "Play resolved", disabled: true };
+    case "BALL_IN_PLAY": return { label: "Resolve fielding", disabled: false };
+    case "UMPIRE_CHECK": return { label: "Roll automatic umpire", disabled: false };
+    case "DIRECT_RESULT": return { label: "Score play", disabled: false };
+    case "PLAY_COMPLETE": return { label: game.resolution.baseState === "EMPTY" ? "Next batter" : "Clear bases & continue test", disabled: false };
   }
 }
 
@@ -74,7 +76,7 @@ export function MatchupPanel({ batter, pitcher, game, onAdvance, onNextTestBatte
         <button className="button ghost" onClick={onReset}><RotateCcw size={16} /> Reset demo</button>
         {game.lastRoll ? (
           <div className={`pitch-result tone-${game.lastRoll.resultTone ?? "neutral"}`} aria-live="polite">
-            <strong>{game.lastRoll.sherco}</strong>
+            <strong>{game.lastRoll.displayValue ?? game.lastRoll.sherco}</strong>
             <span>{game.lastRoll.resultLabel}</span>
             <small>{game.lastRoll.explanation}</small>
           </div>

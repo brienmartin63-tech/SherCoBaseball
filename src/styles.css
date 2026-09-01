@@ -123,6 +123,8 @@ main { padding: 14px 18px 24px; }
 .terrain-special { background: #d8d8d8; }
 .fielder-cell { background: var(--fielder); color: white; z-index: 2; }
 .fielder-label { font: 700 clamp(5px, .54vw, 9px) "Barlow Condensed", sans-serif; line-height: 1; }
+.runner-cell { background: var(--runner); color: #fff; z-index: 2; }
+.runner-label { font: 700 clamp(5px, .54vw, 9px) "Barlow Condensed", sans-serif; line-height: 1; }
 .ball-cell { background: #fff; }
 .ball-marker { width: 44%; height: 44%; background: #fff; border-radius: 50%; box-shadow: 0 0 0 1px #77818d; z-index: 4; }
 .coordinate-label { position: absolute; color: rgba(0,0,0,.62); font: 500 clamp(3px, .32vw, 5px) Inter, sans-serif; line-height: 1; }
@@ -170,6 +172,8 @@ main { padding: 14px 18px 24px; }
 .resolution-strip small { flex: none; color: #8996a5; font-size: 8px; white-space: nowrap; }
 .resolution-strip.phase-ball_in_play { background: #e9f8ef; }
 .resolution-strip.phase-direct_result { background: #f2f4f7; }
+.resolution-strip.phase-umpire_check { background: #fff5d8; }
+.resolution-strip.phase-play_complete { background: #e8f6ee; }
 .button { height: 35px; border: 1px solid transparent; border-radius: 7px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; font-size: 10px; font-weight: 700; }
 .button.primary { background: #126fc6; color: #fff; border-color: #0d5da9; }
 .button.primary:hover { background: #0f61ad; }

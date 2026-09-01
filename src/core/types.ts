@@ -16,6 +16,12 @@ export interface FielderLocation {
   at: Coordinate;
 }
 
+export interface DefensiveRating {
+  arm: 8 | 9;
+  range: 4 | 5;
+  superior?: boolean;
+}
+
 export interface Park {
   id: string;
   name: string;
@@ -41,6 +47,7 @@ export interface Batter {
   ops: number;
   homeRuns: number;
   runsBattedIn: number;
+  defense: DefensiveRating;
 }
 
 export interface Pitcher {
@@ -54,6 +61,7 @@ export interface Pitcher {
   walkStrikeout: string;
   role: "SP" | "RP";
   era: number;
+  defense: DefensiveRating;
 }
 
 export interface Team {
@@ -68,7 +76,7 @@ export interface Team {
 
 export type DiceKind = "pitch" | "chart" | "fielding" | "throw" | "steal" | "umpire";
 export type BaseState = "EMPTY" | "FIRST" | "SECOND" | "THIRD" | "FIRST_SECOND" | "FIRST_THIRD" | "SECOND_THIRD" | "LOADED";
-export type PlateAppearancePhase = "PITCH" | "BATTED_BALL_CHART" | "SPECIAL_EVENT" | "HIT_ERROR_CHECK" | "PITCHER_ERROR_CHECK" | "ERROR_CHART" | "BALL_CHECK" | "COUNT_PENDING" | "TRIPLE_DECISION" | "BALL_IN_PLAY" | "DIRECT_RESULT";
+export type PlateAppearancePhase = "PITCH" | "BATTED_BALL_CHART" | "SPECIAL_EVENT" | "HIT_ERROR_CHECK" | "PITCHER_ERROR_CHECK" | "ERROR_CHART" | "BALL_CHECK" | "COUNT_PENDING" | "TRIPLE_DECISION" | "BALL_IN_PLAY" | "UMPIRE_CHECK" | "DIRECT_RESULT" | "PLAY_COMPLETE";
 export type ChartFamily = "PROBABLE_HIT" | "PROBABLE_OUT" | "SPECIAL_EVENT" | "HIT_ERROR" | "OUT_ERROR";
 export type TerminalOutcome = "HOME_RUN" | "WALK" | "STRIKEOUT" | "HIT_BY_PITCH" | "ERROR";
 
@@ -81,6 +89,8 @@ export interface PlateAppearanceResolution {
   battedBallType?: BattedBallType;
   ballAt?: Coordinate;
   terminalOutcome?: TerminalOutcome;
+  awardedBase?: Exclude<BaseName, "HOME">;
+  creditedHit?: boolean;
 }
 
 export interface DiceRoll {
@@ -93,6 +103,31 @@ export interface DiceRoll {
   explanation: string;
   resultLabel?: string;
   resultTone?: "out" | "hit" | "event" | "error" | "neutral";
+  displayValue?: number;
+}
+
+export type BaseName = "HOME" | "FIRST" | "SECOND" | "THIRD";
+
+export interface BaseRunners {
+  first?: string;
+  second?: string;
+  third?: string;
+}
+
+export interface FieldingAttempt {
+  batterId: string;
+  ballAt: Coordinate;
+  battedBallType: BattedBallType;
+  fielderPosition: FielderPosition;
+  fielderName: string;
+  fielderAt: Coordinate;
+  arm: 8 | 9;
+  range: 4 | 5;
+  fieldingDistance: number;
+  targetBase: BaseName;
+  targetDistance: number;
+  throwingAllowance?: number;
+  throwingRemainder?: number;
 }
 
 export interface ScoreLine {
@@ -113,7 +148,7 @@ export interface PlayEvent {
 }
 
 export interface GameState {
-  schemaVersion: 2;
+  schemaVersion: 3;
   seed: number;
   inning: number;
   half: "top" | "bottom";
@@ -130,4 +165,6 @@ export interface GameState {
   rulesProfileId: "official-1980" | "brien";
   lastRoll?: DiceRoll;
   events: PlayEvent[];
+  runners: BaseRunners;
+  pendingFielding?: FieldingAttempt;
 }

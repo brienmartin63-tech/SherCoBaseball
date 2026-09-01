@@ -1,16 +1,23 @@
-import type { Coordinate, Park } from "../core/types";
+import { BASE_REFERENCE_SQUARES } from "../core/geometry";
+import type { BaseRunners, Coordinate, Park } from "../core/types";
 
 interface Props {
   park: Park;
   ballAt?: Coordinate;
+  runners: BaseRunners;
   showCoordinates: boolean;
 }
 
-export function Stadium({ park, ballAt, showCoordinates }: Props) {
+export function Stadium({ park, ballAt, runners, showCoordinates }: Props) {
   const fielderByCoordinate = new Map(park.fielders.map((fielder) => [
     `${fielder.at.row}-${fielder.at.column}`,
     fielder.position,
   ]));
+  const runnerByCoordinate = new Map([
+    runners.first ? [`${BASE_REFERENCE_SQUARES.FIRST.row}-${BASE_REFERENCE_SQUARES.FIRST.column}`, "1B"] : undefined,
+    runners.second ? [`${BASE_REFERENCE_SQUARES.SECOND.row}-${BASE_REFERENCE_SQUARES.SECOND.column}`, "2B"] : undefined,
+    runners.third ? [`${BASE_REFERENCE_SQUARES.THIRD.row}-${BASE_REFERENCE_SQUARES.THIRD.column}`, "3B"] : undefined,
+  ].filter(Boolean) as [string, string][]);
 
   return (
     <section className="stadium-card" aria-label={`${park.name} playing field`}>
@@ -20,14 +27,16 @@ export function Stadium({ park, ballAt, showCoordinates }: Props) {
             const coordinate = { row: 28 - visualRow, column: 28 - visualColumn };
             const key = `${coordinate.row}-${coordinate.column}`;
             const fielder = fielderByCoordinate.get(key);
+            const runner = runnerByCoordinate.get(key);
             const hasBall = ballAt?.row === coordinate.row && ballAt?.column === coordinate.column;
             return (
               <div
                 key={key}
-                className={`field-cell terrain-${terrain} ${fielder ? "fielder-cell" : ""} ${hasBall ? "ball-cell" : ""}`}
-                title={showCoordinates ? `${key}${fielder ? ` · ${fielder}` : ""}` : undefined}
+                className={`field-cell terrain-${terrain} ${fielder ? "fielder-cell" : ""} ${runner ? "runner-cell" : ""} ${hasBall ? "ball-cell" : ""}`}
+                title={showCoordinates ? `${key}${fielder ? ` · ${fielder}` : ""}${runner ? ` · runner ${runner}` : ""}` : undefined}
               >
                 {fielder && <span className="fielder-label">{fielder}</span>}
+                {runner && <span className="runner-label">R</span>}
                 {hasBall && <span className="ball-marker" aria-label="Ball" />}
                 {showCoordinates && <span className="coordinate-label">{key}</span>}
               </div>
