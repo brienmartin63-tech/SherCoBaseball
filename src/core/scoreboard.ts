@@ -6,3 +6,7 @@ export function scoreboardInnings(currentInning: number): number[] {
 export function inningLabel(inning: number): string {
   return inning === 10 ? "X" : String(inning);
 }
+
+export function hasScoreboardSpacerAfter(inning: number): boolean {
+  return inning === 3 || inning === 6 || inning === 9;
+}

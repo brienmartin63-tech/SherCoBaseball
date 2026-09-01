@@ -71,7 +71,7 @@ export interface DiceRoll {
   label: string;
   explanation: string;
   resultLabel?: string;
-  resultTone?: "out" | "hit" | "event" | "neutral";
+  resultTone?: "out" | "hit" | "event" | "error" | "neutral";
 }
 
 export interface ScoreLine {

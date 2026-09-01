@@ -2,7 +2,7 @@
 
 A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, designed for GitHub Pages and long-running SLOBS leagues.
 
-## Foundation build 0.1.2
+## Foundation build 0.1.3
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
 
@@ -28,6 +28,13 @@ Pitch rolls now present the decisive result prominently as `33 — Probable Out`
 - Home plate and both foul lines now meet at the vertex between `3-3` and `2-2`.
 - The stadium is constrained between the two lineup panels, bringing the matchup and results closer to the top of the game screen.
 - The compact scoreboard groups `1-2-3`, `4-5-6`, and `7-8-9`, labels the tenth inning `X`, keeps R-H-E visible, and begins horizontal inning scrolling with the 11th.
+
+### 0.1.3 classic scoreboard and readability
+
+- True blank gutters separate each three-inning scoreboard group and the ninth from extra innings; box-score lines remain continuous.
+- Lineup names and ratings are modestly larger and easier to scan.
+- Probable Hit uses a brighter green result treatment.
+- Error results are standardized as white lettering on a red background.
 
 Not yet implemented:
 

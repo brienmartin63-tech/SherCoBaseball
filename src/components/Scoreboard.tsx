@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { inningLabel, scoreboardInnings } from "../core/scoreboard";
+import { hasScoreboardSpacerAfter, inningLabel, scoreboardInnings } from "../core/scoreboard";
 import type { GameState, Team } from "../core/types";
 
 interface Props {
@@ -18,14 +18,23 @@ export function Scoreboard({ game, away, home }: Props) {
     }
   }, [game.inning]);
 
-  const inningClass = (inning: number) => `inning-cell ${[3, 6, 9, 10].includes(inning) ? "group-end" : ""}`;
+  const inningCells = (score?: GameState["away"]) => innings.flatMap((inning) => [
+    score
+      ? <td className="inning-cell" key={`inning-${inning}`}>{score.innings[inning - 1] ?? "–"}</td>
+      : <th className="inning-cell" key={`inning-${inning}`}>{inningLabel(inning)}</th>,
+    ...(hasScoreboardSpacerAfter(inning)
+      ? [score
+        ? <td className="inning-spacer" aria-hidden="true" key={`spacer-${inning}`} />
+        : <th className="inning-spacer" aria-hidden="true" key={`spacer-${inning}`} />]
+      : []),
+  ]);
   const line = (team: Team, score: GameState["away"], isBatting: boolean) => (
     <tr>
       <th scope="row" className="team-column">
         <span className={isBatting ? "at-bat-dot active" : "at-bat-dot"} />
         {team.abbreviation}
       </th>
-      {innings.map((inning) => <td className={inningClass(inning)} key={inning}>{score.innings[inning - 1] ?? "–"}</td>)}
+      {inningCells(score)}
       <td className="total total-runs">{score.runs}</td>
       <td className="total total-hits">{score.hits}</td>
       <td className="total total-errors">{score.errors}</td>
@@ -43,7 +52,7 @@ export function Scoreboard({ game, away, home }: Props) {
           <thead>
             <tr>
               <th className="team-column">Team</th>
-              {innings.map((inning) => <th className={inningClass(inning)} key={inning}>{inningLabel(inning)}</th>)}
+              {inningCells()}
               <th className="total total-runs">R</th><th className="total total-hits">H</th><th className="total total-errors">E</th>
             </tr>
           </thead>

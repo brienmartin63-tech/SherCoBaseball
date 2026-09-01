@@ -4,7 +4,7 @@ import { mirrorForLeftHandedBatter, nearestFielder, squaresBetween } from "../co
 import { classifyPitch, hitNumber, pitchResultLabel } from "../core/pitching";
 import { normalize1980Ratings } from "../core/players";
 import { actionAllowed, shouldAttemptExtraBase, shouldAutoStealSecond } from "../core/rules";
-import { inningLabel, scoreboardInnings } from "../core/scoreboard";
+import { hasScoreboardSpacerAfter, inningLabel, scoreboardInnings } from "../core/scoreboard";
 import type { Park } from "../core/types";
 import rawParks from "../data/parks.json";
 
@@ -107,6 +107,7 @@ describe("scoreboard inning line", () => {
   it("groups regulation innings with a permanent X column for the tenth", () => {
     expect(scoreboardInnings(1)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     expect(inningLabel(10)).toBe("X");
+    expect([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].filter(hasScoreboardSpacerAfter)).toEqual([3, 6, 9]);
   });
 
   it("adds scrollable numeric columns beginning with the eleventh", () => {
