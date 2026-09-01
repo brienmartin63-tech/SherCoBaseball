@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { rollTwoDice, shercoNumber } from "../core/dice";
 import { mirrorForLeftHandedBatter, nearestFielder, squaresBetween } from "../core/geometry";
-import { classifyPitch, hitNumber } from "../core/pitching";
+import { classifyPitch, hitNumber, pitchResultLabel } from "../core/pitching";
 import { normalize1980Ratings } from "../core/players";
 import { actionAllowed, shouldAttemptExtraBase, shouldAutoStealSecond } from "../core/rules";
+import { inningLabel, scoreboardInnings } from "../core/scoreboard";
 import type { Park } from "../core/types";
 import rawParks from "../data/parks.json";
 
@@ -24,6 +25,9 @@ describe("1980 pitching chart", () => {
     expect(classifyPitch(34, 44)).toBe("PROBABLE_OUT");
     expect(classifyPitch(44, 44)).toBe("PROBABLE_HIT");
     expect(classifyPitch(66, 44)).toBe("SPECIAL_EVENT");
+    expect(pitchResultLabel(classifyPitch(33, 44))).toBe("Probable Out");
+    expect(pitchResultLabel(classifyPitch(56, 44))).toBe("Probable Hit");
+    expect(pitchResultLabel(classifyPitch(66, 44))).toBe("Special Event");
   });
 });
 
@@ -96,5 +100,17 @@ describe("imported USBL parks", () => {
       const defense = park.fielders.map((fielder) => `${fielder.position}:${fielder.at.row}-${fielder.at.column}`).sort();
       expect(defense).toEqual(expectedDefense);
     }
+  });
+});
+
+describe("scoreboard inning line", () => {
+  it("groups regulation innings with a permanent X column for the tenth", () => {
+    expect(scoreboardInnings(1)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(inningLabel(10)).toBe("X");
+  });
+
+  it("adds scrollable numeric columns beginning with the eleventh", () => {
+    expect(scoreboardInnings(11)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+    expect(inningLabel(11)).toBe("11");
   });
 });

@@ -70,6 +70,8 @@ export interface DiceRoll {
   total: number;
   label: string;
   explanation: string;
+  resultLabel?: string;
+  resultTone?: "out" | "hit" | "event" | "neutral";
 }
 
 export interface ScoreLine {

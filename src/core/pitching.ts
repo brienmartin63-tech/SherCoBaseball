@@ -23,3 +23,9 @@ export function classifyPitch(shercoRoll: number, threshold: number): "PROBABLE_
   if (shercoRoll === 66) return "SPECIAL_EVENT";
   return shercoRoll >= threshold ? "PROBABLE_HIT" : "PROBABLE_OUT";
 }
+
+export function pitchResultLabel(classification: ReturnType<typeof classifyPitch>): string {
+  if (classification === "PROBABLE_HIT") return "Probable Hit";
+  if (classification === "SPECIAL_EVENT") return "Special Event";
+  return "Probable Out";
+}

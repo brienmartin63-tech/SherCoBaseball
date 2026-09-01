@@ -17,7 +17,10 @@ export function DiceLog({ game }: { game: GameState }) {
                 <b>{event.roll?.dice[0]}</b><b>{event.roll?.dice[1]}</b>
               </div>
               <div><strong>{event.roll?.label}</strong><p>{event.auditText}</p></div>
-              <span className="roll-result">{event.roll?.sherco}</span>
+              <span className={`roll-result tone-${event.roll?.resultTone ?? "neutral"}`}>
+                <b>{event.roll?.sherco}</b>
+                <em>{event.roll?.resultLabel}</em>
+              </span>
             </li>
           ))}
         </ol>

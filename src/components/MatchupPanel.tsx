@@ -44,7 +44,13 @@ export function MatchupPanel({ batter, pitcher, game, onRoll, onReset }: Props) 
       <div className="matchup-actions">
         <button className="button primary" onClick={onRoll}><Dices size={18} /> Roll pitch</button>
         <button className="button ghost" onClick={onReset}><RotateCcw size={16} /> Reset demo</button>
-        <p>{game.lastRoll ? game.lastRoll.explanation : "Ready for the first pitch."}</p>
+        {game.lastRoll ? (
+          <div className={`pitch-result tone-${game.lastRoll.resultTone ?? "neutral"}`} aria-live="polite">
+            <strong>{game.lastRoll.sherco}</strong>
+            <span>{game.lastRoll.resultLabel}</span>
+            <small>{game.lastRoll.explanation}</small>
+          </div>
+        ) : <p className="ready-message">Ready for the first pitch.</p>}
       </div>
     </section>
   );

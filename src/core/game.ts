@@ -1,5 +1,5 @@
 import { rollTwoDice } from "./dice";
-import { classifyPitch, hitNumber } from "./pitching";
+import { classifyPitch, hitNumber, pitchResultLabel } from "./pitching";
 import type { Batter, GameState, Pitcher, PlayEvent } from "./types";
 
 export function createInitialGame(selectedParkId: string, seed = 19801021): GameState {
@@ -26,7 +26,12 @@ export function rollPitch(state: GameState, batter: Batter, pitcher: Pitcher): G
   const explanation = classification === "SPECIAL_EVENT"
     ? "66 — consult the base-state Special Event chart"
     : `${result.roll.sherco} ${classification === "PROBABLE_HIT" ? "meets or exceeds" : "is below"} hit number ${threshold}`;
-  const roll = { ...result.roll, explanation };
+  const roll = {
+    ...result.roll,
+    explanation,
+    resultLabel: pitchResultLabel(classification),
+    resultTone: classification === "PROBABLE_HIT" ? "hit" as const : classification === "SPECIAL_EVENT" ? "event" as const : "out" as const,
+  };
   const officialText = classification === "SPECIAL_EVENT"
     ? `${batter.name} at bat; special event pending.`
     : `${batter.name} faces ${pitcher.name}.`;
