@@ -1,4 +1,5 @@
-import { Dices, RotateCcw } from "lucide-react";
+import { Dices, RotateCcw, SkipForward } from "lucide-react";
+import { canAdvanceTestBatter } from "../core/game";
 import { hitNumber } from "../core/pitching";
 import { formatBatterRating, formatPitcherRating } from "../core/ratings";
 import type { Batter, GameState, Pitcher } from "../core/types";
@@ -8,6 +9,7 @@ interface Props {
   pitcher: Pitcher;
   game: GameState;
   onAdvance: () => void;
+  onNextTestBatter: () => void;
   onReset: () => void;
 }
 
@@ -26,10 +28,11 @@ function nextAction(game: GameState): { label: string; disabled: boolean } {
   }
 }
 
-export function MatchupPanel({ batter, pitcher, game, onAdvance, onReset }: Props) {
+export function MatchupPanel({ batter, pitcher, game, onAdvance, onNextTestBatter, onReset }: Props) {
   const currentRate = game.activePitcherRate ?? pitcher.rate;
   const threshold = hitNumber(batter.offensiveGrade, currentRate);
   const action = nextAction(game);
+  const canTestAdvance = canAdvanceTestBatter(game);
   return (
     <section className="matchup-card">
       <div className="matchup-grid">
@@ -60,7 +63,9 @@ export function MatchupPanel({ batter, pitcher, game, onAdvance, onReset }: Prop
         </div>
       </div>
       <div className="matchup-actions">
-        <button className="button primary" onClick={onAdvance} disabled={action.disabled}><Dices size={18} /> {action.label}</button>
+        {canTestAdvance
+          ? <button className="button test-next" onClick={onNextTestBatter} title="Advance without scoring the unresolved play"><SkipForward size={16} /> Next test batter</button>
+          : <button className="button primary" onClick={onAdvance} disabled={action.disabled}><Dices size={18} /> {action.label}</button>}
         <button className="button ghost" onClick={onReset}><RotateCcw size={16} /> Reset demo</button>
         {game.lastRoll ? (
           <div className={`pitch-result tone-${game.lastRoll.resultTone ?? "neutral"}`} aria-live="polite">

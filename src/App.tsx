@@ -5,7 +5,7 @@ import { LineupPanel } from "./components/LineupPanel";
 import { MatchupPanel } from "./components/MatchupPanel";
 import { Scoreboard } from "./components/Scoreboard";
 import { Stadium } from "./components/Stadium";
-import { createInitialGame, rollPitch, rollResolution, selectPark, toggleRulesProfile } from "./core/game";
+import { advanceTestBatter, createInitialGame, rollPitch, rollResolution, selectPark, toggleRulesProfile } from "./core/game";
 import { loadGame, saveGame } from "./core/storage";
 import type { Park } from "./core/types";
 import { demoGame } from "./data/demo";
@@ -64,6 +64,10 @@ export function App() {
       : rollResolution(current, batter, pitcher, park));
   }
 
+  function moveToNextTestBatter() {
+    setGame((current) => advanceTestBatter(current, demoGame.away.lineup.length, demoGame.home.lineup.length));
+  }
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -111,7 +115,7 @@ export function App() {
             <LineupPanel team={demoGame.away} activeIndex={game.awayBatterIndex} side="away" />
             <div className="center-column">
               <Stadium park={park} ballAt={game.ballAt} showCoordinates={showCoordinates} />
-              <MatchupPanel batter={batter} pitcher={pitcher} game={game} onAdvance={advanceResolution} onReset={resetDemo} />
+              <MatchupPanel batter={batter} pitcher={pitcher} game={game} onAdvance={advanceResolution} onNextTestBatter={moveToNextTestBatter} onReset={resetDemo} />
               <DiceLog game={game} />
             </div>
             <LineupPanel team={demoGame.home} activeIndex={game.homeBatterIndex} side="home" />
@@ -124,7 +128,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Rules-engine build 0.2.0 · Five test parks imported</span>
+        <span>Rules-engine build 0.2.1 · Multi-at-bat validation</span>
       </footer>
     </div>
   );

@@ -173,6 +173,8 @@ main { padding: 14px 18px 24px; }
 .button.primary { background: #126fc6; color: #fff; border-color: #0d5da9; }
 .button.primary:hover { background: #0f61ad; }
 .button:disabled, .button:disabled:hover { cursor: default; background: #cbd4dd; color: #637181; border-color: #bbc5cf; }
+.button.test-next { background: #f1a52b; color: #18283b; border-color: #dc901a; }
+.button.test-next:hover { background: #e8991f; }
 .button.ghost { background: #fff; color: #506176; border-color: #d6dfe7; }
 .button.secondary { background: var(--navy); color: #fff; }
 

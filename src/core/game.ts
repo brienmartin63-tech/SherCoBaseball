@@ -180,6 +180,32 @@ export function rollResolution(state: GameState, batter: Batter, pitcher: Pitche
   return state;
 }
 
+const TEST_BATTER_BOUNDARIES = new Set<GameState["resolution"]["phase"]>(["BALL_IN_PLAY", "DIRECT_RESULT", "COUNT_PENDING"]);
+
+export function canAdvanceTestBatter(state: GameState): boolean {
+  return TEST_BATTER_BOUNDARIES.has(state.resolution.phase);
+}
+
+/** Temporary validation loop: advances the lineup without scoring the unresolved play. */
+export function advanceTestBatter(state: GameState, awayLineupSize: number, homeLineupSize: number): GameState {
+  if (!canAdvanceTestBatter(state)) return state;
+  const awayBatterIndex = state.half === "top" && awayLineupSize > 0 ? (state.awayBatterIndex + 1) % awayLineupSize : state.awayBatterIndex;
+  const homeBatterIndex = state.half === "bottom" && homeLineupSize > 0 ? (state.homeBatterIndex + 1) % homeLineupSize : state.homeBatterIndex;
+  return {
+    ...state,
+    awayBatterIndex,
+    homeBatterIndex,
+    resolution: {
+      phase: "PITCH",
+      baseState: "EMPTY",
+      description: "Test mode: the previous result was not scored. Roll for the next batter.",
+      source: "Temporary 0.2.1 chart-validation loop",
+    },
+    ballAt: undefined,
+    lastRoll: undefined,
+  };
+}
+
 export function toggleRulesProfile(state: GameState): GameState {
   return { ...state, rulesProfileId: state.rulesProfileId === "brien" ? "official-1980" : "brien" };
 }

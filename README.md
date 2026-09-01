@@ -4,9 +4,16 @@ A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, des
 
 The durable design decisions, confirmed house rules, scoring requirements, stadium-import conventions, and development priorities are preserved in [Project Checkpoint 0.1.7](docs/PROJECT_CHECKPOINT_0.1.7.md).
 
-## Rules-engine build 0.2.0
+## Rules-engine build 0.2.1
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
+
+### 0.2.1 multi-at-bat validation loop
+
+- A temporary **Next test batter** button appears after a direct result, a ball in play, or an unimplemented count continuation.
+- It cycles through the batting order while preserving the evolving deterministic dice seed, pitcher-rate adjustments, and complete roll audit.
+- It deliberately does not change outs, runners, hits, errors, runs, or official statistics; the interface identifies that the unresolved result was not scored.
+- The control will be retired when fielding and official plate-appearance completion can advance the lineup normally.
 
 Implemented:
 

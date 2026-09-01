@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { rollOneDie, rollTwoDice, shercoNumber } from "../core/dice";
 import { directPitchResult, resolveBasesEmptyBattedBall, resolveBasesEmptySpecialEvent, specialEventPitcherRate, withinHomeRunRating } from "../core/chartResolution";
-import { createInitialGame, rollPitch, rollResolution } from "../core/game";
+import { advanceTestBatter, canAdvanceTestBatter, createInitialGame, rollPitch, rollResolution } from "../core/game";
 import { mirrorForLeftHandedBatter, nearestFielder, squaresBetween } from "../core/geometry";
 import { classifyPitch, hitNumber, pitchResultLabel } from "../core/pitching";
 import { normalize1980Ratings } from "../core/players";
@@ -114,6 +114,55 @@ describe("saved-game schema", () => {
     const migrated = migrateGameState(legacy);
     expect(migrated.schemaVersion).toBe(2);
     expect(migrated.resolution).toEqual({ phase: "PITCH", baseState: "EMPTY" });
+  });
+});
+
+describe("temporary multi-at-bat validation", () => {
+  const park = rawParks[0] as unknown as Park;
+
+  it("advances only after reaching an honest engine boundary", () => {
+    const initial = createInitialGame(park.id, 2690);
+    expect(canAdvanceTestBatter(initial)).toBe(false);
+    expect(advanceTestBatter(initial, 9, 9)).toBe(initial);
+
+    const pitched = rollPitch(initial, philadelphia.lineup[0], kansasCity.starter);
+    const charted = rollResolution(pitched, philadelphia.lineup[0], kansasCity.starter, park);
+    expect(canAdvanceTestBatter(charted)).toBe(true);
+
+    const next = advanceTestBatter(charted, philadelphia.lineup.length, kansasCity.lineup.length);
+    expect(next.awayBatterIndex).toBe(1);
+    expect(next.resolution).toMatchObject({ phase: "PITCH", baseState: "EMPTY" });
+    expect(next.seed).toBe(charted.seed);
+    expect(next.events).toEqual(charted.events);
+    expect(next.ballAt).toBeUndefined();
+    expect(next.lastRoll).toBeUndefined();
+  });
+
+  it("cycles from the ninth hitter back to the leadoff hitter", () => {
+    const terminal = { ...createInitialGame(park.id), awayBatterIndex: 8, resolution: { phase: "DIRECT_RESULT" as const, baseState: "EMPTY" as const } };
+    expect(advanceTestBatter(terminal, 9, 9).awayBatterIndex).toBe(0);
+  });
+
+  it("runs an entire test lineup through independent deterministic plate appearances", () => {
+    let game = createInitialGame(park.id);
+    const seenResults = new Set<string>();
+    for (let plateAppearance = 0; plateAppearance < philadelphia.lineup.length; plateAppearance += 1) {
+      let rolls = 0;
+      while (!canAdvanceTestBatter(game) && rolls < 8) {
+        const batter = philadelphia.lineup[game.awayBatterIndex];
+        game = game.resolution.phase === "PITCH"
+          ? rollPitch(game, batter, kansasCity.starter)
+          : rollResolution(game, batter, kansasCity.starter, park);
+        if (game.lastRoll?.resultLabel) seenResults.add(game.lastRoll.resultLabel);
+        rolls += 1;
+      }
+      expect(canAdvanceTestBatter(game)).toBe(true);
+      game = advanceTestBatter(game, philadelphia.lineup.length, kansasCity.lineup.length);
+    }
+    expect(game.awayBatterIndex).toBe(0);
+    expect(seenResults.has("Probable Out")).toBe(true);
+    expect(seenResults.has("Probable Hit")).toBe(true);
+    expect(seenResults.size).toBeGreaterThanOrEqual(4);
   });
 });
 
