@@ -128,7 +128,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Rules-engine build 0.2.4 · Power and triple rules</span>
+        <span>Rules-engine build 0.2.5 · Neutral triple placement</span>
       </footer>
     </div>
   );

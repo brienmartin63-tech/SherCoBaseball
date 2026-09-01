@@ -145,8 +145,7 @@ export function resolveBasesEmptyBattedBall(
     };
   }
   if (tripleTriggered) {
-    const battingHand = effectiveBattingHand(batter.bats, pitcher.throws);
-    const tripleTarget = farthestInPlaySquare(park, battingHand);
+    const tripleTarget = farthestInPlaySquare(park);
     if (tripleTarget) {
       return {
         phase: "BALL_IN_PLAY",

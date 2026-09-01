@@ -92,8 +92,7 @@ describe("1980 bases-empty chart engine", () => {
   it("invokes Brien's farthest-square triple option on McBride's adjusted 13", () => {
     const mcBride = philadelphia.lineup[1];
     const triplePark = rawParks[1] as unknown as Park;
-    expect(farthestInPlaySquare(triplePark, "L")).toEqual({ row: 26, column: 18 });
-    expect(farthestInPlaySquare(triplePark, "R")).toEqual({ row: 16, column: 26 });
+    expect(farthestInPlaySquare(triplePark)).toEqual({ row: 26, column: 18 });
     const resolution = resolveBasesEmptyBattedBall("PROBABLE_HIT", 13, mcBride, kansasCity.starter, triplePark, 0, true);
     expect(resolution).toMatchObject({ phase: "BALL_IN_PLAY", ballAt: { row: 26, column: 18 } });
     expect(squaresBetween(HOME_PLATE_SQUARE, resolution.ballAt!)).toBe(24);
@@ -101,6 +100,13 @@ describe("1980 bases-empty chart engine", () => {
 
     const officialChoice = resolveBasesEmptyBattedBall("PROBABLE_HIT", 13, mcBride, kansasCity.starter, triplePark, 0, false);
     expect(officialChoice.phase).toBe("TRIPLE_DECISION");
+  });
+
+  it("does not use the batter's pull field to choose an equally distant triple square", () => {
+    const sundome = rawParks[4] as unknown as Park;
+    expect(farthestInPlaySquare(sundome)).toEqual({ row: 25, column: 18 });
+    const schmidtTriple = resolveBasesEmptyBattedBall("PROBABLE_HIT", 23, philadelphia.lineup[2], kansasCity.starter, sundome, 0, true);
+    expect(schmidtTriple.ballAt).toEqual({ row: 25, column: 18 });
   });
 
   it("moves in front of and behind fielders on straight field lanes", () => {

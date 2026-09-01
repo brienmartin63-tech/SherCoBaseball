@@ -4,9 +4,14 @@ A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, des
 
 The durable design decisions, confirmed house rules, scoring requirements, stadium-import conventions, and development priorities are preserved in [Project Checkpoint 0.1.7](docs/PROJECT_CHECKPOINT_0.1.7.md).
 
-## Rules-engine build 0.2.4
+## Rules-engine build 0.2.5
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
+
+### 0.2.5 neutral triple placement
+
+- Triple-rule relocation is independent of batting hand and spray direction; a batter can produce a triple to any part of the park.
+- The program first maximizes SherCo square-distance from home, then radial distance among equally distant squares, and finally uses stable row-column order only when coordinates remain exactly tied.
 
 ### 0.2.4 gopher-ball and triple rules
 
@@ -14,7 +19,7 @@ This checkpoint intentionally separates rules, game state, imported data, persis
 - The matchup shows the effective adjusted power rating against a `+` pitcher while the lineup continues to show the printed rating.
 - A fly sent beyond the selected park's fence by an adjusted HR result now resolves as **Home Run** rather than stopping for fielding.
 - On an exact effective triple number, Brien's Rules automatically invokes the Rule 21 relocation option and selects a legal in-play square at maximum SherCo distance from home.
-- Equal-distance triple targets favor the batter's pull field and then the greatest radial distance. Official 1980 mode stops for the manager's triple-rule choice instead.
+- Equal-distance triple targets use greatest radial distance without regard to the batter's pull field. Official 1980 mode stops for the manager's triple-rule choice instead.
 
 ### 0.2.3 fixed defense and chart conversion
 

@@ -30,7 +30,7 @@ The current vertical slice intentionally stops when a chart result requires fiel
 - RF occupies `19-8`: one square in front is `18-8`, and one square behind is `20-8`.
 - Chart coordinates are written for right-handed batters and mirror across the row-column diagonal for left-handed batters. Thus chart `8-19` is a ball toward LF for a righty and becomes `19-8`, toward RF, for a lefty.
 - Results that name a fielder use the fixed defensive position above and do not undergo handedness mirroring.
-- Brien triple placement maximizes SherCo square-distance from home (`2-2`), excludes `beyondFence` terrain, favors the batter's pull field among equal-distance squares, and then uses radial distance as the final baseball-relevant tie-breaker.
+- Brien triple placement maximizes SherCo square-distance from home (`2-2`), excludes `beyondFence` terrain, and then maximizes radial distance among equal SherCo distances. Batting hand and pull field do not affect placement; stable row-column order resolves an otherwise exact tie.
 
 ## Supplied but not yet executable
 
