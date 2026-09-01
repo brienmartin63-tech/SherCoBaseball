@@ -884,7 +884,7 @@
         }
       },
       {
-        "position": "RF",
+        "position": "LF",
         "at": {
           "row": 8,
           "column": 19
@@ -898,7 +898,7 @@
         }
       },
       {
-        "position": "LF",
+        "position": "RF",
         "at": {
           "row": 19,
           "column": 8
@@ -1799,7 +1799,7 @@
         }
       },
       {
-        "position": "RF",
+        "position": "LF",
         "at": {
           "row": 8,
           "column": 19
@@ -1813,7 +1813,7 @@
         }
       },
       {
-        "position": "LF",
+        "position": "RF",
         "at": {
           "row": 19,
           "column": 8
@@ -2714,7 +2714,7 @@
         }
       },
       {
-        "position": "RF",
+        "position": "LF",
         "at": {
           "row": 8,
           "column": 19
@@ -2728,7 +2728,7 @@
         }
       },
       {
-        "position": "LF",
+        "position": "RF",
         "at": {
           "row": 19,
           "column": 8
@@ -3629,7 +3629,7 @@
         }
       },
       {
-        "position": "RF",
+        "position": "LF",
         "at": {
           "row": 8,
           "column": 19
@@ -3643,7 +3643,7 @@
         }
       },
       {
-        "position": "LF",
+        "position": "RF",
         "at": {
           "row": 19,
           "column": 8
@@ -4544,7 +4544,7 @@
         }
       },
       {
-        "position": "RF",
+        "position": "LF",
         "at": {
           "row": 8,
           "column": 19
@@ -4558,7 +4558,7 @@
         }
       },
       {
-        "position": "LF",
+        "position": "RF",
         "at": {
           "row": 19,
           "column": 8

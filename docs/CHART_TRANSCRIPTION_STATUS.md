@@ -22,9 +22,11 @@ The current vertical slice intentionally stops when a chart result requires fiel
 
 - Coordinates are always read **row-column**.
 - “In front of” and “behind” follow the straight field lane through the named fielder; they are not automatically diagonal movements.
-- RF occupies `8-19`: one square in front is `8-18`, and one square behind is `8-20`.
+- LF occupies `8-19`: one square in front is `8-18`, and one square behind is `8-20`.
 - CF occupies `18-18`: two squares in front is `16-16`, and five squares behind is `23-23`.
-- LF occupies `19-8`: one square in front is `18-8`, and one square behind is `20-8`.
+- RF occupies `19-8`: one square in front is `18-8`, and one square behind is `20-8`.
+- Chart coordinates are written for right-handed batters and mirror across the row-column diagonal for left-handed batters. Thus chart `8-19` is a ball toward LF for a righty and becomes `19-8`, toward RF, for a lefty.
+- Results that name a fielder use the fixed defensive position above and do not undergo handedness mirroring.
 
 ## Supplied but not yet executable
 

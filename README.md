@@ -4,16 +4,22 @@ A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, des
 
 The durable design decisions, confirmed house rules, scoring requirements, stadium-import conventions, and development priorities are preserved in [Project Checkpoint 0.1.7](docs/PROJECT_CHECKPOINT_0.1.7.md).
 
-## Rules-engine build 0.2.2
+## Rules-engine build 0.2.3
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
+
+### 0.2.3 fixed defense and chart conversion
+
+- The fixed defense is LF `8-19`, CF `18-18`, and RF `19-8` on the program grid.
+- A chart coordinate is written for a right-handed batter and mirrors for a left-handed batter: chart `8-19` goes to LF for a righty and becomes `19-8`, to RF, for a lefty.
+- A result naming a fielder uses that fielder's fixed position and does not mirror. Therefore, one square in front of RF `19-8` is `18-8`.
 
 ### 0.2.2 straight field lanes
 
 - “In front of” moves directly toward home on the fielder's field lane; “behind” moves directly away on that same line.
-- From RF `8-19`, one square in front is `8-18`; from LF `19-8`, one square in front is `18-8`.
+- Straight lanes change the column in the `8-19` field lane, the row in the `19-8` field lane, and both coordinates in the center-field lane.
 - From CF `18-18`, two squares in front is `16-16`, and five squares behind is `23-23`.
-- The five test parks now correctly identify RF at `8-19` and LF at `19-8`.
+- Fixed fielder labels are treated separately from handedness-mirrored chart coordinates.
 
 ### 0.2.1 multi-at-bat validation loop
 
