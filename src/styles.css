@@ -103,10 +103,10 @@ main { padding: 14px 18px 24px; }
 .compact-stat { color: #39485a; font: 600 11px "Barlow Condensed", sans-serif; text-align: right; }
 .bullpen { border-top: 1px solid var(--line); padding: 12px 14px 14px; background: #f8fafc; }
 .bullpen > .eyebrow { margin-bottom: 8px; }
-.bullpen-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; border-top: 1px solid #e6ebf0; font-size: 10px; }
+.bullpen-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-top: 1px solid #e6ebf0; font-size: 11px; }
 .bullpen-row:first-of-type { border-top: 0; }
 .bullpen-row span { display: flex; flex-direction: column; }
-.bullpen-row small { color: #8b96a3; font-size: 8px; margin-top: 2px; }
+.bullpen-row small { color: #778596; font-size: 10px; margin-top: 2px; white-space: nowrap; }
 
 .center-column { min-width: 0; display: grid; gap: 10px; }
 .stadium-card { width: 100%; max-width: 540px; justify-self: center; padding: 10px; }
@@ -143,6 +143,7 @@ main { padding: 14px 18px 24px; }
 .rating-row { display: flex; align-items: center; gap: 9px; color: #697789; font-size: 9px; }
 .pitcher .rating-row { justify-content: flex-end; }
 .rating-badge { min-width: 28px; height: 24px; padding: 0 5px; display: inline-grid; place-items: center; background: var(--navy); color: #fff; border-radius: 5px; font: 700 13px "Barlow Condensed", sans-serif; }
+.rating-badge.full-rating { min-width: auto; padding: 0 8px; white-space: nowrap; font-size: 12px; letter-spacing: .015em; }
 .matchup-number { background: #edf4fa; border-left: 1px solid #d8e6f1; border-right: 1px solid #d8e6f1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
 .matchup-number span, .matchup-number small { color: #75879a; font-size: 8px; text-transform: uppercase; letter-spacing: .08em; }
 .matchup-number strong { font: 700 42px/1 "Barlow Condensed", sans-serif; color: #0e5ca5; margin: 3px 0; }
@@ -153,8 +154,8 @@ main { padding: 14px 18px 24px; }
 .pitch-result span { font: 700 18px/1 "Barlow Condensed", sans-serif; text-transform: uppercase; letter-spacing: .035em; color: #25364a; }
 .pitch-result small { margin-top: 4px; color: #697789; font-size: 9px; }
 .pitch-result.tone-out { background: #eef2f6; border-color: #64748b; }
-.pitch-result.tone-hit { background: #d9fbe7; border-color: #14b866; }
-.pitch-result.tone-hit strong, .pitch-result.tone-hit span { color: #08783f; }
+.pitch-result.tone-hit { background: #bdf7d1; border-color: #09a94e; }
+.pitch-result.tone-hit strong, .pitch-result.tone-hit span { color: #056c38; }
 .pitch-result.tone-event { background: #fff5d8; border-color: #d69d12; }
 .pitch-result.tone-event strong, .pitch-result.tone-event span { color: #805b00; }
 .pitch-result.tone-error { background: #c82432; border-color: #89121b; }
@@ -180,7 +181,7 @@ main { padding: 14px 18px 24px; }
 .roll-result { min-height: 42px; padding: 5px 7px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 6px; background: #eef2f6; color: #25364a; }
 .roll-result b { font: 700 21px/1 "Barlow Condensed", sans-serif; }
 .roll-result em { margin-top: 3px; font: normal 700 10px/1 "Barlow Condensed", sans-serif; text-transform: uppercase; white-space: nowrap; }
-.roll-result.tone-hit { background: #d9fbe7; color: #08783f; }
+.roll-result.tone-hit { background: #bdf7d1; color: #056c38; }
 .roll-result.tone-event { background: #fff5d8; color: #805b00; }
 .roll-result.tone-error { background: #c82432; color: #fff; }
 

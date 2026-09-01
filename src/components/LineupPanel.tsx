@@ -1,4 +1,5 @@
 import type { Team } from "../core/types";
+import { formatBatterRating, formatPitcherRating } from "../core/ratings";
 
 interface Props {
   team: Team;
@@ -22,7 +23,7 @@ export function LineupPanel({ team, activeIndex, side }: Props) {
             <span className="order">{index + 1}</span>
             <span className="player-name">
               <strong>{player.name}</strong>
-              <small>{player.bats} · {player.offensiveGrade}{player.speed === "REGULAR" ? "" : player.speed}</small>
+              <small>{player.bats}HB · {formatBatterRating(player)}</small>
             </span>
             <span className="position">{player.position}</span>
             <span className="compact-stat">{player.average.toFixed(3).replace(/^0/, "")}</span>
@@ -33,7 +34,7 @@ export function LineupPanel({ team, activeIndex, side }: Props) {
         <p className="eyebrow">Available bullpen</p>
         {team.bullpen.map((pitcher) => (
           <div className="bullpen-row" key={pitcher.id}>
-            <span><b>{pitcher.name}</b><small>{pitcher.throws}HP · {pitcher.rate} · {pitcher.walkStrikeout}</small></span>
+            <span><b>{pitcher.name}</b><small>{pitcher.throws}HP · {formatPitcherRating(pitcher)}</small></span>
             <strong>{pitcher.era.toFixed(2)}</strong>
           </div>
         ))}

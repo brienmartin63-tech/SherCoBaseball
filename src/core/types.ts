@@ -35,6 +35,7 @@ export interface Batter {
   speed: Speed;
   homeRun?: number;
   triple?: number;
+  clutch?: boolean;
   position: FielderPosition | "DH";
   average: number;
   ops: number;
@@ -45,6 +46,9 @@ export interface Pitcher {
   name: string;
   throws: Exclude<Hand, "S">;
   rate: PitcherRate;
+  effectivenessInnings: number;
+  fatiguedRate: PitcherRate;
+  ratingPrefix?: "+" | "−";
   walkStrikeout: string;
   role: "SP" | "RP";
   era: number;

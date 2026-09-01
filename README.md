@@ -2,7 +2,7 @@
 
 A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, designed for GitHub Pages and long-running SLOBS leagues.
 
-## Foundation build 0.1.3
+## Foundation build 0.1.4
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
 
@@ -35,6 +35,12 @@ Pitch rolls now present the decisive result prominently as `33 — Probable Out`
 - Lineup names and ratings are modestly larger and easier to scan.
 - Probable Hit uses a brighter green result treatment.
 - Error results are standardized as white lettering on a red background.
+
+### 0.1.4 complete on-screen ratings
+
+- Batter displays now include clutch (`#`), offensive grade, home-run number, triple number, and baserunning stars exactly where applicable.
+- Starting-pitcher and bullpen displays now show the complete printed rating: prefix, pitching rate, innings of effectiveness, fatigued rate, and BB/K range.
+- Probable Hit and its dice-log entry use a brighter green background for faster recognition.
 
 Not yet implemented:
 

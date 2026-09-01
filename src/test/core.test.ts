@@ -3,10 +3,12 @@ import { rollTwoDice, shercoNumber } from "../core/dice";
 import { mirrorForLeftHandedBatter, nearestFielder, squaresBetween } from "../core/geometry";
 import { classifyPitch, hitNumber, pitchResultLabel } from "../core/pitching";
 import { normalize1980Ratings } from "../core/players";
+import { formatBatterRating, formatPitcherRating } from "../core/ratings";
 import { actionAllowed, shouldAttemptExtraBase, shouldAutoStealSecond } from "../core/rules";
 import { hasScoreboardSpacerAfter, inningLabel, scoreboardInnings } from "../core/scoreboard";
 import type { Park } from "../core/types";
 import rawParks from "../data/parks.json";
+import { kansasCity, philadelphia } from "../data/demo";
 
 describe("SherCo dice", () => {
   it("reads the lower die first", () => {
@@ -80,6 +82,19 @@ describe("1980 season-set normalization", () => {
       speed: "**",
       ignored: ["[HP]", "[WP]"],
     });
+  });
+});
+
+describe("complete printed ratings", () => {
+  it("shows batter home-run, triple, clutch, and speed ratings", () => {
+    expect(formatBatterRating(philadelphia.lineup[2])).toBe("#B16(22)");
+    expect(formatBatterRating(kansasCity.lineup[0])).toBe("A(11)**");
+    expect(formatBatterRating(kansasCity.lineup[2])).toBe("#AA12(13)");
+  });
+
+  it("shows pitcher prefix, rate, effective innings, fatigue rate, and BB-K range", () => {
+    expect(formatPitcherRating(kansasCity.starter)).toBe("+M8/X (11–14)");
+    expect(formatPitcherRating(philadelphia.bullpen[0])).toBe("−J2/Z (11–15)");
   });
 });
 

@@ -1,5 +1,6 @@
 import { Dices, RotateCcw } from "lucide-react";
 import { hitNumber } from "../core/pitching";
+import { formatBatterRating, formatPitcherRating } from "../core/ratings";
 import type { Batter, GameState, Pitcher } from "../core/types";
 
 interface Props {
@@ -19,7 +20,7 @@ export function MatchupPanel({ batter, pitcher, game, onRoll, onReset }: Props) 
           <p className="eyebrow">At bat</p>
           <h3>{batter.name}</h3>
           <div className="rating-row">
-            <span className="rating-badge">{batter.offensiveGrade}{batter.speed === "REGULAR" ? "" : batter.speed}</span>
+            <span className="rating-badge full-rating">{formatBatterRating(batter)}</span>
             <span>{batter.bats}HB</span>
             <span>AVG <b>{batter.average.toFixed(3).replace(/^0/, "")}</b></span>
             <span>OPS <b>{batter.ops.toFixed(3).replace(/^0/, "")}</b></span>
@@ -34,10 +35,9 @@ export function MatchupPanel({ batter, pitcher, game, onRoll, onReset }: Props) 
           <p className="eyebrow">On the mound</p>
           <h3>{pitcher.name}</h3>
           <div className="rating-row">
-            <span className="rating-badge">{pitcher.rate}</span>
+            <span className="rating-badge full-rating">{formatPitcherRating(pitcher)}</span>
             <span>{pitcher.throws}HP</span>
             <span>ERA <b>{pitcher.era.toFixed(2)}</b></span>
-            <span>BB/K <b>{pitcher.walkStrikeout}</b></span>
           </div>
         </div>
       </div>
