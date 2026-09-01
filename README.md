@@ -2,7 +2,7 @@
 
 A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, designed for GitHub Pages and long-running SLOBS leagues.
 
-## Foundation build 0.1.6
+## Foundation build 0.1.7
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
 
@@ -52,6 +52,12 @@ Pitch rolls now present the decisive result prominently as `33 — Probable Out`
 
 - The supplied 2026 SherCo Grand Slam Baseball Game logo now occupies the upper-left program header.
 - The logo retains its original proportions and transparent background without increasing the header height.
+
+### 0.1.7 compact statistical lineups
+
+- Each lineup entry now occupies one line: order, player and position, batting hand, complete SherCo rating, AVG, HR, and RBI.
+- The supplied Rose, McBride, and Schmidt statistical examples are retained as regression-tested demo values.
+- Wider lineup panels and a 480-pixel stadium reduce vertical scrolling while preserving the full three-column game workspace.
 
 Not yet implemented:
 

@@ -12,7 +12,9 @@ const batter = (
   homeRun?: number,
   triple?: number,
   clutch = false,
-): Batter => ({ id, name, bats, offensiveGrade, speed, position, average, ops, homeRun, triple, clutch });
+  homeRuns = 0,
+  runsBattedIn = 0,
+): Batter => ({ id, name, bats, offensiveGrade, speed, position, average, ops, homeRun, triple, clutch, homeRuns, runsBattedIn });
 
 const pitcher = (
   id: string,
@@ -33,9 +35,9 @@ export const philadelphia: Team = {
   nickname: "Phillies",
   abbreviation: "PHI",
   lineup: [
-    batter("phi-rose", "Pete Rose", "S", "B", "REGULAR", "1B", .282, .706),
-    batter("phi-mcbride", "Bake McBride", "L", "A", "REGULAR", "RF", .309, .801, 11, 12, true),
-    batter("phi-schmidt", "Mike Schmidt", "R", "B", "REGULAR", "3B", .286, 1.004, 16, 22, true),
+    batter("phi-rose", "Pete Rose", "S", "B", "REGULAR", "1B", .282, .706, undefined, undefined, false, 0, 14),
+    batter("phi-mcbride", "Bake McBride", "L", "A", "REGULAR", "RF", .309, .801, 11, 12, true, 11, 56),
+    batter("phi-schmidt", "Mike Schmidt", "R", "B", "REGULAR", "3B", .286, 1.004, 16, 22, true, 48, 119),
     batter("phi-luzinski", "Greg Luzinski", "R", "C", "REGULAR", "LF", .228, .811, 14),
     batter("phi-maddox", "Garry Maddox", "R", "B", "*", "CF", .259, .683, 11),
     batter("phi-trillo", "Manny Trillo", "R", "B", "REGULAR", "2B", .292, .721, 11, 12),

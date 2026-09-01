@@ -115,7 +115,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Foundation build 0.1.6 · Five test parks imported</span>
+        <span>Foundation build 0.1.7 · Five test parks imported</span>
       </footer>
     </div>
   );

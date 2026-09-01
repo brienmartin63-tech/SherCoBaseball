@@ -39,6 +39,8 @@ export interface Batter {
   position: FielderPosition | "DH";
   average: number;
   ops: number;
+  homeRuns: number;
+  runsBattedIn: number;
 }
 
 export interface Pitcher {

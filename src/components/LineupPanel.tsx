@@ -17,16 +17,22 @@ export function LineupPanel({ team, activeIndex, side }: Props) {
         </div>
         <span className="team-mark">{team.abbreviation}</span>
       </div>
+      <div className="lineup-column-headings" aria-hidden="true">
+        <span /><span /><span>B</span><span>Rating</span><span>AVG</span><span>HR</span><span>RBI</span>
+      </div>
       <ol className="lineup-list">
         {team.lineup.map((player, index) => (
           <li key={player.id} className={index === activeIndex ? "active" : ""}>
-            <span className="order">{index + 1}</span>
-            <span className="player-name">
+            <span className="order">{index + 1} -</span>
+            <span className="player-identity">
               <strong>{player.name}</strong>
-              <small>{player.bats}HB · {formatBatterRating(player)}</small>
+              <small>, {player.position.toLowerCase()}</small>
             </span>
-            <span className="position">{player.position}</span>
-            <span className="compact-stat">{player.average.toFixed(3).replace(/^0/, "")}</span>
+            <span className="lineup-hand" title="Bats">{player.bats}</span>
+            <span className="lineup-rating" title="SherCo batting rating">{formatBatterRating(player)}</span>
+            <span className="compact-stat" title="Batting average">{player.average.toFixed(3).replace(/^0/, "")}</span>
+            <span className="compact-stat" title="Home runs">{player.homeRuns}</span>
+            <span className="compact-stat" title="Runs batted in">{player.runsBattedIn}</span>
           </li>
         ))}
       </ol>

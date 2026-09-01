@@ -80,7 +80,7 @@ main { padding: 14px 18px 24px; }
 .at-bat-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; margin-right: 8px; background: #354a60; }
 .at-bat-dot.active { background: #ffe349; box-shadow: 0 0 0 3px rgba(255, 227, 73, .1); }
 
-.game-workspace { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 260px minmax(540px, 580px) 260px; justify-content: center; gap: 12px; align-items: start; }
+.game-workspace { max-width: 1144px; margin: 0 auto; display: grid; grid-template-columns: 320px 480px 320px; justify-content: center; gap: 12px; align-items: start; }
 .lineup-panel, .stadium-card, .matchup-card, .dice-card, .report-page { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
 .lineup-panel { overflow: hidden; }
 .panel-heading { display: flex; justify-content: space-between; align-items: center; padding: 15px 15px 12px; border-bottom: 1px solid var(--line); }
@@ -88,14 +88,18 @@ main { padding: 14px 18px 24px; }
 .panel-heading h2, .stadium-title h2 { font: 700 21px/1 "Barlow Condensed", Inter, sans-serif; margin: 2px 0 0; text-transform: uppercase; letter-spacing: .02em; }
 .eyebrow { margin: 0; color: #7c8999; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; }
 .team-mark { height: 31px; min-width: 38px; padding: 0 7px; display: grid; place-items: center; background: var(--navy); color: #fff; border-radius: 6px; font: 700 15px "Barlow Condensed", sans-serif; }
-.lineup-list { list-style: none; padding: 6px 7px; margin: 0; }
-.lineup-list li { min-height: 43px; display: grid; grid-template-columns: 20px minmax(0, 1fr) 29px 39px; align-items: center; gap: 4px; padding: 4px 7px; border-radius: 6px; border-left: 3px solid transparent; }
+.lineup-column-headings, .lineup-list li { display: grid; grid-template-columns: 28px minmax(91px, 1fr) 15px 64px 34px 19px 24px; align-items: center; column-gap: 3px; }
+.lineup-column-headings { height: 19px; padding: 0 11px 0 14px; color: #97a3b0; background: #f8fafc; border-bottom: 1px solid #edf1f4; font: 700 8px "Barlow Condensed", sans-serif; text-align: right; text-transform: uppercase; letter-spacing: .035em; }
+.lineup-column-headings span:nth-child(3), .lineup-column-headings span:nth-child(4) { text-align: center; }
+.lineup-list { list-style: none; padding: 5px 6px; margin: 0; }
+.lineup-list li { min-height: 31px; padding: 3px 5px; border-radius: 5px; border-left: 3px solid transparent; }
 .lineup-list li.active { background: var(--blue-soft); border-left-color: var(--blue); }
-.order { color: #a3adba; font: 700 13px "Barlow Condensed", sans-serif; }
-.player-name { min-width: 0; display: flex; flex-direction: column; }
-.player-name strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; }
-.player-name small { color: #7b8898; font-size: 10px; margin-top: 2px; }
-.position { color: #687789; font: 700 11px "Barlow Condensed", sans-serif; text-align: center; }
+.order { color: #98a4b2; font: 700 11px "Barlow Condensed", sans-serif; white-space: nowrap; }
+.player-identity { min-width: 0; display: flex; align-items: baseline; white-space: nowrap; overflow: hidden; font-family: "Barlow Condensed", sans-serif; }
+.player-identity strong { overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
+.player-identity small { flex: none; color: #657487; font-size: 10px; }
+.lineup-hand { color: #657487; font: 700 11px "Barlow Condensed", sans-serif; text-align: center; }
+.lineup-rating { color: #17263a; font: 700 11px "Barlow Condensed", sans-serif; text-align: center; white-space: nowrap; }
 .compact-stat { color: #39485a; font: 600 11px "Barlow Condensed", sans-serif; text-align: right; }
 .bullpen { border-top: 1px solid var(--line); padding: 12px 14px 14px; background: #f8fafc; }
 .bullpen > .eyebrow { margin-bottom: 8px; }
@@ -105,7 +109,7 @@ main { padding: 14px 18px 24px; }
 .bullpen-row small { color: #778596; font-size: 10px; margin-top: 2px; white-space: nowrap; }
 
 .center-column { min-width: 0; display: grid; gap: 10px; }
-.stadium-card { width: 100%; max-width: 540px; justify-self: center; padding: 10px; }
+.stadium-card { width: 100%; max-width: 480px; justify-self: center; padding: 10px; }
 .stadium-title { display: flex; justify-content: space-between; align-items: end; padding: 0 2px 7px; }
 .stadium-title > span { color: #8794a3; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; }
 .stadium-frame { --plate-vertex: 8.35%; position: relative; background: #0b1018; padding: 7px; aspect-ratio: 1 / 1; overflow: hidden; }

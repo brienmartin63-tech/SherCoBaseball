@@ -96,6 +96,14 @@ describe("complete printed ratings", () => {
     expect(formatPitcherRating(kansasCity.starter)).toBe("+M8/X (11–14)");
     expect(formatPitcherRating(philadelphia.bullpen[0])).toBe("−J2/Z (11–15)");
   });
+
+  it("carries the compact live AVG-HR-RBI lineup statistics", () => {
+    expect(philadelphia.lineup.slice(0, 3).map((player) => [player.average, player.homeRuns, player.runsBattedIn])).toEqual([
+      [.282, 0, 14],
+      [.309, 11, 56],
+      [.286, 48, 119],
+    ]);
+  });
 });
 
 describe("imported USBL parks", () => {
