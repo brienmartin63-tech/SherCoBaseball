@@ -4,13 +4,19 @@ A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, des
 
 The durable design decisions, confirmed house rules, scoring requirements, stadium-import conventions, and development priorities are preserved in [Project Checkpoint 0.1.7](docs/PROJECT_CHECKPOINT_0.1.7.md).
 
-## Rules-engine build 0.3.0
+## Rules-engine build 0.3.1
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
 
+### 0.3.1 fixed base anchors
+
+- Corrects the transposed first- and third-base references from 0.3.0.
+- Permanently locks first base to row-column `8-3`, second to `8-8`, third to `3-8`, and home to `3-3`.
+- Runner markers, throws, base-distance calculations, and future advancement logic all consume the same tested constants.
+
 ### 0.3.0 bases-empty fielding and running
 
-- The four values in Brien's distance workbook are decoded as ball-to-third, ball-to-second, ball-to-first, and ball-to-home distances, arranged like the diamond.
+- The four values in Brien's distance workbook use permanent row-column anchors: first `8-3`, second `8-8`, third `3-8`, and home `3-3`.
 - Fielder movement is charged separately before any throw. A ball 23 squares from a base and five squares from the nearest fielder requires 28 squares of total movement and throw.
 - The Phillies and Royals demo defenders now carry their printed 1980 arm, range, and Superior ratings.
 - Airborne balls resolve against fielding range; an uncaught airborne ball becomes a ground-ball fielding play under Rule 6.

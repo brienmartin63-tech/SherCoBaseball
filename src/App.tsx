@@ -143,7 +143,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Rules-engine build 0.3.0 · Bases-empty fielding</span>
+        <span>Rules-engine build 0.3.1 · Fixed base anchors</span>
       </footer>
     </div>
   );

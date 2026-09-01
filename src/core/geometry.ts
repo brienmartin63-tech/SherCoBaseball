@@ -17,17 +17,17 @@ export function resolvePullCoordinate(at: Coordinate, battingSide: "L" | "R"): C
   return battingSide === "L" ? mirrorForLeftHandedBatter(at) : at;
 }
 
-export const HOME_PLATE_SQUARE: Coordinate = { row: 2, column: 2 };
+export const HOME_PLATE_SQUARE: Coordinate = { row: 3, column: 3 };
 
 /**
  * Reference squares used by Brien's four-number distance workbook.
- * The workbook places the values like a diamond: 3B / 2B / 1B / home.
+ * These literal row-column anchors never change between parks.
  */
 export const BASE_REFERENCE_SQUARES: Record<BaseName, Coordinate> = {
   HOME: { row: 3, column: 3 },
-  FIRST: { row: 3, column: 8 },
+  FIRST: { row: 8, column: 3 },
   SECOND: { row: 8, column: 8 },
-  THIRD: { row: 8, column: 3 },
+  THIRD: { row: 3, column: 8 },
 };
 
 export function distanceToBase(at: Coordinate, base: BaseName): number {

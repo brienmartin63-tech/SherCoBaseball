@@ -3,7 +3,7 @@ import { rollOneDie, rollTwoDice, shercoNumber } from "../core/dice";
 import { directPitchResult, effectivePowerRatings, moveBehindFielder, moveInFrontOfFielder, resolveBasesEmptyBattedBall, resolveBasesEmptyError, resolveBasesEmptySpecialEvent, specialEventPitcherRate, withinHomeRunRating } from "../core/chartResolution";
 import { createInitialGame, resolveFielding, rollPitch, rollResolution, scoreDirectResult, startNextPlateAppearance } from "../core/game";
 import { automaticUmpireCall, buildRatedDefense, createFieldingAttempt, resolveThrow } from "../core/fielding";
-import { distanceToBase, farthestInPlaySquare, HOME_PLATE_SQUARE, mirrorForLeftHandedBatter, nearestFielder, squaresBetween } from "../core/geometry";
+import { BASE_REFERENCE_SQUARES, distanceToBase, farthestInPlaySquare, HOME_PLATE_SQUARE, mirrorForLeftHandedBatter, nearestFielder, squaresBetween } from "../core/geometry";
 import { classifyPitch, hitNumber, pitchResultLabel } from "../core/pitching";
 import { normalize1980Ratings } from "../core/players";
 import { formatBatterRating, formatPitcherRating } from "../core/ratings";
@@ -96,7 +96,7 @@ describe("1980 bases-empty chart engine", () => {
     expect(farthestInPlaySquare(triplePark)).toEqual({ row: 26, column: 18 });
     const resolution = resolveBasesEmptyBattedBall("PROBABLE_HIT", 13, mcBride, kansasCity.starter, triplePark, 0, true);
     expect(resolution).toMatchObject({ phase: "BALL_IN_PLAY", ballAt: { row: 26, column: 18 } });
-    expect(squaresBetween(HOME_PLATE_SQUARE, resolution.ballAt!)).toBe(24);
+    expect(squaresBetween(HOME_PLATE_SQUARE, resolution.ballAt!)).toBe(23);
     expect(resolution.description).toContain("possible triple");
 
     const officialChoice = resolveBasesEmptyBattedBall("PROBABLE_HIT", 13, mcBride, kansasCity.starter, triplePark, 0, false);
@@ -183,7 +183,13 @@ describe("bases-empty fielding and running", () => {
   const park = rawParks[0] as unknown as Park;
 
   it("uses the four-number workbook distances without including fielder movement", () => {
-    expect(distanceToBase({ row: 9, column: 6 }, "FIRST")).toBe(6);
+    expect(BASE_REFERENCE_SQUARES).toEqual({
+      HOME: { row: 3, column: 3 },
+      FIRST: { row: 8, column: 3 },
+      SECOND: { row: 8, column: 8 },
+      THIRD: { row: 3, column: 8 },
+    });
+    expect(distanceToBase({ row: 9, column: 6 }, "FIRST")).toBe(3);
     expect(distanceToBase({ row: 23, column: 8 }, "SECOND")).toBe(15);
     const attempt = {
       batterId: "batter",
@@ -226,15 +232,15 @@ describe("bases-empty fielding and running", () => {
   it("charges movement before an infielder throws to first", () => {
     const defense = buildRatedDefense(kansasCity, kansasCity.starter, park);
     const attempt = createFieldingAttempt(philadelphia.lineup[0], park, defense, { row: 10, column: 6 }, "ground");
-    expect(attempt).toMatchObject({ fielderName: "Frank White", fieldingDistance: 1, targetDistance: 7, arm: 9 });
+    expect(attempt).toMatchObject({ fielderName: "Frank White", fieldingDistance: 1, targetDistance: 3, arm: 9 });
     expect(resolveThrow(attempt, 6)).toMatchObject({ allowance: 9, remaining: 8, result: "OUT" });
   });
 
   it("sends exact-count throws to the automatic umpire", () => {
     const state = {
       ...createInitialGame(park.id, 1),
-      ballAt: { row: 4, column: 1 },
-      resolution: { phase: "BALL_IN_PLAY" as const, baseState: "EMPTY" as const, battedBallType: "ground" as const, ballAt: { row: 4, column: 1 } },
+      ballAt: { row: 1, column: 4 },
+      resolution: { phase: "BALL_IN_PLAY" as const, baseState: "EMPTY" as const, battedBallType: "ground" as const, ballAt: { row: 1, column: 4 } },
     };
     const tied = resolveFielding(state, philadelphia.lineup[0], kansasCity.starter, park, kansasCity, 9, 9);
     expect(tied.resolution.phase).toBe("UMPIRE_CHECK");
