@@ -4,9 +4,15 @@ A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, des
 
 The durable design decisions, confirmed house rules, scoring requirements, stadium-import conventions, and development priorities are preserved in [Project Checkpoint 0.1.7](docs/PROJECT_CHECKPOINT_0.1.7.md).
 
-## Rules-engine build 0.3.1
+## Rules-engine build 0.3.2
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
+
+### 0.3.2 side resolution wing
+
+- On wide screens, play resolution appears in a large wing left of the visitors while they bat and right of the home lineup while it bats.
+- The wing enlarges the dice result, resolution call, and play description without widening the central stadium and controls.
+- On narrower screens, the existing compact center resolution remains visible as the fallback.
 
 ### 0.3.1 fixed base anchors
 

@@ -3,6 +3,7 @@ import { Archive, BarChart3, BookOpenText, Bug, Download, Gamepad2, Printer, Set
 import { DiceLog } from "./components/DiceLog";
 import { LineupPanel } from "./components/LineupPanel";
 import { MatchupPanel } from "./components/MatchupPanel";
+import { PlayResolutionWing } from "./components/PlayResolutionWing";
 import { Scoreboard } from "./components/Scoreboard";
 import { Stadium } from "./components/Stadium";
 import { advanceTestBatter, createInitialGame, resolveFielding, rollPitch, rollResolution, scoreDirectResult, selectPark, startNextPlateAppearance, toggleRulesProfile } from "./core/game";
@@ -126,14 +127,17 @@ export function App() {
       <main>
         <Scoreboard game={game} away={demoGame.away} home={demoGame.home} />
         {view === "game" && (
-          <div className="game-workspace">
-            <LineupPanel team={demoGame.away} activeIndex={game.awayBatterIndex} side="away" />
-            <div className="center-column">
-              <Stadium park={park} ballAt={game.ballAt} runners={game.runners} showCoordinates={showCoordinates} />
-              <MatchupPanel batter={batter} pitcher={pitcher} game={game} onAdvance={advanceResolution} onNextTestBatter={moveToNextTestBatter} onReset={resetDemo} />
-              <DiceLog game={game} />
+          <div className="game-stage">
+            <PlayResolutionWing game={game} away={demoGame.away} home={demoGame.home} />
+            <div className="game-workspace">
+              <LineupPanel team={demoGame.away} activeIndex={game.awayBatterIndex} side="away" />
+              <div className="center-column">
+                <Stadium park={park} ballAt={game.ballAt} runners={game.runners} showCoordinates={showCoordinates} />
+                <MatchupPanel batter={batter} pitcher={pitcher} game={game} onAdvance={advanceResolution} onNextTestBatter={moveToNextTestBatter} onReset={resetDemo} />
+                <DiceLog game={game} />
+              </div>
+              <LineupPanel team={demoGame.home} activeIndex={game.homeBatterIndex} side="home" />
             </div>
-            <LineupPanel team={demoGame.home} activeIndex={game.homeBatterIndex} side="home" />
           </div>
         )}
         {view === "box" && <BoxScoreView onPrint={() => window.print()} />}
@@ -143,7 +147,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Rules-engine build 0.3.1 · Fixed base anchors</span>
+        <span>Rules-engine build 0.3.2 · Side resolution wing</span>
       </footer>
     </div>
   );
