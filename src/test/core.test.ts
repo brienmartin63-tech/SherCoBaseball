@@ -163,6 +163,18 @@ describe("1980 bases-empty chart engine", () => {
     expect(resolution).toMatchObject({ phase: "PITCHER_ERROR_CHECK", ballAt: { row: 6, column: 6 } });
   });
 
+  it("sends Brien's PH 66 directly to the error chart while preserving the official check", () => {
+    const batter = kansasCity.lineup[2];
+    expect(resolveBasesEmptyBattedBall("PROBABLE_HIT", 66, batter, philadelphia.starter, park, 2, true)).toMatchObject({
+      phase: "ERROR_CHART",
+      chartFamily: "HIT_ERROR",
+    });
+    expect(resolveBasesEmptyBattedBall("PROBABLE_HIT", 66, batter, philadelphia.starter, park, 2, false)).toMatchObject({
+      phase: "HIT_ERROR_CHECK",
+      chartFamily: "HIT_ERROR",
+    });
+  });
+
   it("stops a called-strike Special Event at the unimplemented count boundary", () => {
     const resolution = resolveBasesEmptySpecialEvent(4, philadelphia.lineup[0], kansasCity.starter, park);
     expect(resolution.phase).toBe("COUNT_PENDING");
@@ -315,6 +327,7 @@ describe("bases-empty fielding and running", () => {
       creditedHit: true,
       errorChartRoll: 5,
       errorFielderPosition: "RF",
+      chartAdvancementLocked: true,
     });
     const scored = scoreDirectResult({ ...createInitialGame(park.id), resolution: errorResult }, philadelphia.lineup[1], 9, 9);
     expect(scored.runners.second).toBe(philadelphia.lineup[1].id);
@@ -329,6 +342,35 @@ describe("bases-empty fielding and running", () => {
     const resolved = rollResolution(chartState, kansasCity.lineup[0], philadelphia.starter, park, philadelphia);
     expect(resolved.lastRoll?.sherco).toBe(5);
     expect(resolved.resolution).toMatchObject({ phase: "DIRECT_RESULT", terminalOutcome: "ERROR", awardedBase: "SECOND", creditedHit: true });
+  });
+
+  it("replays Brett's Brien-rules PH 66 and error-chart 5 as a single plus E9", () => {
+    const brett = kansasCity.lineup[2];
+    const probableHit = {
+      ...createInitialGame(park.id, 13328),
+      half: "bottom" as const,
+      outs: 2 as const,
+      homeBatterIndex: 2,
+      resolution: { phase: "BATTED_BALL_CHART" as const, baseState: "EMPTY" as const, chartFamily: "PROBABLE_HIT" as const },
+    };
+    const errorChart = rollResolution(probableHit, brett, philadelphia.starter, park, philadelphia);
+    expect(errorChart.lastRoll?.sherco).toBe(66);
+    expect(errorChart.resolution.phase).toBe("ERROR_CHART");
+
+    const errorFive = rollResolution({ ...errorChart, seed: 10752 }, brett, philadelphia.starter, park, philadelphia);
+    expect(errorFive.lastRoll?.sherco).toBe(5);
+    expect(errorFive.resolution).toMatchObject({
+      phase: "DIRECT_RESULT",
+      terminalOutcome: "ERROR",
+      awardedBase: "SECOND",
+      creditedHit: true,
+      chartAdvancementLocked: true,
+    });
+
+    const scored = scoreDirectResult(errorFive, brett, 9, 9);
+    expect(scored.runners.second).toBe(brett.id);
+    expect(scored.home.hits).toBe(1);
+    expect(scored.away.errors).toBe(1);
   });
 
   it("uses Rule 19's extra die only when the error fielder is Superior", () => {

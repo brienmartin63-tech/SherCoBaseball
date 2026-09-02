@@ -4,9 +4,18 @@ A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, des
 
 The durable design decisions, confirmed house rules, scoring requirements, stadium-import conventions, and development priorities are preserved in [Project Checkpoint 0.1.7](docs/PROJECT_CHECKPOINT_0.1.7.md).
 
-## Rules-engine build 0.4.1
+## Rules-engine build 0.4.2
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
+
+### 0.4.2 Brien error-chart sequence
+
+- Under Brien's Rules, a Probable Hit `66` goes directly to the applicable error chart; the printed outs-based preliminary error-frequency check is not used.
+- The first one-die roll therefore selects the error-chart result. Only when the responsible fielder has an `S` rating is another die rolled: `1–3` uses the chart's no-error branch and `4–6` uses the printed error branch.
+- Runner placement and advancement stated by an error-chart result are authoritative and cannot be replaced by ordinary optional or mandatory baserunning logic.
+- Adds a deterministic end-to-end replay of George Brett's PH `66`, error-chart `5`, and Bake McBride's non-Superior RF rating: single plus E9, Brett on second.
+- Preserves the preliminary outs-based check when the Official 1980 profile is selected.
+- The permanent rule contract is recorded in [Project Checkpoint 0.4.2](docs/PROJECT_CHECKPOINT_0.4.2.md).
 
 ### 0.4.1 Superior-fielding and scoreboard correction
 

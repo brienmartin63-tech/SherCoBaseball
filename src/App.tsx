@@ -186,7 +186,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Rules-engine build 0.4.1 · Game-day workspace</span>
+        <span>Rules-engine build 0.4.2 · Game-day workspace</span>
       </footer>
     </div>
   );

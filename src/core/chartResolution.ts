@@ -120,7 +120,7 @@ export function resolveBasesEmptyBattedBall(
   pitcher: Pitcher,
   park: Park,
   outs: GameState["outs"],
-  automaticTripleOption = false,
+  brienRules = false,
 ): PlateAppearanceResolution {
   if (!isShercoChartRoll(roll)) throw new Error(`Invalid SherCo chart roll: ${roll}`);
   const entry: BattedBallChartEntry = chartFamily === "PROBABLE_HIT"
@@ -128,14 +128,18 @@ export function resolveBasesEmptyBattedBall(
     : BASES_EMPTY_PROBABLE_OUT[roll];
   if (entry.route === "SPECIAL_EVENT") return { phase: "SPECIAL_EVENT", baseState: "EMPTY", chartFamily: "SPECIAL_EVENT", description: entry.description, source: "1980 rulebook p.25" };
   if (entry.route === "ERROR") return { phase: "ERROR_CHART", baseState: "EMPTY", chartFamily: "OUT_ERROR", description: entry.description, source: "1980 rulebook p.25" };
-  if (entry.route === "HIT_ERROR_CHECK") return { phase: "HIT_ERROR_CHECK", baseState: "EMPTY", chartFamily: "HIT_ERROR", description: entry.description, source: "1980 rulebook p.24" };
+  if (entry.route === "HIT_ERROR_CHECK") {
+    return brienRules
+      ? { phase: "ERROR_CHART", baseState: "EMPTY", chartFamily: "HIT_ERROR", description: "Brien's Rules: roll one die directly on the Bases Empty Probable Hit Error Chart.", source: "Brien's Rules error sequence" }
+      : { phase: "HIT_ERROR_CHECK", baseState: "EMPTY", chartFamily: "HIT_ERROR", description: entry.description, source: "1980 rulebook p.24" };
+  }
 
   const powerRatings = effectivePowerRatings(batter, pitcher);
   const ratingAdjustment = powerRatings.gopherAdjusted
     ? `Gopher-ball adjustment: HR ${batter.homeRun ?? "none"}→${powerRatings.homeRun}${batter.triple ? `, triple ${batter.triple}→${powerRatings.triple}` : ""}. `
     : "";
   const tripleTriggered = chartFamily === "PROBABLE_HIT" && isTripleRatingRoll(roll, powerRatings.triple);
-  if (tripleTriggered && !automaticTripleOption) {
+  if (tripleTriggered && !brienRules) {
     return {
       phase: "TRIPLE_DECISION",
       baseState: "EMPTY",
@@ -260,6 +264,7 @@ export function resolveBasesEmptyError(
     creditedHit: chartFamily === "HIT_ERROR" && (roll === 1 || roll === 5),
     errorChartRoll: roll,
     errorFielderPosition,
+    chartAdvancementLocked: true,
   };
 }
 
@@ -284,5 +289,6 @@ export function resolveBasesEmptySuperiorError(
     source: "1980 rulebook Rule 19d and p.24",
     errorChartRoll: pending.errorChartRoll,
     errorFielderPosition: pending.errorFielderPosition,
+    chartAdvancementLocked: true,
   };
 }

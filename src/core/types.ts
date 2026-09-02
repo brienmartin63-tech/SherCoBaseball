@@ -93,6 +93,7 @@ export interface PlateAppearanceResolution {
   creditedHit?: boolean;
   errorChartRoll?: 1 | 2 | 3 | 4 | 5 | 6;
   errorFielderPosition?: FielderPosition;
+  chartAdvancementLocked?: boolean;
 }
 
 export interface DiceRoll {
