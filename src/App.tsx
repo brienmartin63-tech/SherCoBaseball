@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Archive, BarChart3, BookOpenText, Bug, Download, Gamepad2, Printer, Settings2, ShieldCheck } from "lucide-react";
+import { BaserunningPanel } from "./components/BaserunningPanel";
+import { BullpenDrawer } from "./components/BullpenDrawer";
 import { DiceLog } from "./components/DiceLog";
 import { LineupPanel } from "./components/LineupPanel";
 import { MatchupPanel } from "./components/MatchupPanel";
 import { PlayResolutionWing } from "./components/PlayResolutionWing";
 import { Scoreboard } from "./components/Scoreboard";
 import { Stadium } from "./components/Stadium";
-import { advanceTestBatter, createInitialGame, resolveFielding, rollPitch, rollResolution, scoreDirectResult, selectPark, startNextPlateAppearance, toggleRulesProfile } from "./core/game";
+import { advanceTestBatter, createInitialGame, resolveFielding, rollPitch, rollResolution, scoreDirectResult, selectPark, selectPitcher, startNextPlateAppearance, toggleRulesProfile } from "./core/game";
+import { buildRatedDefense, createFieldingAttempt } from "./core/fielding";
 import { loadGame, saveGame } from "./core/storage";
 import type { Park } from "./core/types";
 import { demoGame } from "./data/demo";
@@ -30,11 +33,27 @@ export function App() {
   const [hydrated, setHydrated] = useState(false);
   const [view, setView] = useState<View>("game");
   const [showCoordinates, setShowCoordinates] = useState(false);
+  const [bullpenOpen, setBullpenOpen] = useState(false);
   const park = parks.find((candidate) => candidate.id === game.selectedParkId) ?? parks[0];
-  const batter = game.half === "top"
-    ? demoGame.away.lineup[game.awayBatterIndex]
-    : demoGame.home.lineup[game.homeBatterIndex];
-  const pitcher = game.half === "top" ? demoGame.home.starter : demoGame.away.starter;
+  const battingSide = game.half === "top" ? "away" : "home";
+  const pitchingSide = game.half === "top" ? "home" : "away";
+  const battingTeam = demoGame[battingSide];
+  const pitchingTeam = demoGame[pitchingSide];
+  const batterIndex = battingSide === "away" ? game.awayBatterIndex : game.homeBatterIndex;
+  const batter = battingTeam.lineup[batterIndex];
+  const activePitcherId = game.activePitchers[pitchingSide];
+  const pitcher = [pitchingTeam.starter, ...pitchingTeam.bullpen].find((candidate) => candidate.id === activePitcherId) ?? pitchingTeam.starter;
+  const runnerBallAt = game.resolution.phase === "BALL_IN_PLAY" || game.resolution.phase === "UMPIRE_CHECK" ? game.ballAt : undefined;
+  const fieldingArm = useMemo(() => {
+    if (game.pendingFielding) return game.pendingFielding.arm;
+    if (!game.ballAt || !game.resolution.battedBallType) return game.lastFielding?.arm;
+    try {
+      const defense = buildRatedDefense(pitchingTeam, pitcher, park);
+      return createFieldingAttempt(batter, park, defense, game.ballAt, game.resolution.battedBallType).arm;
+    } catch {
+      return undefined;
+    }
+  }, [batter, game.ballAt, game.lastFielding, game.pendingFielding, game.resolution.battedBallType, park, pitcher, pitchingTeam]);
   const profileName = game.rulesProfileId === "brien" ? "Brien's Rules" : "Official 1980";
 
   useEffect(() => {
@@ -56,7 +75,13 @@ export function App() {
   ], []);
 
   function resetDemo() {
+    setBullpenOpen(false);
     setGame(createInitialGame(game.selectedParkId));
+  }
+
+  function confirmPitchingChange(replacement: typeof pitcher) {
+    setGame((current) => selectPitcher(current, pitchingSide, replacement.id));
+    setBullpenOpen(false);
   }
 
   function advanceResolution() {
@@ -64,8 +89,10 @@ export function App() {
       const activeBatter = current.half === "top"
         ? demoGame.away.lineup[current.awayBatterIndex]
         : demoGame.home.lineup[current.homeBatterIndex];
-      const activePitcher = current.half === "top" ? demoGame.home.starter : demoGame.away.starter;
-      const defensiveTeam = current.half === "top" ? demoGame.home : demoGame.away;
+      const currentPitchingSide = current.half === "top" ? "home" : "away";
+      const defensiveTeam = demoGame[currentPitchingSide];
+      const currentPitcherId = current.activePitchers[currentPitchingSide];
+      const activePitcher = [defensiveTeam.starter, ...defensiveTeam.bullpen].find((candidate) => candidate.id === currentPitcherId) ?? defensiveTeam.starter;
       if (current.resolution.phase === "PITCH") return rollPitch(current, activeBatter, activePitcher);
       if (current.resolution.phase === "BALL_IN_PLAY" || current.resolution.phase === "UMPIRE_CHECK") {
         return resolveFielding(current, activeBatter, activePitcher, park, defensiveTeam, demoGame.away.lineup.length, demoGame.home.lineup.length);
@@ -127,18 +154,30 @@ export function App() {
       <main>
         <Scoreboard game={game} away={demoGame.away} home={demoGame.home} />
         {view === "game" && (
-          <div className="game-stage">
-            <PlayResolutionWing game={game} away={demoGame.away} home={demoGame.home} />
-            <div className="game-workspace">
-              <LineupPanel team={demoGame.away} activeIndex={game.awayBatterIndex} side="away" />
-              <div className="center-column">
+          <>
+            <div className="game-stage">
+              <div className="game-workspace">
+                <LineupPanel
+                  team={battingTeam}
+                  activeIndex={batterIndex}
+                  displayName={battingSide === "away" ? battingTeam.city : battingTeam.nickname}
+                  pitcher={pitcher}
+                  pitchingTeam={pitchingTeam}
+                  onPitcherClick={() => setBullpenOpen(true)}
+                />
+                <div className="resolution-column">
+                  <PlayResolutionWing game={game} away={demoGame.away} home={demoGame.home} />
+                  <BaserunningPanel batter={batter} ballAt={runnerBallAt} runners={game.runners} arm={fieldingArm} />
+                </div>
                 <Stadium park={park} ballAt={game.ballAt} runners={game.runners} showCoordinates={showCoordinates} />
-                <MatchupPanel batter={batter} pitcher={pitcher} game={game} onAdvance={advanceResolution} onNextTestBatter={moveToNextTestBatter} onReset={resetDemo} />
-                <DiceLog game={game} />
+                <div className="matchup-row">
+                  <MatchupPanel batter={batter} pitcher={pitcher} game={game} onAdvance={advanceResolution} onNextTestBatter={moveToNextTestBatter} onReset={resetDemo} />
+                </div>
+                <div className="audit-row"><DiceLog game={game} /></div>
               </div>
-              <LineupPanel team={demoGame.home} activeIndex={game.homeBatterIndex} side="home" />
             </div>
-          </div>
+            <BullpenDrawer open={bullpenOpen} team={pitchingTeam} currentPitcher={pitcher} onClose={() => setBullpenOpen(false)} onConfirm={confirmPitchingChange} />
+          </>
         )}
         {view === "box" && <BoxScoreView onPrint={() => window.print()} />}
         {view === "pbp" && <PlayByPlayView game={game} />}
@@ -147,7 +186,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Rules-engine build 0.3.3 · Resolution console</span>
+        <span>Rules-engine build 0.4.0 · Game-day workspace</span>
       </footer>
     </div>
   );

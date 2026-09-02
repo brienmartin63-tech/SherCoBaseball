@@ -267,8 +267,150 @@ footer span { display: flex; align-items: center; gap: 6px; }
 @media (max-width: 1260px) {
   .app-header { grid-template-columns: 255px 1fr 100px; }
   .primary-nav button { padding: 0 10px; }
-  .game-workspace { grid-template-columns: 250px 560px 250px; }
 }
+
+/* 0.4.0 game-day workspace: active offense, live resolution, and field. */
+.game-stage { max-width: 1144px; }
+.game-workspace {
+  max-width: 1144px;
+  grid-template-columns: 340px 350px 430px;
+  grid-template-areas:
+    "lineup resolution stadium"
+    "matchup matchup stadium"
+    "audit audit stadium";
+  justify-content: center;
+  gap: 12px;
+  align-items: start;
+}
+.lineup-panel.active-offense { grid-area: lineup; }
+.resolution-column { grid-area: resolution; min-width: 0; display: grid; gap: 10px; }
+.game-workspace > .stadium-card { grid-area: stadium; max-width: 430px; }
+.matchup-row { grid-area: matchup; min-width: 0; }
+.audit-row { grid-area: audit; min-width: 0; }
+.matchup-row .matchup-card, .audit-row .dice-card { width: 100%; }
+
+.play-resolution-wing {
+  display: block;
+  position: relative;
+  inset: auto;
+  width: 100%;
+}
+.play-resolution-wing.side-away, .play-resolution-wing.side-home { right: auto; left: auto; }
+.play-resolution-wing .wing-hero { min-height: 118px; padding: 14px 15px 15px; }
+.play-resolution-wing .wing-call { justify-content: flex-start; text-align: left; }
+.play-resolution-wing .wing-call strong { font-size: 45px; }
+.play-resolution-wing .wing-call h2 { font-size: 31px; }
+.play-resolution-wing .wing-description { font-size: 18px; text-align: left; }
+.play-resolution-wing .wing-cell { min-height: 48px; }
+.play-resolution-wing .wing-cell b { font-size: 13px; }
+.play-resolution-wing .wing-cell:not(.span-2) b { font-size: 17px; }
+
+.game-lineup-headings, .game-lineup-list li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) repeat(4, 29px);
+  align-items: center;
+  column-gap: 3px;
+}
+.game-lineup-headings {
+  min-height: 23px;
+  padding: 0 10px;
+  background: #f6f8fa;
+  border-bottom: 1px solid #e6ebf0;
+  color: #8794a3;
+  font: 700 9px "Barlow Condensed", sans-serif;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.game-lineup-headings span:first-child { grid-column: 1 / 3; text-align: left; padding-left: 3px; }
+.game-lineup-list { list-style: none; margin: 0; padding: 6px; }
+.game-lineup-list li { min-height: 34px; padding: 3px 5px; border-left: 3px solid transparent; border-radius: 5px; }
+.game-lineup-list li.active { background: var(--blue-soft); border-left-color: var(--blue); }
+.game-lineup-list li > span:nth-child(n + 3) { color: #405065; font: 700 12px "Barlow Condensed", sans-serif; text-align: center; }
+.game-lineup-list .player-identity strong { font-size: 15px; }
+.game-lineup-list .player-identity small { font-size: 11px; }
+
+.pitching-line-heading, .active-pitcher-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(6, 29px);
+  align-items: center;
+  column-gap: 3px;
+}
+.pitching-line-heading {
+  min-height: 25px;
+  padding: 0 11px;
+  background: #eef2f6;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid #dfe5eb;
+  color: #68778a;
+  font: 700 9px "Barlow Condensed", sans-serif;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: .045em;
+}
+.pitching-line-heading span:first-child { text-align: left; }
+.active-pitcher-row {
+  width: calc(100% - 12px);
+  min-height: 52px;
+  margin: 6px 6px 2px;
+  padding: 6px 5px 6px 9px;
+  border: 1px solid #d6e2ed;
+  border-radius: 7px;
+  background: #f5f9fc;
+  color: var(--ink);
+  text-align: center;
+}
+.active-pitcher-row:hover { border-color: #7db2df; background: #eaf4fc; }
+.active-pitcher-row > span { min-width: 0; display: flex; flex-direction: column; text-align: left; }
+.active-pitcher-row strong { font: 700 15px "Barlow Condensed", sans-serif; text-transform: uppercase; }
+.active-pitcher-row small { overflow: hidden; margin-top: 3px; color: #617286; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.active-pitcher-row > b { font: 700 12px "Barlow Condensed", sans-serif; }
+.pitcher-click-note { margin: 3px 11px 9px; color: #8b98a7; font-size: 8px; }
+
+.baserunning-card {
+  overflow: hidden;
+  border: 1px solid #1d2d3e;
+  border-radius: 10px;
+  background: #091522;
+  color: #fff;
+  box-shadow: var(--shadow);
+}
+.baserunning-card > header { min-height: 42px; padding: 8px 11px; display: flex; align-items: center; justify-content: space-between; background: #11243a; border-bottom: 1px solid #2d4155; }
+.baserunning-card h2 { margin: 2px 0 0; font: 700 17px "Barlow Condensed", sans-serif; text-transform: uppercase; }
+.baserunning-card > header > span { padding: 4px 7px; border: 1px solid #3a526a; border-radius: 5px; color: #b9c9d8; font: 700 10px "Barlow Condensed", sans-serif; }
+.baserunning-empty { min-height: 64px; padding: 20px 14px; color: #7990a5; font-size: 9px; text-align: center; }
+.runner-distance-list { padding: 6px; display: grid; gap: 4px; }
+.runner-distance { min-height: 43px; display: grid; grid-template-columns: minmax(0, 1fr) 42px 42px; align-items: center; overflow: hidden; border-radius: 6px; background: #172434; }
+.runner-distance > div { min-width: 0; padding: 6px 8px; display: flex; flex-direction: column; }
+.runner-distance strong { overflow: hidden; font: 700 13px "Barlow Condensed", sans-serif; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.runner-distance small { margin-top: 2px; color: #8ea1b5; font-size: 8px; }
+.runner-distance > b { height: 100%; display: grid; place-items: center; font: 700 25px "Barlow Condensed", sans-serif; background: #29394a; }
+.runner-distance > span { height: 100%; display: grid; place-items: center; color: #fff; font: 800 9px Inter, sans-serif; }
+.runner-distance.tone-green > b, .runner-distance.tone-green > span { background: #118447; }
+.runner-distance.tone-yellow > b, .runner-distance.tone-yellow > span { background: #d2a313; color: #101820; }
+.runner-distance.tone-red > b, .runner-distance.tone-red > span { background: #b72331; }
+.baserunning-card > footer { min-height: 25px; padding: 7px 9px; border-top: 1px solid #263a4e; background: #08121d; color: #6f8498; font-size: 7px; }
+
+.bullpen-scrim { position: fixed; inset: 0; z-index: 100; display: flex; justify-content: flex-end; background: rgba(5, 13, 22, .58); backdrop-filter: blur(2px); }
+.bullpen-drawer { width: 390px; max-width: 92vw; height: 100%; padding: 0 18px 20px; overflow-y: auto; background: #f8fafc; box-shadow: -18px 0 55px rgba(0, 0, 0, .28); }
+.bullpen-drawer > header { min-height: 72px; margin: 0 -18px 16px; padding: 0 18px; display: flex; align-items: center; justify-content: space-between; background: var(--navy); color: #fff; }
+.bullpen-drawer h2 { margin: 3px 0 0; font: 700 24px "Barlow Condensed", sans-serif; text-transform: uppercase; }
+.drawer-close { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid #405268; border-radius: 7px; background: #15283c; color: #fff; }
+.current-pitcher-card { padding: 13px 14px; display: flex; flex-direction: column; border: 1px solid #cbd9e5; border-radius: 8px; background: #eaf3fa; }
+.current-pitcher-card span { color: #6a7c8f; font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+.current-pitcher-card strong { margin: 4px 0 3px; font: 700 20px "Barlow Condensed", sans-serif; text-transform: uppercase; }
+.current-pitcher-card b { color: #38516a; font-size: 10px; }
+.bullpen-options { margin-top: 14px; display: grid; gap: 7px; }
+.bullpen-options > button { min-height: 58px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #d6dfe7; border-radius: 8px; background: #fff; color: var(--ink); text-align: left; }
+.bullpen-options > button:hover, .bullpen-options > button.selected { border-color: #3a8fd5; background: #eaf4fc; }
+.bullpen-options span { display: flex; flex-direction: column; }
+.bullpen-options strong { font: 700 16px "Barlow Condensed", sans-serif; text-transform: uppercase; }
+.bullpen-options small { margin-top: 3px; color: #718095; font-size: 9px; }
+.bullpen-options > button > b { font: 700 18px "Barlow Condensed", sans-serif; }
+.pitch-change-confirm { margin-top: 16px; padding: 13px; border: 1px solid #e0bd69; border-radius: 8px; background: #fff7df; }
+.pitch-change-confirm p { margin: 0 0 11px; color: #5d4a19; font-size: 11px; line-height: 1.45; }
+.pitch-change-confirm > div { display: flex; justify-content: flex-end; gap: 7px; }
+.drawer-note { margin: 18px 2px 0; color: #8995a4; font-size: 9px; }
 
 @media print {
   body { min-width: 0; background: #fff; }

@@ -4,9 +4,20 @@ A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, des
 
 The durable design decisions, confirmed house rules, scoring requirements, stadium-import conventions, and development priorities are preserved in [Project Checkpoint 0.1.7](docs/PROJECT_CHECKPOINT_0.1.7.md).
 
-## Rules-engine build 0.3.3
+## Rules-engine build 0.4.0
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
+
+### 0.4.0 game-day workspace and running foundation
+
+- Reorganizes the game screen around the active half-inning: only the batting lineup and the opposing pitcher occupy permanent lineup space.
+- Moves the stadium to the right, embeds the scorer console and runner-distance board in the middle, and places the batter-pitcher matchup beneath the active lineup and resolution area.
+- The current pitcher is clickable. A modern bullpen drawer shows each reliever's complete printed rating and requires confirmation before changing pitchers.
+- Pitching changes are stored by team in version-four saved-game state and immediately drive subsequent matchup and rules calculations.
+- Adds a runner-distance board using the confirmed red `0–8`, yellow `9–12`, and green `13+` bands. The calculation is strictly ball-to-destination; fielder movement remains a separate fielding calculation.
+- Encodes Brien's mandatory extra-base thresholds for every runner: `8+` against an 8 arm and `10+` against a 9 arm.
+- Encodes the two-out hit-and-run head start: runners already on base advance two bases before the first throw, while the batter-runner continues one base at a time.
+- Preserves these clarifications and the SherCo Shortcuts design in [Project Checkpoint 0.4.0](docs/PROJECT_CHECKPOINT_0.4.0.md).
 
 ### 0.3.3 resolution console
 

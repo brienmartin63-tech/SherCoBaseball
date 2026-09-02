@@ -148,7 +148,7 @@ export interface PlayEvent {
 }
 
 export interface GameState {
-  schemaVersion: 3;
+  schemaVersion: 4;
   seed: number;
   inning: number;
   half: "top" | "bottom";
@@ -163,6 +163,7 @@ export interface GameState {
   ballAt?: Coordinate;
   selectedParkId: string;
   rulesProfileId: "official-1980" | "brien";
+  activePitchers: Partial<Record<"away" | "home", string>>;
   lastRoll?: DiceRoll;
   events: PlayEvent[];
   runners: BaseRunners;

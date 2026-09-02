@@ -6,7 +6,7 @@ import type { BaseRunners, BaseState, Batter, DiceRoll, GameState, Park, Pitcher
 
 export function createInitialGame(selectedParkId: string, seed = 198010210): GameState {
   return {
-    schemaVersion: 3,
+    schemaVersion: 4,
     seed,
     inning: 1,
     half: "top",
@@ -19,8 +19,17 @@ export function createInitialGame(selectedParkId: string, seed = 198010210): Gam
     resolution: { phase: "PITCH", baseState: "EMPTY" },
     selectedParkId,
     rulesProfileId: "brien",
+    activePitchers: {},
     events: [],
     runners: {},
+  };
+}
+
+export function selectPitcher(state: GameState, side: "away" | "home", pitcherId: string): GameState {
+  return {
+    ...state,
+    activePitchers: { ...state.activePitchers, [side]: pitcherId },
+    activePitcherRate: undefined,
   };
 }
 

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { rollOneDie, rollTwoDice, shercoNumber } from "../core/dice";
+import { runnerDistance, runnerDistanceTone, twoOutHitAndRunDestination } from "../core/baserunning";
 import { directPitchResult, effectivePowerRatings, moveBehindFielder, moveInFrontOfFielder, resolveBasesEmptyBattedBall, resolveBasesEmptyError, resolveBasesEmptySpecialEvent, specialEventPitcherRate, withinHomeRunRating } from "../core/chartResolution";
-import { createInitialGame, resolveFielding, rollPitch, rollResolution, scoreDirectResult, startNextPlateAppearance } from "../core/game";
+import { createInitialGame, resolveFielding, rollPitch, rollResolution, scoreDirectResult, selectPitcher, startNextPlateAppearance } from "../core/game";
 import { automaticUmpireCall, buildRatedDefense, createFieldingAttempt, resolveThrow } from "../core/fielding";
 import { BASE_REFERENCE_SQUARES, distanceToBase, farthestInPlaySquare, HOME_PLATE_SQUARE, mirrorForLeftHandedBatter, nearestFielder, squaresBetween } from "../core/geometry";
 import { classifyPitch, hitNumber, pitchResultLabel } from "../core/pitching";
@@ -169,13 +170,14 @@ describe("1980 bases-empty chart engine", () => {
 });
 
 describe("saved-game schema", () => {
-  it("migrates a 0.1.x game into the version-three fielding state", () => {
+  it("migrates a 0.1.x game into the version-four game-day state", () => {
     const current = createInitialGame("test-park");
-    const { schemaVersion: _schemaVersion, resolution: _resolution, runners: _runners, ...legacy } = current;
+    const { schemaVersion: _schemaVersion, resolution: _resolution, runners: _runners, activePitchers: _activePitchers, ...legacy } = current;
     const migrated = migrateGameState(legacy);
-    expect(migrated.schemaVersion).toBe(3);
+    expect(migrated.schemaVersion).toBe(4);
     expect(migrated.resolution).toEqual({ phase: "PITCH", baseState: "EMPTY" });
     expect(migrated.runners).toEqual({});
+    expect(migrated.activePitchers).toEqual({});
   });
 });
 
@@ -334,6 +336,37 @@ describe("Brien's rules", () => {
     expect(actionAllowed("chart", 4)).toBe(true);
     expect(actionAllowed("managerial", 4)).toBe(false);
     expect(actionAllowed("managerial", 2)).toBe(true);
+  });
+
+  it("uses ball-to-destination distance only for every runner", () => {
+    const batterToFirst = runnerDistance({ row: 19, column: 8 }, "HOME", 8);
+    const mcBrideToThird = runnerDistance({ row: 19, column: 8 }, "SECOND", 8);
+    expect(batterToFirst).toMatchObject({ to: "FIRST", distance: 11, tone: "yellow", mustAdvance: true });
+    expect(mcBrideToThird).toMatchObject({ to: "THIRD", distance: 16, tone: "green", safeBeforeThrow: true });
+
+    const ballAfterThrow = { row: 10, column: 8 };
+    expect(runnerDistance(ballAfterThrow, "FIRST", 9)).toMatchObject({ to: "SECOND", distance: 2, tone: "red", mustAdvance: false });
+    expect(runnerDistance(ballAfterThrow, "THIRD", 9)).toMatchObject({ to: "HOME", distance: 7, tone: "red", mustAdvance: false });
+  });
+
+  it("preserves the red, yellow, and green SherCo distance bands", () => {
+    expect([runnerDistanceTone(8), runnerDistanceTone(9), runnerDistanceTone(12), runnerDistanceTone(13)]).toEqual(["red", "yellow", "yellow", "green"]);
+  });
+
+  it("gives existing runners—but not the batter—a two-base head start with two outs", () => {
+    expect(twoOutHitAndRunDestination("FIRST")).toBe("THIRD");
+    expect(twoOutHitAndRunDestination("SECOND")).toBe("HOME");
+    expect(twoOutHitAndRunDestination("THIRD")).toBe("HOME");
+    expect(twoOutHitAndRunDestination("HOME", true)).toBe("FIRST");
+  });
+});
+
+describe("game-day pitching changes", () => {
+  it("stores the selected pitcher by team and clears a temporary rate adjustment", () => {
+    const state = { ...createInitialGame("test-park"), activePitcherRate: "X" as const };
+    const changed = selectPitcher(state, "home", kansasCity.bullpen[0].id);
+    expect(changed.activePitchers.home).toBe(kansasCity.bullpen[0].id);
+    expect(changed.activePitcherRate).toBeUndefined();
   });
 });
 

@@ -1,8 +1,9 @@
 import type { GameState } from "./types";
 
-type LegacyGameState = Omit<GameState, "schemaVersion" | "resolution" | "runners" | "pendingFielding"> & {
-  schemaVersion?: 1 | 2;
+type LegacyGameState = Omit<GameState, "schemaVersion" | "resolution" | "runners" | "pendingFielding" | "activePitchers"> & {
+  schemaVersion?: 1 | 2 | 3;
   resolution?: GameState["resolution"];
+  activePitchers?: GameState["activePitchers"];
 };
 
 const DATABASE = "sherco-grand-slam";
@@ -46,12 +47,13 @@ export async function loadGame(): Promise<GameState | undefined> {
 }
 
 export function migrateGameState(game: GameState | LegacyGameState): GameState {
-  if (game.schemaVersion === 3 && game.resolution && game.runners) return game;
+  if (game.schemaVersion === 4 && game.resolution && game.runners && game.activePitchers) return game;
   return {
     ...game,
-    schemaVersion: 3,
-    resolution: game.schemaVersion === 2 && game.resolution ? game.resolution : { phase: "PITCH", baseState: "EMPTY" },
-    runners: {},
+    schemaVersion: 4,
+    resolution: game.schemaVersion && game.schemaVersion >= 2 && game.resolution ? game.resolution : { phase: "PITCH", baseState: "EMPTY" },
+    runners: game.schemaVersion === 3 && "runners" in game ? game.runners : {},
+    activePitchers: game.activePitchers ?? {},
     pendingFielding: undefined,
     ballAt: undefined,
   } as GameState;
