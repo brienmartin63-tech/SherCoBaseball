@@ -1,5 +1,5 @@
 import { farthestInPlaySquare, HOME_PLATE_SQUARE, mirrorForLeftHandedBatter, parkTerrainAt, squaresBetween } from "./geometry";
-import type { Batter, Coordinate, GameState, Hand, Park, Pitcher, PitcherRate, PlateAppearanceResolution } from "./types";
+import type { Batter, Coordinate, FielderPosition, GameState, Hand, Park, Pitcher, PitcherRate, PlateAppearanceResolution } from "./types";
 import {
   BASES_EMPTY_HIT_ERROR,
   BASES_EMPTY_OUT_ERROR,
@@ -214,8 +214,38 @@ export function resolveBasesEmptySpecialEvent(roll: OneDieRoll, batter: Batter, 
   };
 }
 
-export function resolveBasesEmptyError(chartFamily: "HIT_ERROR" | "OUT_ERROR", roll: OneDieRoll): PlateAppearanceResolution {
+export function basesEmptyErrorFielder(
+  chartFamily: "HIT_ERROR" | "OUT_ERROR",
+  roll: OneDieRoll,
+  batter: Batter,
+  pitcher: Pitcher,
+): FielderPosition | undefined {
+  if (chartFamily !== "HIT_ERROR") return undefined;
+  if (roll === 1 || roll === 2) return "CF";
+  if (roll === 3) return "LF";
+  if (roll === 4) return "3B";
+  if (roll === 5) return "RF";
+  return effectiveBattingHand(batter.bats, pitcher.throws) === "R" ? "LF" : "RF";
+}
+
+export function resolveBasesEmptyError(
+  chartFamily: "HIT_ERROR" | "OUT_ERROR",
+  roll: OneDieRoll,
+  superiorErrorCheck = false,
+  errorFielderPosition?: FielderPosition,
+): PlateAppearanceResolution {
   const entry = chartFamily === "HIT_ERROR" ? BASES_EMPTY_HIT_ERROR[roll] : BASES_EMPTY_OUT_ERROR[roll];
+  if (chartFamily === "HIT_ERROR" && superiorErrorCheck && errorFielderPosition) {
+    return {
+      phase: "SUPERIOR_ERROR_CHECK",
+      baseState: "EMPTY",
+      chartFamily,
+      description: `${errorFielderPosition} is Superior. Roll one die: 1–3, no error; 4–6, apply error-chart result ${roll}.`,
+      source: "1980 rulebook Rule 19d and p.24",
+      errorChartRoll: roll,
+      errorFielderPosition,
+    };
+  }
   const awardedBase = chartFamily === "HIT_ERROR"
     ? roll === 6 ? "THIRD" : "SECOND"
     : roll === 3 ? "SECOND" : "FIRST";
@@ -228,5 +258,31 @@ export function resolveBasesEmptyError(chartFamily: "HIT_ERROR" | "OUT_ERROR", r
     terminalOutcome: "ERROR",
     awardedBase,
     creditedHit: chartFamily === "HIT_ERROR" && (roll === 1 || roll === 5),
+    errorChartRoll: roll,
+    errorFielderPosition,
+  };
+}
+
+export function resolveBasesEmptySuperiorError(
+  pending: PlateAppearanceResolution,
+  roll: OneDieRoll,
+): PlateAppearanceResolution {
+  if (pending.phase !== "SUPERIOR_ERROR_CHECK" || pending.chartFamily !== "HIT_ERROR" || !pending.errorChartRoll) return pending;
+  if (roll >= 4) {
+    return resolveBasesEmptyError("HIT_ERROR", pending.errorChartRoll, false, pending.errorFielderPosition);
+  }
+
+  const isSingle = pending.errorChartRoll === 5;
+  return {
+    phase: "DIRECT_RESULT",
+    baseState: "EMPTY",
+    chartFamily: "HIT_ERROR",
+    terminalOutcome: isSingle ? "SINGLE" : "OUT",
+    description: isSingle
+      ? "Superior right fielder prevents the error; score a single only, with the batter at first."
+      : `Superior ${pending.errorFielderPosition ?? "fielder"} prevents the error and records the out.`,
+    source: "1980 rulebook Rule 19d and p.24",
+    errorChartRoll: pending.errorChartRoll,
+    errorFielderPosition: pending.errorFielderPosition,
   };
 }

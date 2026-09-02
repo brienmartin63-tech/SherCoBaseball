@@ -1,4 +1,4 @@
-import type { Team } from "./types";
+import type { GameState, ScoreLine, Team } from "./types";
 
 /** The tenth inning is always available as X; later innings extend the scrollable line. */
 export function scoreboardInnings(currentInning: number): number[] {
@@ -16,4 +16,17 @@ export function hasScoreboardSpacerAfter(inning: number): boolean {
 /** The park scoreboard identifies visitors by city and the home club by nickname. */
 export function scoreboardTeamName(team: Team, side: "away" | "home"): string {
   return side === "away" ? team.city : team.nickname;
+}
+
+/** A dash means that club has not yet had its turn to bat in the inning. */
+export function scoreboardInningValue(
+  score: ScoreLine,
+  side: "away" | "home",
+  inning: number,
+  currentInning: number,
+  currentHalf: GameState["half"],
+): number | "–" {
+  if (inning > currentInning) return "–";
+  if (inning === currentInning && side === "home" && currentHalf === "top") return "–";
+  return score.innings[inning - 1] ?? 0;
 }

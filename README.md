@@ -4,9 +4,16 @@ A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, des
 
 The durable design decisions, confirmed house rules, scoring requirements, stadium-import conventions, and development priorities are preserved in [Project Checkpoint 0.1.7](docs/PROJECT_CHECKPOINT_0.1.7.md).
 
-## Rules-engine build 0.4.0
+## Rules-engine build 0.4.1
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
+
+### 0.4.1 Superior-fielding and scoreboard correction
+
+- Corrects Bases Empty Probable Hit Error result 5: a non-Superior RF produces a single plus E9 with the batter on second; the play never returns to the Probable Hit chart.
+- Implements the Rule 19 Superior check for every Bases Empty Probable Hit error result. Only the responsible `S` fielder rolls again: `1–3` uses the chart's no-error branch and `4–6` preserves the error.
+- On result 5, a Superior RF's `1–3` is a clean single with the batter on first; `4–6` remains a single plus E9 with the batter on second.
+- Displays `–` for a team's inning until that team has actually come to bat. The visiting first-inning cell begins at `0`; the home first-inning cell remains `–` throughout the top half.
 
 ### 0.4.0 game-day workspace and running foundation
 

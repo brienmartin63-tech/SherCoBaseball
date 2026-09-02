@@ -103,7 +103,7 @@ export function App() {
       if (current.resolution.phase === "PLAY_COMPLETE") {
         return startNextPlateAppearance(current, current.resolution.baseState !== "EMPTY");
       }
-      return rollResolution(current, activeBatter, activePitcher, park);
+      return rollResolution(current, activeBatter, activePitcher, park, defensiveTeam);
     });
   }
 
@@ -186,7 +186,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Rules-engine build 0.4.0 · Game-day workspace</span>
+        <span>Rules-engine build 0.4.1 · Game-day workspace</span>
       </footer>
     </div>
   );

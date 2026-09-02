@@ -1,5 +1,5 @@
 import { rollOneDie, rollTwoDice } from "./dice";
-import { directPitchResult, resolveBasesEmptyBattedBall, resolveBasesEmptyError, resolveBasesEmptySpecialEvent, specialEventPitcherRate } from "./chartResolution";
+import { basesEmptyErrorFielder, directPitchResult, resolveBasesEmptyBattedBall, resolveBasesEmptyError, resolveBasesEmptySpecialEvent, resolveBasesEmptySuperiorError, specialEventPitcherRate } from "./chartResolution";
 import { classifyPitch, hitNumber, pitchResultLabel } from "./pitching";
 import { automaticUmpireCall, buildRatedDefense, createFieldingAttempt, isAirborneCatch, positionName, resolveThrow } from "./fielding";
 import type { BaseRunners, BaseState, Batter, DiceRoll, GameState, Park, Pitcher, PlateAppearanceResolution, PlayEvent, ScoreLine, Team } from "./types";
@@ -114,7 +114,7 @@ function appendRollEvent(state: GameState, roll: DiceRoll, officialText: string,
   };
 }
 
-export function rollResolution(state: GameState, batter: Batter, pitcher: Pitcher, park: Park): GameState {
+export function rollResolution(state: GameState, batter: Batter, pitcher: Pitcher, park: Park, defensiveTeam?: Team): GameState {
   const { phase, chartFamily } = state.resolution;
   if (phase === "BATTED_BALL_CHART" && (chartFamily === "PROBABLE_HIT" || chartFamily === "PROBABLE_OUT")) {
     const result = rollTwoDice(state.seed, "chart", `${chartFamily === "PROBABLE_HIT" ? "Probable Hit" : "Probable Out"} chart roll`);
@@ -169,8 +169,31 @@ export function rollResolution(state: GameState, batter: Batter, pitcher: Pitche
 
   if (phase === "ERROR_CHART" && (chartFamily === "HIT_ERROR" || chartFamily === "OUT_ERROR")) {
     const result = rollOneDie(state.seed, "chart", `${chartFamily === "HIT_ERROR" ? "Probable Hit" : "Probable Out"} error roll`);
-    const resolution = resolveBasesEmptyError(chartFamily, result.roll.sherco as 1 | 2 | 3 | 4 | 5 | 6);
-    const roll: DiceRoll = { ...result.roll, explanation: resolution.description!, resultLabel: "Error", resultTone: "error" };
+    const errorRoll = result.roll.sherco as 1 | 2 | 3 | 4 | 5 | 6;
+    const errorFielderPosition = basesEmptyErrorFielder(chartFamily, errorRoll, batter, pitcher);
+    const superior = errorFielderPosition === "P"
+      ? Boolean(pitcher.defense.superior)
+      : Boolean(defensiveTeam?.lineup.find((fielder) => fielder.position === errorFielderPosition)?.defense.superior);
+    const resolution = resolveBasesEmptyError(chartFamily, errorRoll, superior, errorFielderPosition);
+    const roll: DiceRoll = {
+      ...result.roll,
+      explanation: resolution.description!,
+      resultLabel: resolution.phase === "SUPERIOR_ERROR_CHECK" ? "Superior check" : "Error",
+      resultTone: resolution.phase === "SUPERIOR_ERROR_CHECK" ? "event" : "error",
+    };
+    return appendRollEvent(state, roll, resolution.description!, resolution, result.state);
+  }
+
+  if (phase === "SUPERIOR_ERROR_CHECK") {
+    const result = rollOneDie(state.seed, "fielding", "Superior fielder error check");
+    const resolution = resolveBasesEmptySuperiorError(state.resolution, result.roll.sherco as 1 | 2 | 3 | 4 | 5 | 6);
+    const noError = result.roll.sherco <= 3;
+    const roll: DiceRoll = {
+      ...result.roll,
+      explanation: resolution.description!,
+      resultLabel: noError ? "No error" : "Error stands",
+      resultTone: noError ? resolution.terminalOutcome === "SINGLE" ? "hit" : "out" : "error",
+    };
     return appendRollEvent(state, roll, resolution.description!, resolution, result.state);
   }
 
@@ -316,7 +339,7 @@ function finishPlateAppearance(
     resolution: {
       phase: "PLAY_COMPLETE",
       baseState,
-      terminalOutcome: result === "HOME_RUN" ? "HOME_RUN" : result === "WALK" ? "WALK" : result === "HIT_BY_PITCH" ? "HIT_BY_PITCH" : result === "ERROR" ? "ERROR" : undefined,
+      terminalOutcome: result === "OUT" ? "OUT" : result === "SINGLE" ? "SINGLE" : result === "HOME_RUN" ? "HOME_RUN" : result === "WALK" ? "WALK" : result === "HIT_BY_PITCH" ? "HIT_BY_PITCH" : result === "ERROR" ? "ERROR" : undefined,
       description: officialText,
       source: "1980 Rule 6 fielding and scoring sequence",
     },
@@ -428,10 +451,12 @@ export function scoreDirectResult(
 ): GameState {
   if (state.resolution.phase !== "DIRECT_RESULT" || !state.resolution.terminalOutcome) return state;
   const outcome = state.resolution.terminalOutcome;
-  const result = outcome === "STRIKEOUT" ? "OUT" : outcome;
+  const result = outcome === "STRIKEOUT" || outcome === "OUT" ? "OUT" : outcome;
   const errorBase = state.resolution.awardedBase ?? "FIRST";
   const errorBaseLabel = errorBase === "FIRST" ? "first" : errorBase === "SECOND" ? "second" : "third";
   const officialText = outcome === "STRIKEOUT" ? `${batter.name} strikes out.`
+    : outcome === "OUT" ? `${batter.name} is out.`
+    : outcome === "SINGLE" ? `${batter.name} singles.`
     : outcome === "WALK" ? `${batter.name} walks.`
       : outcome === "HIT_BY_PITCH" ? `${batter.name} is hit by a pitch.`
         : outcome === "HOME_RUN" ? `${batter.name} hits a home run.`

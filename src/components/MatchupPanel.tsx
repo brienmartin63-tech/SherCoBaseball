@@ -22,6 +22,7 @@ function nextAction(game: GameState): { label: string; disabled: boolean } {
     case "HIT_ERROR_CHECK": return { label: "Roll error check", disabled: false };
     case "PITCHER_ERROR_CHECK": return { label: "Roll pitcher error", disabled: false };
     case "ERROR_CHART": return { label: "Roll error chart", disabled: false };
+    case "SUPERIOR_ERROR_CHECK": return { label: "Roll Superior check", disabled: false };
     case "BALL_CHECK": return { label: "Roll ball check", disabled: false };
     case "COUNT_PENDING": return { label: "Count continuation pending", disabled: true };
     case "TRIPLE_DECISION": return { label: "Triple choice pending", disabled: true };

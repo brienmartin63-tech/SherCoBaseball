@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { hasScoreboardSpacerAfter, inningLabel, scoreboardInnings, scoreboardTeamName } from "../core/scoreboard";
+import { hasScoreboardSpacerAfter, inningLabel, scoreboardInnings, scoreboardInningValue, scoreboardTeamName } from "../core/scoreboard";
 import type { GameState, Team } from "../core/types";
 
 interface Props {
@@ -18,9 +18,9 @@ export function Scoreboard({ game, away, home }: Props) {
     }
   }, [game.inning]);
 
-  const inningCells = (score?: GameState["away"]) => innings.flatMap((inning) => [
+  const inningCells = (score?: GameState["away"], side?: "away" | "home") => innings.flatMap((inning) => [
     score
-      ? <td className="inning-cell" key={`inning-${inning}`}>{score.innings[inning - 1] ?? "–"}</td>
+      ? <td className="inning-cell" key={`inning-${inning}`}>{scoreboardInningValue(score, side!, inning, game.inning, game.half)}</td>
       : <th className="inning-cell" key={`inning-${inning}`}>{inningLabel(inning)}</th>,
     ...(hasScoreboardSpacerAfter(inning)
       ? [score
@@ -35,7 +35,7 @@ export function Scoreboard({ game, away, home }: Props) {
         {scoreboardTeamName(team, side)}
       </th>
       <td className="team-spacer" aria-hidden="true" />
-      {inningCells(score)}
+      {inningCells(score, side)}
       <td className="totals-spacer" aria-hidden="true" />
       <td className="total total-runs">{score.runs}</td>
       <td className="total total-hits">{score.hits}</td>

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { rollOneDie, rollTwoDice, shercoNumber } from "../core/dice";
 import { runnerDistance, runnerDistanceTone, twoOutHitAndRunDestination } from "../core/baserunning";
-import { directPitchResult, effectivePowerRatings, moveBehindFielder, moveInFrontOfFielder, resolveBasesEmptyBattedBall, resolveBasesEmptyError, resolveBasesEmptySpecialEvent, specialEventPitcherRate, withinHomeRunRating } from "../core/chartResolution";
+import { basesEmptyErrorFielder, directPitchResult, effectivePowerRatings, moveBehindFielder, moveInFrontOfFielder, resolveBasesEmptyBattedBall, resolveBasesEmptyError, resolveBasesEmptySpecialEvent, resolveBasesEmptySuperiorError, specialEventPitcherRate, withinHomeRunRating } from "../core/chartResolution";
 import { createInitialGame, resolveFielding, rollPitch, rollResolution, scoreDirectResult, selectPitcher, startNextPlateAppearance } from "../core/game";
 import { automaticUmpireCall, buildRatedDefense, createFieldingAttempt, resolveThrow } from "../core/fielding";
 import { BASE_REFERENCE_SQUARES, distanceToBase, farthestInPlaySquare, HOME_PLATE_SQUARE, mirrorForLeftHandedBatter, nearestFielder, squaresBetween } from "../core/geometry";
@@ -9,7 +9,7 @@ import { classifyPitch, hitNumber, pitchResultLabel } from "../core/pitching";
 import { normalize1980Ratings } from "../core/players";
 import { formatBatterRating, formatPitcherRating } from "../core/ratings";
 import { actionAllowed, shouldAttemptExtraBase, shouldAutoStealSecond } from "../core/rules";
-import { hasScoreboardSpacerAfter, inningLabel, scoreboardInnings, scoreboardTeamName } from "../core/scoreboard";
+import { hasScoreboardSpacerAfter, inningLabel, scoreboardInnings, scoreboardInningValue, scoreboardTeamName } from "../core/scoreboard";
 import { migrateGameState } from "../core/storage";
 import type { Park } from "../core/types";
 import rawParks from "../data/parks.json";
@@ -306,6 +306,51 @@ describe("bases-empty fielding and running", () => {
     expect(scoredError.home.errors).toBe(1);
   });
 
+  it("scores Probable Hit error result 5 as a single and E9 for a non-Superior RF", () => {
+    const errorResult = resolveBasesEmptyError("HIT_ERROR", 5, false, "RF");
+    expect(errorResult).toMatchObject({
+      phase: "DIRECT_RESULT",
+      terminalOutcome: "ERROR",
+      awardedBase: "SECOND",
+      creditedHit: true,
+      errorChartRoll: 5,
+      errorFielderPosition: "RF",
+    });
+    const scored = scoreDirectResult({ ...createInitialGame(park.id), resolution: errorResult }, philadelphia.lineup[1], 9, 9);
+    expect(scored.runners.second).toBe(philadelphia.lineup[1].id);
+    expect(scored.away.hits).toBe(1);
+    expect(scored.home.errors).toBe(1);
+
+    const chartState = {
+      ...createInitialGame(park.id, 10752),
+      half: "bottom" as const,
+      resolution: { phase: "ERROR_CHART" as const, baseState: "EMPTY" as const, chartFamily: "HIT_ERROR" as const },
+    };
+    const resolved = rollResolution(chartState, kansasCity.lineup[0], philadelphia.starter, park, philadelphia);
+    expect(resolved.lastRoll?.sherco).toBe(5);
+    expect(resolved.resolution).toMatchObject({ phase: "DIRECT_RESULT", terminalOutcome: "ERROR", awardedBase: "SECOND", creditedHit: true });
+  });
+
+  it("uses Rule 19's extra die only when the error fielder is Superior", () => {
+    expect(basesEmptyErrorFielder("HIT_ERROR", 5, philadelphia.lineup[1], kansasCity.starter)).toBe("RF");
+    const pending = resolveBasesEmptyError("HIT_ERROR", 5, true, "RF");
+    expect(pending).toMatchObject({ phase: "SUPERIOR_ERROR_CHECK", errorChartRoll: 5, errorFielderPosition: "RF" });
+
+    const prevented = resolveBasesEmptySuperiorError(pending, 3);
+    expect(prevented).toMatchObject({ phase: "DIRECT_RESULT", terminalOutcome: "SINGLE" });
+    const cleanSingle = scoreDirectResult({ ...createInitialGame(park.id), resolution: prevented }, philadelphia.lineup[1], 9, 9);
+    expect(cleanSingle.runners.first).toBe(philadelphia.lineup[1].id);
+    expect(cleanSingle.away.hits).toBe(1);
+    expect(cleanSingle.home.errors).toBe(0);
+
+    expect(resolveBasesEmptySuperiorError(pending, 4)).toMatchObject({
+      phase: "DIRECT_RESULT",
+      terminalOutcome: "ERROR",
+      awardedBase: "SECOND",
+      creditedHit: true,
+    });
+  });
+
   it("changes sides after the third out and preserves the next visiting hitter", () => {
     const direct = { ...createInitialGame(park.id), outs: 2, awayBatterIndex: 8, resolution: { phase: "DIRECT_RESULT" as const, baseState: "EMPTY" as const, terminalOutcome: "STRIKEOUT" as const } };
     const scored = scoreDirectResult(direct, philadelphia.lineup[8], 9, 9);
@@ -454,5 +499,13 @@ describe("scoreboard inning line", () => {
   it("adds scrollable numeric columns beginning with the eleventh", () => {
     expect(scoreboardInnings(11)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
     expect(inningLabel(11)).toBe("11");
+  });
+
+  it("shows a dash until each club has begun batting in that inning", () => {
+    const game = createInitialGame("test-park");
+    expect(scoreboardInningValue(game.away, "away", 1, 1, "top")).toBe(0);
+    expect(scoreboardInningValue(game.home, "home", 1, 1, "top")).toBe("–");
+    expect(scoreboardInningValue(game.home, "home", 1, 1, "bottom")).toBe(0);
+    expect(scoreboardInningValue(game.away, "away", 2, 1, "bottom")).toBe("–");
   });
 });
