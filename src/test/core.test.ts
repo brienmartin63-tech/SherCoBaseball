@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { rollOneDie, rollTwoDice, shercoNumber } from "../core/dice";
+import { createRandomSeed } from "../core/rng";
 import { applyTwoOutPreThrowAdvance, homeThrowChoices, leadRunnerDecisions, runnerDistance, runnerDistanceTone, twoOutHitAndRunDestination } from "../core/baserunning";
 import { basesEmptyErrorFielder, directPitchResult, effectivePowerRatings, moveBehindFielder, moveInFrontOfFielder, resolveBasesEmptyBattedBall, resolveBasesEmptyError, resolveBasesEmptySpecialEvent, resolveBasesEmptySuperiorError, specialEventPitcherRate, withinHomeRunRating } from "../core/chartResolution";
 import { createInitialGame, resolveFielding, rollPitch, rollResolution, scoreDirectResult, selectPitcher, startNextPlateAppearance } from "../core/game";
@@ -17,6 +18,12 @@ import { kansasCity, philadelphia } from "../data/demo";
 import { BASES_EMPTY_PROBABLE_HIT, BASES_EMPTY_PROBABLE_OUT, SHERCO_CHART_ROLLS } from "../data/charts1980";
 
 describe("SherCo dice", () => {
+  it("starts each new game from a fresh nonzero seed while allowing exact test seeds", () => {
+    expect(createRandomSeed(() => 0x19801021)).toBe(0x19801021);
+    expect(createRandomSeed(() => 0)).not.toBe(0);
+    expect(createInitialGame("test-park", 2722).seed).toBe(2722);
+  });
+
   it("reads the lower die first", () => {
     expect(shercoNumber([5, 3])).toBe(35);
     expect(shercoNumber([2, 6])).toBe(26);
@@ -55,6 +62,24 @@ describe("1980 bases-empty chart engine", () => {
   it("contains every valid two-die result in both batted-ball charts", () => {
     expect(Object.keys(BASES_EMPTY_PROBABLE_HIT).map(Number)).toEqual(SHERCO_CHART_ROLLS);
     expect(Object.keys(BASES_EMPTY_PROBABLE_OUT).map(Number)).toEqual(SHERCO_CHART_ROLLS);
+  });
+
+  it("uses the rolled SherCo number to select the matching chart-book entry", () => {
+    const schmidt = philadelphia.lineup[2];
+    const state = {
+      ...createInitialGame(park.id, 2722),
+      awayBatterIndex: 2,
+      resolution: { phase: "BATTED_BALL_CHART" as const, baseState: "EMPTY" as const, chartFamily: "PROBABLE_HIT" as const },
+    };
+    const resolved = rollResolution(state, schmidt, kansasCity.starter, park, kansasCity);
+    expect(resolved.lastRoll?.sherco).toBe(26);
+    expect(resolved.resolution).toMatchObject({
+      phase: "BALL_IN_PLAY",
+      chartFamily: "PROBABLE_HIT",
+      battedBallType: "ground",
+      ballAt: { row: 14, column: 19 },
+    });
+    expect(resolved.resolution.description).toContain(BASES_EMPTY_PROBABLE_HIT[26].description);
   });
 
   it("uses the HR clause and mirrors switch hitters against right-handed pitchers", () => {

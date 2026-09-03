@@ -193,7 +193,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Rules-engine build 0.5.1 · Continuous bases-empty running</span>
+        <span>Rules-engine build 0.5.2 · Randomized, auditable dice</span>
       </footer>
     </div>
   );

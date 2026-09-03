@@ -4,9 +4,10 @@ import { classifyPitch, hitNumber, pitchResultLabel } from "./pitching";
 import { automaticUmpireCall, buildRatedDefense, createFieldingAttempt, isAirborneCatch, positionName, resolveThrow } from "./fielding";
 import { runnerDistance } from "./baserunning";
 import { distanceToBase } from "./geometry";
+import { createRandomSeed } from "./rng";
 import type { BaseName, BaseRunners, BaseState, Batter, DiceRoll, FieldingAttempt, GameState, Park, Pitcher, PlateAppearanceResolution, PlayEvent, ScoreLine, Team, TerminalOutcome } from "./types";
 
-export function createInitialGame(selectedParkId: string, seed = 198010210): GameState {
+export function createInitialGame(selectedParkId: string, seed = createRandomSeed()): GameState {
   return {
     schemaVersion: 4,
     seed,
