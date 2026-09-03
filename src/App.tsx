@@ -102,7 +102,8 @@ export function App() {
         return scoreDirectResult(current, activeBatter, demoGame.away.lineup.length, demoGame.home.lineup.length);
       }
       if (current.resolution.phase === "PLAY_COMPLETE") {
-        return startNextPlateAppearance(current, current.resolution.baseState !== "EMPTY");
+        const started = startNextPlateAppearance(current, current.resolution.baseState !== "EMPTY");
+        return rollPitch(started, activeBatter, activePitcher);
       }
       return rollResolution(current, activeBatter, activePitcher, park, defensiveTeam);
     });
@@ -193,7 +194,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Rules-engine build 0.5.2 · Randomized, auditable dice</span>
+        <span>Rules-engine build 0.5.3 · Single-step batting rotation</span>
       </footer>
     </div>
   );

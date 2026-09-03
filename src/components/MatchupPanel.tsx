@@ -30,7 +30,7 @@ function nextAction(game: GameState): { label: string; disabled: boolean } {
     case "RUNNER_ADVANCE": return { label: `Throw to ${game.pendingFielding?.targetBase.toLowerCase() ?? "next base"}`, disabled: false };
     case "UMPIRE_CHECK": return { label: "Roll automatic umpire", disabled: false };
     case "DIRECT_RESULT": return { label: "Score play", disabled: false };
-    case "PLAY_COMPLETE": return { label: game.resolution.baseState === "EMPTY" ? "Next batter" : "Clear bases & continue test", disabled: false };
+    case "PLAY_COMPLETE": return { label: game.resolution.baseState === "EMPTY" ? "Roll pitch" : "Clear bases & roll pitch", disabled: false };
   }
 }
 

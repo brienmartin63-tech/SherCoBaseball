@@ -358,7 +358,11 @@ describe("bases-empty fielding and running", () => {
       runners: { third: porter.id },
       resolution: { phase: "PLAY_COMPLETE", baseState: "THIRD", terminalOutcome: "TRIPLE" },
       home: { hits: 1 },
+      homeBatterIndex: 7,
     });
+    const hurdleReady = startNextPlateAppearance(toThird, true);
+    const hurdlePitch = rollPitch(hurdleReady, kansasCity.lineup[7], philadelphia.starter);
+    expect(hurdlePitch.homeBatterIndex).toBe(7);
 
     const caughtStretching = resolveFielding({
       ...toFirst,
@@ -386,6 +390,24 @@ describe("bases-empty fielding and running", () => {
     const scored = scoreDirectResult(direct, philadelphia.lineup[0], 9, 9);
     expect(scored).toMatchObject({ outs: 1, awayBatterIndex: 1, resolution: { phase: "PLAY_COMPLETE", baseState: "EMPTY" } });
     expect(startNextPlateAppearance(scored).resolution.phase).toBe("PITCH");
+  });
+
+  it("advances exactly once across every completed direct plate appearance", () => {
+    const outcomes = ["OUT", "SINGLE", "DOUBLE", "TRIPLE", "WALK", "HIT_BY_PITCH", "ERROR", "HOME_RUN"] as const;
+    for (const outcome of outcomes) {
+      const state = {
+        ...createInitialGame(park.id, 2722),
+        resolution: { phase: "DIRECT_RESULT" as const, baseState: "EMPTY" as const, terminalOutcome: outcome },
+      };
+      const completed = scoreDirectResult(state, philadelphia.lineup[0], 9, 9);
+      expect(completed.awayBatterIndex, `${outcome} completion`).toBe(1);
+
+      const ready = startNextPlateAppearance(completed, completed.resolution.baseState !== "EMPTY");
+      expect(ready.awayBatterIndex, `${outcome} ready state`).toBe(1);
+
+      const nextPitch = rollPitch(ready, philadelphia.lineup[1], kansasCity.starter);
+      expect(nextPitch.awayBatterIndex, `${outcome} next pitch`).toBe(1);
+    }
   });
 
   it("places a batter on first and can clear the bases only for continued testing", () => {
@@ -513,6 +535,8 @@ describe("bases-empty fielding and running", () => {
     const scored = scoreDirectResult(direct, philadelphia.lineup[8], 9, 9);
     expect(scored).toMatchObject({ inning: 1, half: "bottom", outs: 0, awayBatterIndex: 0 });
     expect(scored.runners).toEqual({});
+    const bottomFirstPitch = rollPitch(startNextPlateAppearance(scored), kansasCity.lineup[0], philadelphia.starter);
+    expect(bottomFirstPitch).toMatchObject({ half: "bottom", awayBatterIndex: 0, homeBatterIndex: 0 });
   });
 });
 

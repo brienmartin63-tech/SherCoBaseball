@@ -4,9 +4,18 @@ A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, des
 
 The durable design decisions, confirmed house rules, scoring requirements, stadium-import conventions, and development priorities are preserved in [Project Checkpoint 0.1.7](docs/PROJECT_CHECKPOINT_0.1.7.md).
 
-## Rules-engine build 0.5.2
+## Rules-engine build 0.5.3
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
+
+### 0.5.3 single-step batting rotation
+
+- Removes the redundant **Next batter** transition. A completed play has already advanced the lineup and displays the proper upcoming hitter.
+- The next action now reads **Roll pitch** and opens that visible hitter's plate appearance while rolling immediately.
+- At the temporary occupied-base boundary, the action reads **Clear bases & roll pitch** so test behavior remains explicit without an extra click.
+- Adds a lineup regression across outs, singles, doubles, triples, walks, hit batters, errors, and home runs. Completion advances exactly once; preparing and rolling the next pitch do not advance again.
+- Extends the Porter multi-throw regression to verify that his completed triple advances Kansas City's batting index from Porter to Hurdle exactly once.
+- The batting-rotation contract is recorded in [Project Checkpoint 0.5.3](docs/PROJECT_CHECKPOINT_0.5.3.md).
 
 ### 0.5.2 randomized, auditable dice
 
@@ -92,7 +101,7 @@ This checkpoint intentionally separates rules, game state, imported data, persis
 - Ground-ball fielding rolls use the conventional dice total, the greater of that total or the fielder's arm, and then subtract the fielder-to-ball movement before measuring the throw.
 - Exact-count plays at first route through the correct 84/85 or 94/95 Automatic Umpire table and the batter-runner's printed speed.
 - Completed outs, singles, walks, hit batters, home runs, and errors update the score line, base state, batting order, outs, and half-inning state.
-- A runner reaching first appears as a gray square. Until the occupied-base charts are executable, **Clear bases & continue test** explicitly returns the program to bases-empty validation.
+- A runner reaching first appears as a gray square. Until the occupied-base charts are executable, **Clear bases & roll pitch** explicitly returns the program to bases-empty validation and rolls for the already-displayed next batter.
 
 ### 0.2.5 neutral triple placement
 
