@@ -9,6 +9,9 @@ interface Props {
 function headline(game: GameState): string {
   if (game.resolution.phase === "PLAY_COMPLETE") {
     if (game.resolution.terminalOutcome === "HOME_RUN") return "Home Run";
+    if (game.resolution.terminalOutcome === "TRIPLE") return "Triple";
+    if (game.resolution.terminalOutcome === "DOUBLE") return "Double";
+    if (game.resolution.terminalOutcome === "SINGLE") return "Single";
     if (game.resolution.terminalOutcome === "WALK") return "Walk";
     if (game.resolution.terminalOutcome === "HIT_BY_PITCH") return "Hit By Pitch";
     if (game.resolution.terminalOutcome === "ERROR") return "Error";
@@ -20,7 +23,7 @@ function headline(game: GameState): string {
 function tone(game: GameState): NonNullable<GameState["lastRoll"]>["resultTone"] {
   if (game.resolution.phase === "PLAY_COMPLETE") {
     if (game.resolution.terminalOutcome === "ERROR") return "error";
-    if (game.resolution.terminalOutcome === "HOME_RUN" || game.resolution.terminalOutcome === "WALK" || game.resolution.terminalOutcome === "HIT_BY_PITCH") return "hit";
+    if (["SINGLE", "DOUBLE", "TRIPLE", "HOME_RUN", "WALK", "HIT_BY_PITCH"].includes(game.resolution.terminalOutcome ?? "")) return "hit";
     return game.resolution.baseState === "EMPTY" ? "out" : "hit";
   }
   return game.lastRoll?.resultTone ?? "neutral";
@@ -35,7 +38,7 @@ export function PlayResolutionWing({ game, away, home }: Props) {
   const showRoll = game.resolution.phase !== "PLAY_COMPLETE" && rollValue !== undefined;
   const fielding = game.pendingFielding ?? game.lastFielding;
   const totalRoute = fielding ? fielding.fieldingDistance + fielding.targetDistance : undefined;
-  const diceText = game.lastRoll?.dice.join(game.lastRoll.kind === "fielding" ? " + " : " · ") ?? "—";
+  const diceText = game.lastRoll?.dice.join(game.lastRoll.kind === "fielding" || game.lastRoll.kind === "throw" ? " + " : " · ") ?? "—";
   return (
     <aside
       className={`play-resolution-wing side-${displayHalf === "top" ? "away" : "home"} tone-${tone(game)}`}

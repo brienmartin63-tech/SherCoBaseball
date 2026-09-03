@@ -17,14 +17,15 @@ const baseLabel: Record<BaseName, string> = {
 
 export function BaserunningPanel({ batter, ballAt, runners, arm }: Props) {
   const runnerDecisions = ballAt && arm ? leadRunnerDecisions(ballAt, runners, arm) : [];
+  const batterIsRunner = Object.values(runners).includes(batter.id);
   const candidates = ballAt ? [
     ...runnerDecisions.map((decision) => ({
       id: decision.runnerId,
-      name: `Runner on ${baseLabel[decision.from]}`,
+      name: decision.runnerId === batter.id ? batter.name : `Runner on ${baseLabel[decision.from]}`,
       from: decision.from,
       decision,
     })),
-    { id: batter.id, name: batter.name, from: "HOME" as const, decision: undefined },
+    ...(batterIsRunner ? [] : [{ id: batter.id, name: batter.name, from: "HOME" as const, decision: undefined }]),
   ] : [];
 
   return (

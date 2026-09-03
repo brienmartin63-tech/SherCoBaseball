@@ -4,9 +4,18 @@ A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, des
 
 The durable design decisions, confirmed house rules, scoring requirements, stadium-import conventions, and development priorities are preserved in [Project Checkpoint 0.1.7](docs/PROJECT_CHECKPOINT_0.1.7.md).
 
-## Rules-engine build 0.5.0
+## Rules-engine build 0.5.1
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
+
+### 0.5.1 continuous bases-empty running
+
+- A safe first throw no longer ends a live ground-ball play. The batter-runner is placed on the base reached, the ball is remeasured to the next base, and Brien's arm threshold is applied again.
+- Every required extra base receives a fresh conventional two-dice throw, with the fielder's arm as the minimum. The ball is already controlled, so subsequent throws spend their full allowance toward the new target.
+- Exact-count throws to any base—not just first—use the Automatic Umpire before the play continues or ends.
+- A batter put out stretching a hit retains the correct single, double, or triple credit and adds the baserunning out.
+- Permanently tests Darrell Porter's left-handed `9-26` grounder at Phoenix: it lands one square beyond the wall, ricochets to `25-9`, costs Bake McBride six squares to field, and can continue through separate throws to a triple.
+- The durable example and its regression checks are recorded in [Project Checkpoint 0.5.1](docs/PROJECT_CHECKPOINT_0.5.1.md).
 
 ### 0.5.0 stop-action fielding contract
 

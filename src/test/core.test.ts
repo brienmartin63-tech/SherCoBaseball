@@ -266,6 +266,96 @@ describe("bases-empty fielding and running", () => {
     expect(automaticUmpireCall(66, 9, "REGULAR")).toBe("OUT");
   });
 
+  it("continues Porter's ricochet grounder through the mandatory throws to a triple", () => {
+    const phoenix = rawParks.find((candidate) => candidate.id === "sundome") as unknown as Park;
+    const porter = kansasCity.lineup[6];
+
+    const plotted = {
+      ...createInitialGame(phoenix.id, 2722),
+      half: "bottom" as const,
+      homeBatterIndex: 6,
+      ballAt: { row: 26, column: 9 },
+      resolution: {
+        phase: "BALL_IN_PLAY" as const,
+        baseState: "EMPTY" as const,
+        chartFamily: "PROBABLE_HIT" as const,
+        battedBallType: "ground" as const,
+        ballAt: { row: 26, column: 9 },
+      },
+    };
+
+    const toFirst = resolveFielding(plotted, porter, philadelphia.starter, phoenix, philadelphia, 9, 9);
+    expect(toFirst.lastFielding?.ricochet).toMatchObject({
+      originalLandingAt: { row: 26, column: 9 },
+      fenceAt: { row: 25, column: 9 },
+      depth: 1,
+    });
+    expect(toFirst.lastFielding).toMatchObject({
+      fielderName: "Bake McBride",
+      ballAt: { row: 25, column: 9 },
+      fieldingDistance: 6,
+      throwingAllowance: 8,
+      throwingRemainder: 2,
+    });
+    expect(toFirst).toMatchObject({
+      ballAt: { row: 23, column: 7 },
+      runners: { first: porter.id },
+      resolution: { phase: "RUNNER_ADVANCE", baseState: "FIRST" },
+      pendingFielding: { targetBase: "SECOND", targetDistance: 15, fieldingDistance: 0 },
+    });
+
+    const toSecond = resolveFielding(toFirst, porter, philadelphia.starter, phoenix, philadelphia, 9, 9);
+    expect(toSecond).toMatchObject({
+      ballAt: { row: 15, column: 8 },
+      runners: { second: porter.id },
+      resolution: { phase: "RUNNER_ADVANCE", baseState: "SECOND" },
+      pendingFielding: { targetBase: "THIRD", targetDistance: 12, fieldingDistance: 0 },
+    });
+
+    const exactAtThird = resolveFielding({ ...toSecond, seed: 13328 }, porter, philadelphia.starter, phoenix, philadelphia, 9, 9);
+    expect(exactAtThird).toMatchObject({
+      ballAt: { row: 3, column: 8 },
+      runners: { second: porter.id },
+      resolution: { phase: "UMPIRE_CHECK", baseState: "SECOND" },
+      pendingFielding: { targetBase: "THIRD", throwingRemainder: 12 },
+    });
+
+    const safeAtThird = resolveFielding({ ...exactAtThird, seed: 2722 }, porter, philadelphia.starter, phoenix, philadelphia, 9, 9);
+    expect(safeAtThird).toMatchObject({
+      runners: { third: porter.id },
+      resolution: { phase: "PLAY_COMPLETE", terminalOutcome: "TRIPLE" },
+      home: { hits: 1 },
+    });
+
+    const toThird = resolveFielding(toSecond, porter, philadelphia.starter, phoenix, philadelphia, 9, 9);
+    expect(toThird).toMatchObject({
+      ballAt: { row: 7, column: 8 },
+      runners: { third: porter.id },
+      resolution: { phase: "PLAY_COMPLETE", baseState: "THIRD", terminalOutcome: "TRIPLE" },
+      home: { hits: 1 },
+    });
+
+    const caughtStretching = resolveFielding({
+      ...toFirst,
+      seed: 13328,
+      ballAt: { row: 10, column: 8 },
+      resolution: { ...toFirst.resolution, phase: "RUNNER_ADVANCE" as const, ballAt: { row: 10, column: 8 } },
+      pendingFielding: {
+        ...toFirst.pendingFielding!,
+        ballAt: { row: 10, column: 8 },
+        targetBase: "SECOND" as const,
+        targetDistance: 2,
+        fieldingDistance: 0,
+      },
+    }, porter, philadelphia.starter, phoenix, philadelphia, 9, 9);
+    expect(caughtStretching).toMatchObject({
+      outs: 1,
+      runners: {},
+      resolution: { phase: "PLAY_COMPLETE", terminalOutcome: "OUT", awardedBase: "FIRST", creditedHit: true },
+      home: { hits: 1 },
+    });
+  });
+
   it("scores a strikeout and advances cleanly to the next batter", () => {
     const direct = { ...createInitialGame(park.id), resolution: { phase: "DIRECT_RESULT" as const, baseState: "EMPTY" as const, terminalOutcome: "STRIKEOUT" as const } };
     const scored = scoreDirectResult(direct, philadelphia.lineup[0], 9, 9);

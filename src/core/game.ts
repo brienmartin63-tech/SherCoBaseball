@@ -2,7 +2,9 @@ import { rollOneDie, rollTwoDice } from "./dice";
 import { basesEmptyErrorFielder, directPitchResult, resolveBasesEmptyBattedBall, resolveBasesEmptyError, resolveBasesEmptySpecialEvent, resolveBasesEmptySuperiorError, specialEventPitcherRate } from "./chartResolution";
 import { classifyPitch, hitNumber, pitchResultLabel } from "./pitching";
 import { automaticUmpireCall, buildRatedDefense, createFieldingAttempt, isAirborneCatch, positionName, resolveThrow } from "./fielding";
-import type { BaseRunners, BaseState, Batter, DiceRoll, GameState, Park, Pitcher, PlateAppearanceResolution, PlayEvent, ScoreLine, Team } from "./types";
+import { runnerDistance } from "./baserunning";
+import { distanceToBase } from "./geometry";
+import type { BaseName, BaseRunners, BaseState, Batter, DiceRoll, FieldingAttempt, GameState, Park, Pitcher, PlateAppearanceResolution, PlayEvent, ScoreLine, Team, TerminalOutcome } from "./types";
 
 export function createInitialGame(selectedParkId: string, seed = 198010210): GameState {
   return {
@@ -277,7 +279,7 @@ function finishPlateAppearance(
   batter: Batter,
   awayLineupSize: number,
   homeLineupSize: number,
-  result: "OUT" | "SINGLE" | "WALK" | "HIT_BY_PITCH" | "ERROR" | "HOME_RUN",
+  result: "OUT" | "SINGLE" | "DOUBLE" | "TRIPLE" | "WALK" | "HIT_BY_PITCH" | "ERROR" | "HOME_RUN",
   officialText: string,
   auditText: string,
   roll?: DiceRoll,
@@ -295,10 +297,10 @@ function finishPlateAppearance(
   } else if (result === "HOME_RUN") {
     next = withBattingLine(next, { hits: 1, runs: 1 });
   } else {
-    if (result === "ERROR" && errorAward?.base === "SECOND") runners.second = batter.id;
-    else if (result === "ERROR" && errorAward?.base === "THIRD") runners.third = batter.id;
+    if (result === "DOUBLE" || (result === "ERROR" && errorAward?.base === "SECOND")) runners.second = batter.id;
+    else if (result === "TRIPLE" || (result === "ERROR" && errorAward?.base === "THIRD")) runners.third = batter.id;
     else runners.first = batter.id;
-    if (result === "SINGLE") next = withBattingLine(next, { hits: 1 });
+    if (result === "SINGLE" || result === "DOUBLE" || result === "TRIPLE") next = withBattingLine(next, { hits: 1 });
     if (result === "ERROR") {
       if (errorAward?.creditedHit) next = withBattingLine(next, { hits: 1 });
       next = withFieldingError(next);
@@ -339,9 +341,177 @@ function finishPlateAppearance(
     resolution: {
       phase: "PLAY_COMPLETE",
       baseState,
-      terminalOutcome: result === "OUT" ? "OUT" : result === "SINGLE" ? "SINGLE" : result === "HOME_RUN" ? "HOME_RUN" : result === "WALK" ? "WALK" : result === "HIT_BY_PITCH" ? "HIT_BY_PITCH" : result === "ERROR" ? "ERROR" : undefined,
+      terminalOutcome: result,
       description: officialText,
       source: "1980 Rule 6 fielding and scoring sequence",
+    },
+  };
+}
+
+type HitBase = "FIRST" | "SECOND" | "THIRD";
+
+const BASE_WORD: Record<BaseName, string> = {
+  HOME: "home",
+  FIRST: "first",
+  SECOND: "second",
+  THIRD: "third",
+};
+
+const HIT_OUTCOME: Record<HitBase, Extract<TerminalOutcome, "SINGLE" | "DOUBLE" | "TRIPLE">> = {
+  FIRST: "SINGLE",
+  SECOND: "DOUBLE",
+  THIRD: "TRIPLE",
+};
+
+function batterBase(runners: BaseRunners, batterId: string): HitBase | undefined {
+  if (runners.first === batterId) return "FIRST";
+  if (runners.second === batterId) return "SECOND";
+  if (runners.third === batterId) return "THIRD";
+  return undefined;
+}
+
+function moveBatterRunner(runners: BaseRunners, batterId: string, base?: HitBase): BaseRunners {
+  const next = { ...runners };
+  if (next.first === batterId) delete next.first;
+  if (next.second === batterId) delete next.second;
+  if (next.third === batterId) delete next.third;
+  if (base === "FIRST") next.first = batterId;
+  if (base === "SECOND") next.second = batterId;
+  if (base === "THIRD") next.third = batterId;
+  return next;
+}
+
+/**
+ * Completes a bases-empty hit after all mandatory stop-action advancement has
+ * ended. A batter put out trying for an extra base is still credited with the
+ * last base he reached safely.
+ */
+function finishBatterRun(
+  state: GameState,
+  batter: Batter,
+  awayLineupSize: number,
+  homeLineupSize: number,
+  lastSafeBase: HitBase | "HOME",
+  outAt: BaseName | undefined,
+  officialText: string,
+  auditText: string,
+  roll?: DiceRoll,
+): GameState {
+  let next = withBattingLine(state, { hits: 1, runs: lastSafeBase === "HOME" ? 1 : 0 });
+  let runners = moveBatterRunner(state.runners, batter.id, (outAt || lastSafeBase === "HOME") ? undefined : lastSafeBase);
+  let outs = state.outs + (outAt ? 1 : 0);
+  let half = state.half;
+  let inning = state.inning;
+  let activePitcherRate = state.activePitcherRate;
+
+  next = advanceBattingOrder(next, awayLineupSize, homeLineupSize);
+  next = appendPlayEvent(next, officialText, auditText, roll);
+
+  if (outs === 3) {
+    runners = {};
+    outs = 0;
+    if (half === "top") {
+      half = "bottom";
+    } else {
+      half = "top";
+      inning += 1;
+      next = {
+        ...next,
+        away: updateLine(next.away, inning, {}),
+        home: updateLine(next.home, inning, {}),
+      };
+    }
+    activePitcherRate = undefined;
+  }
+
+  const outcome: TerminalOutcome = outAt ? "OUT" : lastSafeBase === "HOME" ? "HOME_RUN" : HIT_OUTCOME[lastSafeBase];
+  return {
+    ...next,
+    inning,
+    half,
+    outs,
+    activePitcherRate,
+    runners,
+    lastFielding: state.pendingFielding ?? state.lastFielding,
+    pendingFielding: undefined,
+    resolution: {
+      phase: "PLAY_COMPLETE",
+      baseState: baseStateFromRunners(runners),
+      terminalOutcome: outcome,
+      awardedBase: lastSafeBase === "HOME" ? undefined : lastSafeBase,
+      creditedHit: true,
+      description: officialText,
+      source: "1980 Rule 6 stop-action fielding; Brien mandatory advancement",
+    },
+  };
+}
+
+function continuationAttempt(attempt: FieldingAttempt, ballAt: FieldingAttempt["ballAt"], targetBase: BaseName): FieldingAttempt {
+  return {
+    ...attempt,
+    ballAt,
+    fielderAt: ballAt,
+    fieldingDistance: 0,
+    targetBase,
+    targetDistance: distanceToBase(ballAt, targetBase),
+    throwingAllowance: undefined,
+    throwingRemainder: undefined,
+    fieldingPath: [],
+    actionPath: attempt.actionPath ?? attempt.fieldingPath ?? [],
+    ricochet: undefined,
+  };
+}
+
+function continueOrFinishBatterRun(
+  state: GameState,
+  batter: Batter,
+  achievedBase: HitBase | "HOME",
+  attempt: FieldingAttempt,
+  awayLineupSize: number,
+  homeLineupSize: number,
+): GameState {
+  if (achievedBase === "HOME") {
+    return finishBatterRun(
+      { ...state, runners: moveBatterRunner(state.runners, batter.id) },
+      batter,
+      awayLineupSize,
+      homeLineupSize,
+      "HOME",
+      undefined,
+      `${batter.name} circles the bases for an inside-the-park home run.`,
+      `${batter.name} reached home safely after the defense's final throw.`,
+    );
+  }
+
+  const runners = moveBatterRunner(state.runners, batter.id, achievedBase);
+  const advance = runnerDistance(state.ballAt ?? attempt.ballAt, achievedBase, attempt.arm);
+  if (!advance.mustAdvance) {
+    const outcome = HIT_OUTCOME[achievedBase].toLowerCase();
+    return finishBatterRun(
+      { ...state, runners },
+      batter,
+      awayLineupSize,
+      homeLineupSize,
+      achievedBase,
+      undefined,
+      `${batter.name} reaches ${BASE_WORD[achievedBase]} safely for a ${outcome}.`,
+      `The ball is ${advance.distance} square${advance.distance === 1 ? "" : "s"} from ${BASE_WORD[advance.to]}; against an ${attempt.arm} arm, ${batter.name} holds at ${BASE_WORD[achievedBase]}.`,
+    );
+  }
+
+  const relay = continuationAttempt(attempt, state.ballAt ?? attempt.ballAt, advance.to);
+  return {
+    ...state,
+    runners,
+    pendingFielding: relay,
+    lastFielding: attempt,
+    resolution: {
+      phase: "RUNNER_ADVANCE",
+      baseState: baseStateFromRunners(runners),
+      battedBallType: state.resolution.battedBallType ?? attempt.battedBallType,
+      ballAt: relay.ballAt,
+      description: `${batter.name} is safe at ${BASE_WORD[achievedBase]}. The ball is ${advance.distance} from ${BASE_WORD[advance.to]}; against an ${attempt.arm} arm, he must try for ${BASE_WORD[advance.to]}.`,
+      source: "Brien's Rules: mandatory extra base at 8+ vs arm 8 or 10+ vs arm 9",
     },
   };
 }
@@ -365,18 +535,109 @@ export function resolveFielding(
       resultTone: call === "OUT" ? "out" : "hit",
     };
     const seeded = { ...state, seed: result.state, lastRoll: roll };
-    return finishPlateAppearance(
+    const currentBase = batterBase(state.runners, batter.id);
+    const targetBase = state.pendingFielding.targetBase;
+    if (!currentBase) {
+      if (call === "OUT") {
+        return finishPlateAppearance(
+          seeded,
+          batter,
+          awayLineupSize,
+          homeLineupSize,
+          "OUT",
+          `${batter.name} is out at first on a close play, ${state.pendingFielding.fielderName} making the throw.`,
+          `The throw reached first by exact count. Automatic Umpire: ${roll.dice.join(" and ")} → ${roll.sherco}, ${call}.`,
+          roll,
+        );
+      }
+      const safeSeeded = appendPlayEvent(
+        seeded,
+        `${batter.name} is safe at first on the Automatic Umpire call.`,
+        `The throw reached first by exact count. Automatic Umpire: ${roll.dice.join(" and ")} → ${roll.sherco}, SAFE.`,
+        roll,
+      );
+      return continueOrFinishBatterRun(safeSeeded, batter, "FIRST", state.pendingFielding, awayLineupSize, homeLineupSize);
+    }
+
+    if (call === "OUT") {
+      const credited = HIT_OUTCOME[currentBase].toLowerCase();
+      return finishBatterRun(
+        seeded,
+        batter,
+        awayLineupSize,
+        homeLineupSize,
+        currentBase,
+        targetBase,
+        `${batter.name} is credited with a ${credited} and is out trying for ${BASE_WORD[targetBase]}.`,
+        `Exact-count throw to ${BASE_WORD[targetBase]}. Automatic Umpire: ${roll.dice.join(" and ")} → ${roll.sherco}, OUT.`,
+        roll,
+      );
+    }
+    const safeSeeded = appendPlayEvent(
       seeded,
-      batter,
-      awayLineupSize,
-      homeLineupSize,
-      call === "OUT" ? "OUT" : "SINGLE",
-      call === "OUT"
-        ? `${batter.name} is out at first on a close play, ${state.pendingFielding.fielderName} making the throw.`
-        : `${batter.name} beats the throw by ${state.pendingFielding.fielderName} for a single.`,
-      `The throw reached first by exact count. Automatic Umpire: ${roll.dice.join(" and ")} → ${roll.sherco}, ${call}.`,
+      `${batter.name} is safe at ${BASE_WORD[targetBase]} on the Automatic Umpire call.`,
+      `Exact-count throw to ${BASE_WORD[targetBase]}. Automatic Umpire: ${roll.dice.join(" and ")} → ${roll.sherco}, SAFE.`,
       roll,
     );
+    return continueOrFinishBatterRun(safeSeeded, batter, targetBase as HitBase | "HOME", state.pendingFielding, awayLineupSize, homeLineupSize);
+  }
+
+  if (state.resolution.phase === "RUNNER_ADVANCE" && state.pendingFielding) {
+    const currentBase = batterBase(state.runners, batter.id);
+    if (!currentBase) return state;
+    const attempt = state.pendingFielding;
+    const targetBase = attempt.targetBase;
+    const result = rollTwoDice(state.seed, "throw", `${attempt.fielderPosition} throw to ${BASE_WORD[targetBase]}`);
+    const thrown = resolveThrow(attempt, result.roll.total);
+    const updatedAttempt: FieldingAttempt = {
+      ...attempt,
+      throwingAllowance: thrown.allowance,
+      throwingRemainder: thrown.remaining,
+      actionPath: thrown.path,
+    };
+    const roll: DiceRoll = {
+      ...result.roll,
+      displayValue: result.roll.total,
+      explanation: `${attempt.fielderName}: max of arm ${attempt.arm} or dice total ${result.roll.total} = ${thrown.allowance}; ball is already controlled, so all ${thrown.remaining} points go toward ${BASE_WORD[targetBase]} (${attempt.targetDistance} squares).`,
+      resultLabel: thrown.result === "TIE" ? `Tie at ${BASE_WORD[targetBase]}` : thrown.result,
+      resultTone: thrown.result === "OUT" ? "out" : thrown.result === "SAFE" ? "hit" : "event",
+    };
+    const seeded = appendPlayEvent(
+      { ...state, seed: result.state, ballAt: thrown.ballAt, pendingFielding: updatedAttempt },
+      `${attempt.fielderName} throws to ${BASE_WORD[targetBase]}.`,
+      `${roll.label}: ${roll.dice.join(" plus ")} = ${roll.total}. ${roll.explanation}`,
+      roll,
+    );
+
+    if (thrown.result === "TIE") {
+      return {
+        ...seeded,
+        resolution: {
+          phase: "UMPIRE_CHECK",
+          baseState: baseStateFromRunners(state.runners),
+          battedBallType: attempt.battedBallType,
+          ballAt: thrown.ballAt,
+          description: `The throw reaches ${BASE_WORD[targetBase]} by exact count. Consult the Automatic Umpire (${attempt.arm}${attempt.range} DEF vs ${batter.speed === "REGULAR" ? "regular" : batter.speed} runner).`,
+          source: "1980 Rule 6c(13) and Rule 16",
+        },
+      };
+    }
+
+    if (thrown.result === "OUT") {
+      const credited = HIT_OUTCOME[currentBase].toLowerCase();
+      return finishBatterRun(
+        seeded,
+        batter,
+        awayLineupSize,
+        homeLineupSize,
+        currentBase,
+        targetBase,
+        `${batter.name} is credited with a ${credited} and is out trying for ${BASE_WORD[targetBase]}.`,
+        `${attempt.fielderName}'s throw beats ${batter.name} to ${BASE_WORD[targetBase]}.`,
+      );
+    }
+
+    return continueOrFinishBatterRun(seeded, batter, targetBase as HitBase | "HOME", updatedAttempt, awayLineupSize, homeLineupSize);
   }
 
   if (state.resolution.phase !== "BALL_IN_PLAY" || !state.resolution.ballAt || !state.resolution.battedBallType) return state;
@@ -438,17 +699,19 @@ export function resolveFielding(
     };
   }
 
-  return finishPlateAppearance(
-    seeded,
-    batter,
-    awayLineupSize,
-    homeLineupSize,
-    thrown.result === "OUT" ? "OUT" : "SINGLE",
-    thrown.result === "OUT"
-      ? `${batter.name} grounds out, ${positionName(attempt.fielderPosition)} to first.`
-      : `${batter.name} beats the throw by ${attempt.fielderName} for a single.`,
-    `${attempt.fielderName} had ${thrown.remaining} square${thrown.remaining === 1 ? "" : "s"} after fielding${attempt.ricochet ? " by way of the fence" : ""}; first base was ${attempt.targetDistance} away.${ricochetText}`,
-  );
+  if (thrown.result === "OUT") {
+    return finishPlateAppearance(
+      seeded,
+      batter,
+      awayLineupSize,
+      homeLineupSize,
+      "OUT",
+      `${batter.name} grounds out, ${positionName(attempt.fielderPosition)} to first.`,
+      `${attempt.fielderName} had ${thrown.remaining} square${thrown.remaining === 1 ? "" : "s"} after fielding${attempt.ricochet ? " by way of the fence" : ""}; first base was ${attempt.targetDistance} away.${ricochetText}`,
+    );
+  }
+
+  return continueOrFinishBatterRun(seeded, batter, "FIRST", updatedAttempt, awayLineupSize, homeLineupSize);
 }
 
 export function scoreDirectResult(
@@ -465,6 +728,8 @@ export function scoreDirectResult(
   const officialText = outcome === "STRIKEOUT" ? `${batter.name} strikes out.`
     : outcome === "OUT" ? `${batter.name} is out.`
     : outcome === "SINGLE" ? `${batter.name} singles.`
+    : outcome === "DOUBLE" ? `${batter.name} doubles.`
+    : outcome === "TRIPLE" ? `${batter.name} triples.`
     : outcome === "WALK" ? `${batter.name} walks.`
       : outcome === "HIT_BY_PITCH" ? `${batter.name} is hit by a pitch.`
         : outcome === "HOME_RUN" ? `${batter.name} hits a home run.`

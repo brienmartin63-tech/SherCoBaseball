@@ -76,9 +76,9 @@ export interface Team {
 
 export type DiceKind = "pitch" | "chart" | "fielding" | "throw" | "steal" | "umpire";
 export type BaseState = "EMPTY" | "FIRST" | "SECOND" | "THIRD" | "FIRST_SECOND" | "FIRST_THIRD" | "SECOND_THIRD" | "LOADED";
-export type PlateAppearancePhase = "PITCH" | "BATTED_BALL_CHART" | "SPECIAL_EVENT" | "HIT_ERROR_CHECK" | "PITCHER_ERROR_CHECK" | "ERROR_CHART" | "SUPERIOR_ERROR_CHECK" | "BALL_CHECK" | "COUNT_PENDING" | "TRIPLE_DECISION" | "BALL_IN_PLAY" | "UMPIRE_CHECK" | "DIRECT_RESULT" | "PLAY_COMPLETE";
+export type PlateAppearancePhase = "PITCH" | "BATTED_BALL_CHART" | "SPECIAL_EVENT" | "HIT_ERROR_CHECK" | "PITCHER_ERROR_CHECK" | "ERROR_CHART" | "SUPERIOR_ERROR_CHECK" | "BALL_CHECK" | "COUNT_PENDING" | "TRIPLE_DECISION" | "BALL_IN_PLAY" | "RUNNER_ADVANCE" | "UMPIRE_CHECK" | "DIRECT_RESULT" | "PLAY_COMPLETE";
 export type ChartFamily = "PROBABLE_HIT" | "PROBABLE_OUT" | "SPECIAL_EVENT" | "HIT_ERROR" | "OUT_ERROR";
-export type TerminalOutcome = "OUT" | "SINGLE" | "HOME_RUN" | "WALK" | "STRIKEOUT" | "HIT_BY_PITCH" | "ERROR";
+export type TerminalOutcome = "OUT" | "SINGLE" | "DOUBLE" | "TRIPLE" | "HOME_RUN" | "WALK" | "STRIKEOUT" | "HIT_BY_PITCH" | "ERROR";
 
 export interface PlateAppearanceResolution {
   phase: PlateAppearancePhase;

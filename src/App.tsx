@@ -53,7 +53,7 @@ export function App() {
     }
   }, [batter, game.ballAt, game.resolution.battedBallType, game.resolution.phase, park, pitcher, pitchingTeam]);
   const displayBallAt = game.resolution.phase === "BALL_IN_PLAY" ? previewFielding?.ballAt ?? game.ballAt : game.ballAt;
-  const runnerBallAt = game.resolution.phase === "BALL_IN_PLAY" || game.resolution.phase === "UMPIRE_CHECK" ? displayBallAt : undefined;
+  const runnerBallAt = game.resolution.phase === "BALL_IN_PLAY" || game.resolution.phase === "RUNNER_ADVANCE" || game.resolution.phase === "UMPIRE_CHECK" ? displayBallAt : undefined;
   const fieldingArm = game.pendingFielding?.arm ?? previewFielding?.arm ?? game.lastFielding?.arm;
   const profileName = game.rulesProfileId === "brien" ? "Brien's Rules" : "Official 1980";
 
@@ -95,7 +95,7 @@ export function App() {
       const currentPitcherId = current.activePitchers[currentPitchingSide];
       const activePitcher = [defensiveTeam.starter, ...defensiveTeam.bullpen].find((candidate) => candidate.id === currentPitcherId) ?? defensiveTeam.starter;
       if (current.resolution.phase === "PITCH") return rollPitch(current, activeBatter, activePitcher);
-      if (current.resolution.phase === "BALL_IN_PLAY" || current.resolution.phase === "UMPIRE_CHECK") {
+      if (current.resolution.phase === "BALL_IN_PLAY" || current.resolution.phase === "RUNNER_ADVANCE" || current.resolution.phase === "UMPIRE_CHECK") {
         return resolveFielding(current, activeBatter, activePitcher, park, defensiveTeam, demoGame.away.lineup.length, demoGame.home.lineup.length);
       }
       if (current.resolution.phase === "DIRECT_RESULT") {
@@ -193,7 +193,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Rules-engine build 0.5.0 · Stop-action fielding foundation</span>
+        <span>Rules-engine build 0.5.1 · Continuous bases-empty running</span>
       </footer>
     </div>
   );
