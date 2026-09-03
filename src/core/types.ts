@@ -131,6 +131,14 @@ export interface FieldingAttempt {
   targetDistance: number;
   throwingAllowance?: number;
   throwingRemainder?: number;
+  pivotPenalty?: number;
+  fieldingPath?: Coordinate[];
+  actionPath?: Coordinate[];
+  ricochet?: {
+    originalLandingAt: Coordinate;
+    fenceAt: Coordinate;
+    depth: number;
+  };
 }
 
 export interface ScoreLine {

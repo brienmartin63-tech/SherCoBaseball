@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { rollOneDie, rollTwoDice, shercoNumber } from "../core/dice";
-import { runnerDistance, runnerDistanceTone, twoOutHitAndRunDestination } from "../core/baserunning";
+import { applyTwoOutPreThrowAdvance, homeThrowChoices, leadRunnerDecisions, runnerDistance, runnerDistanceTone, twoOutHitAndRunDestination } from "../core/baserunning";
 import { basesEmptyErrorFielder, directPitchResult, effectivePowerRatings, moveBehindFielder, moveInFrontOfFielder, resolveBasesEmptyBattedBall, resolveBasesEmptyError, resolveBasesEmptySpecialEvent, resolveBasesEmptySuperiorError, specialEventPitcherRate, withinHomeRunRating } from "../core/chartResolution";
 import { createInitialGame, resolveFielding, rollPitch, rollResolution, scoreDirectResult, selectPitcher, startNextPlateAppearance } from "../core/game";
-import { automaticUmpireCall, buildRatedDefense, createFieldingAttempt, resolveThrow } from "../core/fielding";
-import { BASE_REFERENCE_SQUARES, distanceToBase, farthestInPlaySquare, HOME_PLATE_SQUARE, mirrorForLeftHandedBatter, nearestFielder, squaresBetween } from "../core/geometry";
+import { automaticUmpireCall, buildRatedDefense, createFieldingAttempt, pivotRulePenalty, resolveContinuousPlay, resolveThrow } from "../core/fielding";
+import { BASE_REFERENCE_SQUARES, directPath, distanceToBase, farthestInPlaySquare, HOME_PLATE_SQUARE, mirrorForLeftHandedBatter, nearestFielder, resolveGroundBallRicochet, squaresBetween } from "../core/geometry";
 import { classifyPitch, hitNumber, pitchResultLabel } from "../core/pitching";
 import { normalize1980Ratings } from "../core/players";
 import { formatBatterRating, formatPitcherRating } from "../core/ratings";
@@ -446,6 +446,41 @@ describe("Brien's rules", () => {
     expect(twoOutHitAndRunDestination("THIRD")).toBe("HOME");
     expect(twoOutHitAndRunDestination("HOME", true)).toBe("FIRST");
   });
+
+  it("lets the lead runner control every trailing extra-base decision", () => {
+    const runners = { third: "mcbride", second: "schmidt" };
+    expect(leadRunnerDecisions({ row: 12, column: 3 }, runners, 9).map(({ runnerId, distance, status }) => ({ runnerId, distance, status }))).toEqual([
+      { runnerId: "mcbride", distance: 9, status: "HOLD" },
+      { runnerId: "schmidt", distance: 9, status: "BLOCKED" },
+    ]);
+    expect(leadRunnerDecisions({ row: 12, column: 3 }, runners, 8).map(({ runnerId, distance, status }) => ({ runnerId, distance, status }))).toEqual([
+      { runnerId: "mcbride", distance: 9, status: "GO" },
+      { runnerId: "schmidt", distance: 9, status: "GO" },
+    ]);
+  });
+
+  it("places the loaded-base two-out example before the first defensive throw", () => {
+    expect(applyTwoOutPreThrowAdvance({ first: "schmidt", second: "mcbride", third: "rose" }, "luzinski")).toEqual({
+      runners: { first: "luzinski", third: "schmidt" },
+      scored: ["rose", "mcbride"],
+    });
+  });
+
+  it("presents Brien with cut or throw-through choices when Schmidt tries home", () => {
+    expect(homeThrowChoices({ first: "luzinski", third: "schmidt" })).toEqual([
+      {
+        choice: "CUT",
+        label: "Cut throw — concede run; hold trailing runner at first",
+        concededRun: "schmidt",
+      },
+      {
+        choice: "THROW_HOME",
+        label: "Throw home — play on lead runner; trailing runner takes second",
+        runnerAtRisk: "schmidt",
+        trailingAdvance: { runnerId: "luzinski", from: "FIRST", to: "SECOND" },
+      },
+    ]);
+  });
 });
 
 describe("game-day pitching changes", () => {
@@ -471,6 +506,64 @@ describe("field geometry", () => {
     ];
     expect(nearestFielder({ row: 5, column: 6 }, fielders, "ground")?.position).toBe("3B");
     expect(nearestFielder({ row: 5, column: 6 }, fielders, "fly")?.position).toBe("SS");
+  });
+
+  it("retraces a ground ball by its full beyond-fence depth", () => {
+    const cells: Park["cells"] = Array.from({ length: 28 }, () => Array.from({ length: 28 }, () => "field"));
+    for (const coordinate of [{ row: 14, column: 14 }, { row: 15, column: 15 }, { row: 16, column: 16 }]) {
+      cells[28 - coordinate.row][28 - coordinate.column] = "beyondFence";
+    }
+    const park = { id: "ricochet", name: "Ricochet", team: "Test", location: "Test", dimensions: 28 as const, cells, fielders: [], sourceSheet: "Test" };
+    expect(directPath({ row: 13, column: 13 }, { row: 16, column: 16 })).toEqual([
+      { row: 14, column: 14 }, { row: 15, column: 15 }, { row: 16, column: 16 },
+    ]);
+    expect(resolveGroundBallRicochet(park, { row: 16, column: 16 })).toEqual({
+      originalLandingAt: { row: 16, column: 16 },
+      fenceAt: { row: 13, column: 13 },
+      finalBallAt: { row: 11, column: 11 },
+      depth: 3,
+    });
+
+    const attempt = createFieldingAttempt(
+      philadelphia.lineup[0],
+      park,
+      [
+        { position: "CF", name: "Center Fielder", at: { row: 11, column: 14 }, arm: 8, range: 5 },
+        { position: "LF", name: "Left Fielder", at: { row: 2, column: 20 }, arm: 9, range: 4 },
+      ],
+      { row: 16, column: 16 },
+      "ground",
+    );
+    expect(attempt).toMatchObject({
+      fielderPosition: "CF",
+      ballAt: { row: 11, column: 11 },
+      fieldingDistance: 4,
+      ricochet: { fenceAt: { row: 13, column: 13 }, depth: 3 },
+    });
+    expect(attempt.fieldingPath).toHaveLength(4);
+  });
+
+  it("applies the Pivot Rule to the 7-9 continuous 6-4-3 route", () => {
+    expect(pivotRulePenalty(8, 7)).toBe(1);
+    expect(pivotRulePenalty(8, 8)).toBe(0);
+    const attempt = { arm: 8 as const, fieldingDistance: 1, ballAt: { row: 7, column: 9 } };
+    const weakPivot = resolveContinuousPlay(attempt, 6, [
+      { base: "SECOND", pivotArm: 7 },
+      { base: "FIRST" },
+    ]);
+    expect(weakPivot).toMatchObject({
+      rawAllowance: 8,
+      allowance: 7,
+      pivotPenalty: 1,
+      totalRoute: 7,
+      ballAt: { row: 8, column: 3 },
+      legs: [
+        { base: "SECOND", routeDistance: 2, result: "OUT" },
+        { base: "FIRST", routeDistance: 7, result: "TIE" },
+      ],
+    });
+    expect(resolveContinuousPlay(attempt, 9, [{ base: "SECOND", pivotArm: 7 }, { base: "FIRST" }]).legs[1].result).toBe("OUT");
+    expect(resolveContinuousPlay(attempt, 6, [{ base: "SECOND", pivotArm: 8 }, { base: "FIRST" }]).legs[1].result).toBe("OUT");
   });
 });
 

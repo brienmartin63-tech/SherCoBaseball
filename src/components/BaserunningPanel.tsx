@@ -1,4 +1,4 @@
-import { runnerDistance } from "../core/baserunning";
+import { leadRunnerDecisions, runnerDistance } from "../core/baserunning";
 import type { BaseName, Batter, BaseRunners, Coordinate } from "../core/types";
 
 interface Props {
@@ -16,11 +16,15 @@ const baseLabel: Record<BaseName, string> = {
 };
 
 export function BaserunningPanel({ batter, ballAt, runners, arm }: Props) {
+  const runnerDecisions = ballAt && arm ? leadRunnerDecisions(ballAt, runners, arm) : [];
   const candidates = ballAt ? [
-    { id: batter.id, name: batter.name, from: "HOME" as const },
-    ...(runners.third ? [{ id: runners.third, name: "Runner on third", from: "THIRD" as const }] : []),
-    ...(runners.second ? [{ id: runners.second, name: "Runner on second", from: "SECOND" as const }] : []),
-    ...(runners.first ? [{ id: runners.first, name: "Runner on first", from: "FIRST" as const }] : []),
+    ...runnerDecisions.map((decision) => ({
+      id: decision.runnerId,
+      name: `Runner on ${baseLabel[decision.from]}`,
+      from: decision.from,
+      decision,
+    })),
+    { id: batter.id, name: batter.name, from: "HOME" as const, decision: undefined },
   ] : [];
 
   return (
@@ -34,18 +38,21 @@ export function BaserunningPanel({ batter, ballAt, runners, arm }: Props) {
       ) : (
         <div className="runner-distance-list">
           {candidates.map((candidate) => {
-            const status = runnerDistance(ballAt!, candidate.from, arm ?? 9);
+            const status = candidate.decision ?? runnerDistance(ballAt!, candidate.from, arm ?? 9);
+            const call = candidate.decision?.status === "BLOCKED"
+              ? "BLOCK"
+              : candidate.decision?.status ?? (status.safeBeforeThrow ? "SAFE" : candidate.from === "HOME" ? "RUN" : arm ? status.mustAdvance ? "GO" : "HOLD" : "—");
             return (
               <div className={`runner-distance tone-${status.tone}`} key={`${candidate.id}-${candidate.from}`}>
                 <div><strong>{candidate.name}</strong><small>{baseLabel[status.from]} → {baseLabel[status.to]}</small></div>
                 <b>{status.distance}</b>
-                <span>{status.safeBeforeThrow ? "SAFE" : candidate.from === "HOME" ? "RUN" : arm ? status.mustAdvance ? "GO" : "HOLD" : "—"}</span>
+                <span>{call}</span>
               </div>
             );
           })}
         </div>
       )}
-      <footer>Distance is ball to destination only; fielder movement is not added.</footer>
+      <footer>Ball-to-destination only. Existing runners are read lead first; a HOLD blocks everyone behind him.</footer>
     </section>
   );
 }

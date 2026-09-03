@@ -43,6 +43,56 @@ export function moveToward(from: Coordinate, to: Coordinate, squares: number): C
   return current;
 }
 
+/** The deterministic SherCo straight-line route, excluding the starting square. */
+export function directPath(from: Coordinate, to: Coordinate): Coordinate[] {
+  const path: Coordinate[] = [];
+  let current = { ...from };
+  while (current.row !== to.row || current.column !== to.column) {
+    current = moveToward(current, to, 1);
+    path.push(current);
+  }
+  return path;
+}
+
+export interface GroundBallRicochet {
+  originalLandingAt: Coordinate;
+  fenceAt: Coordinate;
+  finalBallAt: Coordinate;
+  depth: number;
+}
+
+/**
+ * Brien's Ricochet Rule mirrors only a ground ball plotted beyond the fence.
+ * The last in-play square is the base of the wall; penetration depth is then
+ * retraced into the field along the original straight line.
+ */
+export function resolveGroundBallRicochet(park: Park, landingAt: Coordinate): GroundBallRicochet | undefined {
+  if (parkTerrainAt(park, landingAt) !== "beyondFence") return undefined;
+  const flight = directPath(HOME_PLATE_SQUARE, landingAt);
+  let depth = 0;
+  for (let index = flight.length - 1; index >= 0; index -= 1) {
+    if (parkTerrainAt(park, flight[index]) !== "beyondFence") break;
+    depth += 1;
+  }
+  if (depth === 0) return undefined;
+  const firstBeyond = flight.length - depth;
+  if (firstBeyond <= 0) return undefined;
+
+  const fenceAt = flight[firstBeyond - 1];
+  const reflectedIndex = Math.max(0, firstBeyond - depth);
+  return {
+    originalLandingAt: landingAt,
+    fenceAt,
+    finalBallAt: flight[reflectedIndex],
+    depth,
+  };
+}
+
+export function moveAlongPath(path: Coordinate[], squares: number, fallback: Coordinate): Coordinate {
+  if (squares <= 0 || path.length === 0) return fallback;
+  return path[Math.min(squares, path.length) - 1];
+}
+
 export function parkTerrainAt(park: Park, at: Coordinate) {
   return park.cells[28 - at.row]?.[28 - at.column];
 }

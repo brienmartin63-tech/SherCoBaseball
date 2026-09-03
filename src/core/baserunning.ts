@@ -1,6 +1,6 @@
 import { distanceToBase } from "./geometry";
 import { shouldAttemptExtraBase } from "./rules";
-import type { BaseName, Coordinate } from "./types";
+import type { BaseName, BaseRunners, Coordinate } from "./types";
 
 export type RunnerDistanceTone = "red" | "yellow" | "green";
 
@@ -11,6 +11,13 @@ export interface RunnerDistance {
   tone: RunnerDistanceTone;
   mustAdvance: boolean;
   safeBeforeThrow: boolean;
+}
+
+export type LeadRunnerStatus = "GO" | "HOLD" | "BLOCKED";
+
+export interface LeadRunnerDecision extends RunnerDistance {
+  runnerId: string;
+  status: LeadRunnerStatus;
 }
 
 export function nextBase(from: BaseName): BaseName | undefined {
@@ -43,6 +50,68 @@ export function runnerDistance(ballAt: Coordinate, from: BaseName, arm: 8 | 9): 
     mustAdvance: shouldAttemptExtraBase(arm, distance),
     safeBeforeThrow: distance >= 13,
   };
+}
+
+/**
+ * Existing runners are evaluated lead runner first. Once a lead runner holds,
+ * no trailing runner may advance past the occupied sequence behind him.
+ */
+export function leadRunnerDecisions(ballAt: Coordinate, runners: BaseRunners, arm: 8 | 9): LeadRunnerDecision[] {
+  const candidates = [
+    runners.third ? { runnerId: runners.third, from: "THIRD" as const } : undefined,
+    runners.second ? { runnerId: runners.second, from: "SECOND" as const } : undefined,
+    runners.first ? { runnerId: runners.first, from: "FIRST" as const } : undefined,
+  ].filter(Boolean) as { runnerId: string; from: "FIRST" | "SECOND" | "THIRD" }[];
+
+  let blocked = false;
+  return candidates.map(({ runnerId, from }) => {
+    const distance = runnerDistance(ballAt, from, arm);
+    const status: LeadRunnerStatus = blocked ? "BLOCKED" : distance.mustAdvance ? "GO" : "HOLD";
+    if (status === "HOLD") blocked = true;
+    return { ...distance, runnerId, status };
+  });
+}
+
+export interface TwoOutPreThrowState {
+  runners: BaseRunners;
+  scored: string[];
+}
+
+export interface HomeThrowChoice {
+  choice: "CUT" | "THROW_HOME";
+  label: string;
+  runnerAtRisk?: string;
+  concededRun?: string;
+  trailingAdvance?: { runnerId: string; from: "FIRST"; to: "SECOND" };
+}
+
+/** Existing runners take the two-out two-base jump before the first throw. */
+export function applyTwoOutPreThrowAdvance(runners: BaseRunners, batterId: string): TwoOutPreThrowState {
+  return {
+    runners: {
+      first: batterId,
+      third: runners.first,
+    },
+    scored: [runners.third, runners.second].filter(Boolean) as string[],
+  };
+}
+
+/** Defensive choices when the lead runner goes home and a trailer occupies first. */
+export function homeThrowChoices(runners: BaseRunners): HomeThrowChoice[] {
+  if (!runners.third || !runners.first) return [];
+  return [
+    {
+      choice: "CUT",
+      label: "Cut throw — concede run; hold trailing runner at first",
+      concededRun: runners.third,
+    },
+    {
+      choice: "THROW_HOME",
+      label: "Throw home — play on lead runner; trailing runner takes second",
+      runnerAtRisk: runners.third,
+      trailingAdvance: { runnerId: runners.first, from: "FIRST", to: "SECOND" },
+    },
+  ];
 }
 
 /**

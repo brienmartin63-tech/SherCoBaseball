@@ -43,17 +43,18 @@ export function App() {
   const batter = battingTeam.lineup[batterIndex];
   const activePitcherId = game.activePitchers[pitchingSide];
   const pitcher = [pitchingTeam.starter, ...pitchingTeam.bullpen].find((candidate) => candidate.id === activePitcherId) ?? pitchingTeam.starter;
-  const runnerBallAt = game.resolution.phase === "BALL_IN_PLAY" || game.resolution.phase === "UMPIRE_CHECK" ? game.ballAt : undefined;
-  const fieldingArm = useMemo(() => {
-    if (game.pendingFielding) return game.pendingFielding.arm;
-    if (!game.ballAt || !game.resolution.battedBallType) return game.lastFielding?.arm;
+  const previewFielding = useMemo(() => {
+    if (!game.ballAt || !game.resolution.battedBallType || game.resolution.phase !== "BALL_IN_PLAY") return undefined;
     try {
       const defense = buildRatedDefense(pitchingTeam, pitcher, park);
-      return createFieldingAttempt(batter, park, defense, game.ballAt, game.resolution.battedBallType).arm;
+      return createFieldingAttempt(batter, park, defense, game.ballAt, game.resolution.battedBallType);
     } catch {
       return undefined;
     }
-  }, [batter, game.ballAt, game.lastFielding, game.pendingFielding, game.resolution.battedBallType, park, pitcher, pitchingTeam]);
+  }, [batter, game.ballAt, game.resolution.battedBallType, game.resolution.phase, park, pitcher, pitchingTeam]);
+  const displayBallAt = game.resolution.phase === "BALL_IN_PLAY" ? previewFielding?.ballAt ?? game.ballAt : game.ballAt;
+  const runnerBallAt = game.resolution.phase === "BALL_IN_PLAY" || game.resolution.phase === "UMPIRE_CHECK" ? displayBallAt : undefined;
+  const fieldingArm = game.pendingFielding?.arm ?? previewFielding?.arm ?? game.lastFielding?.arm;
   const profileName = game.rulesProfileId === "brien" ? "Brien's Rules" : "Official 1980";
 
   useEffect(() => {
@@ -169,7 +170,13 @@ export function App() {
                   <PlayResolutionWing game={game} away={demoGame.away} home={demoGame.home} />
                   <BaserunningPanel batter={batter} ballAt={runnerBallAt} runners={game.runners} arm={fieldingArm} />
                 </div>
-                <Stadium park={park} ballAt={game.ballAt} runners={game.runners} showCoordinates={showCoordinates} />
+                <Stadium
+                  park={park}
+                  ballAt={displayBallAt}
+                  runners={game.runners}
+                  showCoordinates={showCoordinates}
+                  actionPath={(game.pendingFielding ?? game.lastFielding)?.actionPath ?? previewFielding?.fieldingPath}
+                />
                 <div className="matchup-row">
                   <MatchupPanel batter={batter} pitcher={pitcher} game={game} onAdvance={advanceResolution} onNextTestBatter={moveToNextTestBatter} onReset={resetDemo} />
                 </div>
@@ -186,7 +193,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Rules-engine build 0.4.2 · Game-day workspace</span>
+        <span>Rules-engine build 0.5.0 · Stop-action fielding foundation</span>
       </footer>
     </div>
   );

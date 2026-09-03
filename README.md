@@ -4,9 +4,22 @@ A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, des
 
 The durable design decisions, confirmed house rules, scoring requirements, stadium-import conventions, and development priorities are preserved in [Project Checkpoint 0.1.7](docs/PROJECT_CHECKPOINT_0.1.7.md).
 
-## Rules-engine build 0.4.2
+## Rules-engine build 0.5.0
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
+
+### 0.5.0 stop-action fielding contract
+
+- Adds a continuous-action throw resolver for double and triple plays. It charges the initial fielder's movement, follows every base in order, ignores pivot movement, and uses one roll with the initial fielder's arm.
+- Adopts the current-edition Pivot Rule under Brien's Rules: when the pivot man's arm is lower than the initial fielder's arm, the complete allowance is reduced by one.
+- Permanently tests the `7-9` RHB grounder with the shortstop on `7-10`: one to the ball, one to second, five to first. The seven-square route is a double play with an ordinary allowance of eight, but a weaker pivot reduces that allowance to seven and sends the play at first to the Automatic Umpire.
+- Implements ground-ball ricochets. A ball plotted beyond the fence returns into play by the same number of squares along its original straight line. The nearest fielder is selected from the final ball square, but must travel to the wall-crossing square and then to the ball.
+- Runner decisions are now evaluated lead runner first. A lead runner who holds blocks every trailing runner; a lead runner who goes allows the next runner to be evaluated against the same arm threshold.
+- Encodes the loaded two-out pre-throw example: Rose and McBride score, Schmidt moves from first to third, and Luzinski begins at first before the first defensive throw.
+- Encodes the defensive choice when Schmidt must try home: cut the throw and hold Luzinski at first, or throw home and allow Luzinski to take second.
+- The stadium can display a numbered defensive action route. Ricochet previews and runner distances use the returned in-play ball square.
+- The occupied-base chart transcriptions remain the next integration boundary; they will call these tested mechanics rather than recreate them.
+- The durable rule contract is recorded in [Project Checkpoint 0.5.0](docs/PROJECT_CHECKPOINT_0.5.0.md).
 
 ### 0.4.2 Brien error-chart sequence
 

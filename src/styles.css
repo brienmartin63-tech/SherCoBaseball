@@ -166,6 +166,10 @@ main { padding: 14px 18px 24px; }
 .stadium-legend > span { display: flex; gap: 5px; align-items: center; }
 .legend-swatch { width: 9px; height: 9px; display: inline-block; border: 1px solid rgba(0,0,0,.22); }
 .legend-swatch.fielder { background: var(--fielder); }.legend-swatch.runner { background: var(--runner); }.legend-swatch.ball { background: #fff; }
+.legend-swatch.route { background: transparent; border: 2px solid #7c3aed; }
+.field-cell.action-route-cell { box-shadow: inset 0 0 0 2px rgba(124, 58, 237, .72); }
+.route-label { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; color: #4c1d95; font: 800 8px/1 "Barlow Condensed", sans-serif; }
+.field-cell.fielder-cell .route-label, .field-cell.ball-cell .route-label { opacity: .34; }
 .stadium-legend .park-team { margin-left: auto; text-transform: uppercase; letter-spacing: .06em; }
 
 .matchup-card { overflow: hidden; }

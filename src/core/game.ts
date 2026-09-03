@@ -403,11 +403,19 @@ export function resolveFielding(
 
   const result = rollTwoDice(state.seed, "fielding", `${attempt.fielderPosition} fielding throw`);
   const thrown = resolveThrow(attempt, result.roll.total);
-  const updatedAttempt = { ...attempt, throwingAllowance: thrown.allowance, throwingRemainder: thrown.remaining };
+  const updatedAttempt = {
+    ...attempt,
+    throwingAllowance: thrown.allowance,
+    throwingRemainder: thrown.remaining,
+    actionPath: [...(attempt.fieldingPath ?? []), ...thrown.path],
+  };
+  const ricochetText = attempt.ricochet
+    ? ` Ground ball plotted at ${attempt.ricochet.originalLandingAt.row}-${attempt.ricochet.originalLandingAt.column} ricochets ${attempt.ricochet.depth} back from the wall at ${attempt.ricochet.fenceAt.row}-${attempt.ricochet.fenceAt.column} to ${attempt.ballAt.row}-${attempt.ballAt.column}.`
+    : "";
   const roll: DiceRoll = {
     ...result.roll,
     displayValue: result.roll.total,
-    explanation: `${attempt.fielderName}: max of arm ${attempt.arm} or dice total ${result.roll.total} = ${thrown.allowance}; ${attempt.fieldingDistance} to field, ${thrown.remaining} left for a ${attempt.targetDistance}-square throw to first.`,
+    explanation: `${attempt.fielderName}: max of arm ${attempt.arm} or dice total ${result.roll.total} = ${thrown.allowance}; ${attempt.fieldingDistance} to field${attempt.ricochet ? " via the fence" : ""}, ${thrown.remaining} left for a ${attempt.targetDistance}-square throw to first.${ricochetText}`,
     resultLabel: thrown.result === "TIE" ? "Tie at first" : thrown.result,
     resultTone: thrown.result === "OUT" ? "out" : thrown.result === "SAFE" ? "hit" : "event",
   };
@@ -439,7 +447,7 @@ export function resolveFielding(
     thrown.result === "OUT"
       ? `${batter.name} grounds out, ${positionName(attempt.fielderPosition)} to first.`
       : `${batter.name} beats the throw by ${attempt.fielderName} for a single.`,
-    `${attempt.fielderName} had ${thrown.remaining} square${thrown.remaining === 1 ? "" : "s"} after fielding; first base was ${attempt.targetDistance} away.`,
+    `${attempt.fielderName} had ${thrown.remaining} square${thrown.remaining === 1 ? "" : "s"} after fielding${attempt.ricochet ? " by way of the fence" : ""}; first base was ${attempt.targetDistance} away.${ricochetText}`,
   );
 }
 
