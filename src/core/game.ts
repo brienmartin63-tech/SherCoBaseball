@@ -2,11 +2,11 @@ import { rollOneDie, rollTwoDice } from "./dice";
 import { basesEmptyErrorFielder, directPitchResult, resolveBasesEmptyBattedBall, resolveBasesEmptyError, resolveBasesEmptySpecialEvent, resolveBasesEmptySuperiorError, specialEventPitcherRate } from "./chartResolution";
 import { classifyPitch, hitNumber, pitchResultLabel } from "./pitching";
 import { automaticUmpireCall, buildRatedDefense, createFieldingAttempt, isAirborneCatch, positionName, resolveThrow } from "./fielding";
-import { runnerDistance } from "./baserunning";
+import { leadRunnerDecisions, runnerDistance } from "./baserunning";
 import { distanceToBase } from "./geometry";
 import { createRandomSeed } from "./rng";
 import { isOccupiedBaseState, resolveOccupiedBattedBall, resolveOccupiedOneDie } from "./occupiedChartResolution";
-import type { BaseName, BaseRunners, BaseState, Batter, DiceRoll, FieldingAttempt, GameState, Park, Pitcher, PlateAppearanceResolution, PlayEvent, ScoreLine, Team, TerminalOutcome } from "./types";
+import type { BaseName, BaseRunners, BaseState, Batter, DefenseTargetOption, DiceRoll, FieldingAttempt, GameState, Park, PendingRunnerPlay, Pitcher, PlateAppearanceResolution, PlayEvent, RunnerMovement, ScoreLine, Team, TerminalOutcome } from "./types";
 
 export function createInitialGame(selectedParkId: string, seed = createRandomSeed()): GameState {
   return {
@@ -375,6 +375,7 @@ function finishPlateAppearance(
     runners,
     lastFielding: state.pendingFielding ?? state.lastFielding,
     pendingFielding: undefined,
+    pendingRunnerPlay: undefined,
     ballAt: next.ballAt,
     resolution: {
       phase: "PLAY_COMPLETE",
@@ -472,6 +473,7 @@ function finishBatterRun(
     runners,
     lastFielding: state.pendingFielding ?? state.lastFielding,
     pendingFielding: undefined,
+    pendingRunnerPlay: undefined,
     resolution: {
       phase: "PLAY_COMPLETE",
       baseState: baseStateFromRunners(runners),
@@ -554,6 +556,253 @@ function continueOrFinishBatterRun(
   };
 }
 
+function runnerName(runnerId: string, batter: Batter, offensiveTeam?: Team): string {
+  if (runnerId === batter.id) return batter.name;
+  return offensiveTeam?.lineup.find((player) => player.id === runnerId)?.name ?? runnerId;
+}
+
+function initialHitMovements(
+  state: GameState,
+  batter: Batter,
+  attempt: FieldingAttempt,
+  offensiveTeam?: Team,
+): RunnerMovement[] {
+  const oneBaseOnly = state.resolution.description?.toLowerCase().includes("one base only") ?? false;
+  const twoOutAdvance = state.outs === 2 && !oneBaseOnly;
+  const specifications = [
+    state.runners.third ? { runnerId: state.runners.third, from: "THIRD" as const, to: "HOME" as const } : undefined,
+    state.runners.second ? { runnerId: state.runners.second, from: "SECOND" as const, to: twoOutAdvance ? "HOME" as const : "THIRD" as const } : undefined,
+    state.runners.first ? { runnerId: state.runners.first, from: "FIRST" as const, to: twoOutAdvance ? "THIRD" as const : "SECOND" as const } : undefined,
+    { runnerId: batter.id, from: "HOME" as const, to: "FIRST" as const },
+  ].filter(Boolean) as Array<{ runnerId: string; from: BaseName; to: BaseName }>;
+
+  return specifications.map(({ runnerId, from, to }) => ({
+    runnerId,
+    runnerName: runnerName(runnerId, batter, offensiveTeam),
+    from,
+    to,
+    isBatter: runnerId === batter.id,
+    routeDistance: attempt.fieldingDistance + distanceToBase(attempt.ballAt, to),
+  }));
+}
+
+function removeRunner(runners: BaseRunners, runnerId: string): void {
+  if (runners.first === runnerId) delete runners.first;
+  if (runners.second === runnerId) delete runners.second;
+  if (runners.third === runnerId) delete runners.third;
+}
+
+function applyRunnerMovements(runners: BaseRunners, movements: RunnerMovement[], outRunnerId?: string): { runners: BaseRunners; scored: string[] } {
+  const next = { ...runners };
+  const scored: string[] = [];
+  for (const movement of movements) removeRunner(next, movement.runnerId);
+  for (const movement of movements) {
+    if (movement.runnerId === outRunnerId) continue;
+    if (movement.to === "HOME") scored.push(movement.runnerId);
+    if (movement.to === "FIRST") next.first = movement.runnerId;
+    if (movement.to === "SECOND") next.second = movement.runnerId;
+    if (movement.to === "THIRD") next.third = movement.runnerId;
+  }
+  return { runners: next, scored };
+}
+
+function targetOptions(movements: RunnerMovement[]): DefenseTargetOption[] {
+  return movements
+    .filter((movement) => movement.routeDistance <= 12)
+    .map(({ runnerId, runnerName: name, to, routeDistance }) => ({ runnerId, runnerName: name, targetBase: to, routeDistance }));
+}
+
+function automaticTarget(options: DefenseTargetOption[]): DefenseTargetOption | undefined {
+  if (options.length === 1) return options[0];
+  if (options.length > 1 && options.every((option) => option.routeDistance === options[0].routeDistance)) return options[0];
+  return undefined;
+}
+
+function fieldingWithTarget(attempt: FieldingAttempt, targetBase: BaseName): FieldingAttempt {
+  return {
+    ...attempt,
+    targetBase,
+    targetDistance: distanceToBase(attempt.ballAt, targetBase),
+    throwingAllowance: undefined,
+    throwingRemainder: undefined,
+  };
+}
+
+function finalizeOccupiedHit(
+  state: GameState,
+  batter: Batter,
+  awayLineupSize: number,
+  homeLineupSize: number,
+  play: PendingRunnerPlay,
+): GameState {
+  const scored = play.scored;
+  let next = withBattingLine(state, { hits: 1, runs: scored.length });
+  let runners = { ...state.runners };
+  let outs = state.outs;
+  let half = state.half;
+  let inning = state.inning;
+  let activePitcherRate = state.activePitcherRate;
+  const batterAt = batterBase(runners, batter.id);
+  const batterScored = scored.includes(batter.id);
+  const outcome: TerminalOutcome = batterScored ? "HOME_RUN" : batterAt ? HIT_OUTCOME[batterAt] : "OUT";
+  const reached = batterScored ? "home" : batterAt ? BASE_WORD[batterAt] : "no base";
+  const officialText = `${batter.name} reaches ${reached}${scored.length ? `; ${scored.length} run${scored.length === 1 ? "" : "s"} score` : ""}.`;
+
+  next = advanceBattingOrder(next, awayLineupSize, homeLineupSize);
+  next = appendPlayEvent(next, officialText, `Occupied-base hit sequence completed with ${scored.length} runner${scored.length === 1 ? "" : "s"} scoring.`);
+
+  if (outs >= 3) {
+    runners = {};
+    outs = 0;
+    if (half === "top") half = "bottom";
+    else {
+      half = "top";
+      inning += 1;
+      next = { ...next, away: updateLine(next.away, inning, {}), home: updateLine(next.home, inning, {}) };
+    }
+    activePitcherRate = undefined;
+  }
+
+  return {
+    ...next,
+    inning,
+    half,
+    outs,
+    activePitcherRate,
+    runners,
+    lastFielding: state.pendingFielding ?? state.lastFielding,
+    pendingFielding: undefined,
+    pendingRunnerPlay: undefined,
+    resolution: {
+      phase: "PLAY_COMPLETE",
+      baseState: baseStateFromRunners(runners),
+      terminalOutcome: outcome,
+      creditedHit: true,
+      description: officialText,
+      source: "1980 occupied-base hit; Brien stop-action advancement",
+    },
+  };
+}
+
+function prepareFurtherHitAdvance(
+  state: GameState,
+  batter: Batter,
+  attempt: FieldingAttempt,
+  awayLineupSize: number,
+  homeLineupSize: number,
+  play: PendingRunnerPlay,
+  offensiveTeam?: Team,
+): GameState {
+  if (!play.allowExtraBases || state.outs >= 3) return finalizeOccupiedHit(state, batter, awayLineupSize, homeLineupSize, play);
+  const decisions = leadRunnerDecisions(attempt.ballAt, state.runners, attempt.arm);
+  const movements = decisions
+    .filter((decision) => decision.status === "GO")
+    .map((decision): RunnerMovement => ({
+      runnerId: decision.runnerId,
+      runnerName: runnerName(decision.runnerId, batter, offensiveTeam),
+      from: decision.from,
+      to: decision.to,
+      isBatter: decision.runnerId === batter.id,
+      routeDistance: decision.distance,
+    }));
+  if (movements.length === 0) return finalizeOccupiedHit(state, batter, awayLineupSize, homeLineupSize, play);
+  const relay = continuationAttempt(attempt, attempt.ballAt, movements[0].to);
+  return prepareRunnerThrow(state, batter, relay, awayLineupSize, homeLineupSize, { ...play, movements, initialThrow: false }, offensiveTeam);
+}
+
+function prepareRunnerThrow(
+  state: GameState,
+  batter: Batter,
+  attempt: FieldingAttempt,
+  awayLineupSize: number,
+  homeLineupSize: number,
+  play: PendingRunnerPlay,
+  offensiveTeam?: Team,
+): GameState {
+  const options = targetOptions(play.movements);
+  if (options.length === 0) {
+    const advanced = applyRunnerMovements(state.runners, play.movements);
+    const nextPlay = { ...play, scored: [...play.scored, ...advanced.scored] };
+    return prepareFurtherHitAdvance({ ...state, runners: advanced.runners }, batter, attempt, awayLineupSize, homeLineupSize, nextPlay, offensiveTeam);
+  }
+
+  const selected = automaticTarget(options);
+  if (!selected) {
+    return {
+      ...state,
+      pendingFielding: attempt,
+      pendingRunnerPlay: { ...play, targetRunnerId: undefined },
+      resolution: {
+        ...state.resolution,
+        phase: "DEFENSE_CHOICE",
+        defensiveOptions: options,
+        description: `Choose the defensive target. Initial routes include ${attempt.fieldingDistance} square${attempt.fieldingDistance === 1 ? "" : "s"} for ${attempt.fielderName} to reach the ball; subsequent routes begin with the ball already controlled.`,
+      },
+    };
+  }
+
+  const targetedAttempt = fieldingWithTarget(attempt, selected.targetBase);
+  const equalRoute = options.length > 1;
+  return {
+    ...state,
+    pendingFielding: targetedAttempt,
+    pendingRunnerPlay: { ...play, targetRunnerId: selected.runnerId },
+    resolution: {
+      ...state.resolution,
+      phase: "RUNNER_ADVANCE",
+      defensiveOptions: undefined,
+      ballAt: targetedAttempt.ballAt,
+      description: `${play.movements.map((movement) => `${movement.runnerName} to ${BASE_WORD[movement.to]} (${movement.routeDistance})`).join("; ")}. ${equalRoute ? `Equal routes—defense targets lead runner ${selected.runnerName}` : `Defense targets ${selected.runnerName}`} at ${BASE_WORD[selected.targetBase]}.`,
+      source: "1980 Rule 6 stop-action fielding; lead runner breaks equal defensive routes",
+    },
+  };
+}
+
+export function selectDefensiveTarget(state: GameState, runnerId: string): GameState {
+  if (state.resolution.phase !== "DEFENSE_CHOICE" || !state.pendingRunnerPlay || !state.pendingFielding) return state;
+  const option = state.resolution.defensiveOptions?.find((candidate) => candidate.runnerId === runnerId);
+  if (!option) return state;
+  return {
+    ...state,
+    pendingFielding: fieldingWithTarget(state.pendingFielding, option.targetBase),
+    pendingRunnerPlay: { ...state.pendingRunnerPlay, targetRunnerId: runnerId },
+    resolution: {
+      ...state.resolution,
+      phase: "RUNNER_ADVANCE",
+      defensiveOptions: undefined,
+      description: `Defense chooses ${option.runnerName} at ${BASE_WORD[option.targetBase]} (${option.routeDistance}-square route).`,
+    },
+  };
+}
+
+function completeOccupiedRunnerThrow(
+  state: GameState,
+  batter: Batter,
+  attempt: FieldingAttempt,
+  call: "OUT" | "SAFE",
+  awayLineupSize: number,
+  homeLineupSize: number,
+  offensiveTeam?: Team,
+): GameState {
+  const play = state.pendingRunnerPlay!;
+  const targetRunnerId = play.targetRunnerId!;
+  const advanced = applyRunnerMovements(state.runners, play.movements, call === "OUT" ? targetRunnerId : undefined);
+  const nextPlay: PendingRunnerPlay = {
+    ...play,
+    scored: [...play.scored, ...advanced.scored],
+    targetRunnerId: undefined,
+  };
+  const next = {
+    ...state,
+    outs: state.outs + (call === "OUT" ? 1 : 0),
+    runners: advanced.runners,
+    pendingRunnerPlay: nextPlay,
+    pendingFielding: attempt,
+    ballAt: attempt.ballAt,
+  };
+  return prepareFurtherHitAdvance(next, batter, attempt, awayLineupSize, homeLineupSize, nextPlay, offensiveTeam);
+}
+
 export function resolveFielding(
   state: GameState,
   batter: Batter,
@@ -562,7 +811,73 @@ export function resolveFielding(
   defensiveTeam: Team,
   awayLineupSize: number,
   homeLineupSize: number,
+  offensiveTeam?: Team,
 ): GameState {
+  if (state.resolution.phase === "UMPIRE_CHECK" && state.pendingFielding && state.pendingRunnerPlay?.targetRunnerId) {
+    const targetRunner = offensiveTeam?.lineup.find((player) => player.id === state.pendingRunnerPlay?.targetRunnerId) ?? batter;
+    const result = rollTwoDice(state.seed, "umpire", "Automatic umpire roll");
+    const call = automaticUmpireCall(result.roll.sherco, state.pendingFielding.arm, targetRunner.speed);
+    const roll: DiceRoll = {
+      ...result.roll,
+      explanation: `${state.pendingFielding.arm}${state.pendingFielding.range} defense versus ${targetRunner.speed === "REGULAR" ? "regular" : targetRunner.speed} speed: ${call.toLowerCase()}.`,
+      resultLabel: call,
+      resultTone: call === "OUT" ? "out" : "hit",
+    };
+    const seeded = appendPlayEvent(
+      { ...state, seed: result.state, lastRoll: roll },
+      `${targetRunner.name} is ${call.toLowerCase()} at ${BASE_WORD[state.pendingFielding.targetBase]}.`,
+      `Exact-count throw. Automatic Umpire: ${roll.dice.join(" and ")} → ${roll.sherco}, ${call}.`,
+      roll,
+    );
+    return completeOccupiedRunnerThrow(seeded, batter, state.pendingFielding, call, awayLineupSize, homeLineupSize, offensiveTeam);
+  }
+
+  if (state.resolution.phase === "RUNNER_ADVANCE" && state.pendingFielding && state.pendingRunnerPlay?.targetRunnerId) {
+    const attempt = state.pendingFielding;
+    const play = state.pendingRunnerPlay;
+    const target = play.movements.find((movement) => movement.runnerId === play.targetRunnerId)!;
+    const result = rollTwoDice(state.seed, play.initialThrow ? "fielding" : "throw", `${attempt.fielderPosition} throw to ${BASE_WORD[attempt.targetBase]}`);
+    const thrown = resolveThrow(attempt, result.roll.total);
+    const updatedAttempt: FieldingAttempt = {
+      ...attempt,
+      ballAt: thrown.ballAt,
+      fielderAt: thrown.ballAt,
+      fieldingDistance: 0,
+      throwingAllowance: thrown.allowance,
+      throwingRemainder: thrown.remaining,
+      actionPath: [...(attempt.actionPath ?? attempt.fieldingPath ?? []), ...thrown.path],
+    };
+    const movementText = play.initialThrow
+      ? `${attempt.fieldingDistance} to field, then ${attempt.targetDistance} to ${BASE_WORD[attempt.targetBase]} (${attempt.fieldingDistance + attempt.targetDistance} total)`
+      : `ball already controlled; ${attempt.targetDistance} to ${BASE_WORD[attempt.targetBase]}`;
+    const roll: DiceRoll = {
+      ...result.roll,
+      displayValue: result.roll.total,
+      explanation: `${attempt.fielderName}: max of arm ${attempt.arm} or dice total ${result.roll.total} = ${thrown.allowance}; ${movementText}.`,
+      resultLabel: thrown.result === "TIE" ? `Tie at ${BASE_WORD[attempt.targetBase]}` : thrown.result,
+      resultTone: thrown.result === "OUT" ? "out" : thrown.result === "SAFE" ? "hit" : "event",
+    };
+    const seeded = appendPlayEvent(
+      { ...state, seed: result.state, ballAt: thrown.ballAt, pendingFielding: updatedAttempt },
+      `${attempt.fielderName} throws for ${target.runnerName} at ${BASE_WORD[attempt.targetBase]}.`,
+      `${roll.label}: ${roll.dice.join(" plus ")} = ${roll.total}. ${roll.explanation}`,
+      roll,
+    );
+    if (thrown.result === "TIE") {
+      return {
+        ...seeded,
+        resolution: {
+          ...state.resolution,
+          phase: "UMPIRE_CHECK",
+          ballAt: thrown.ballAt,
+          description: `The throw reaches ${BASE_WORD[attempt.targetBase]} by exact count. Consult the Automatic Umpire for ${target.runnerName}.`,
+          source: "1980 Rule 6c(13) and Rule 16",
+        },
+      };
+    }
+    return completeOccupiedRunnerThrow(seeded, batter, updatedAttempt, thrown.result, awayLineupSize, homeLineupSize, offensiveTeam);
+  }
+
   if (state.resolution.phase === "UMPIRE_CHECK" && state.pendingFielding) {
     const result = rollTwoDice(state.seed, "umpire", "Automatic umpire roll");
     const call = automaticUmpireCall(result.roll.sherco, state.pendingFielding.arm, batter.speed);
@@ -700,10 +1015,21 @@ export function resolveFielding(
     ? catchAttempt
     : { ...createFieldingAttempt(batter, park, defense, state.resolution.ballAt, "ground"), battedBallType: state.resolution.battedBallType };
 
-  // Occupied-base throws require a defense-selected target plus simultaneous
-  // runner movement. Until that state machine is attached, stop on the exact
-  // chart placement instead of incorrectly forcing every play to first.
   if (state.resolution.baseState !== "EMPTY") {
+    if (state.resolution.chartFamily === "PROBABLE_HIT") {
+      const movements = initialHitMovements(state, batter, attempt, offensiveTeam);
+      const play: PendingRunnerPlay = {
+        kind: "HIT_ADVANCE",
+        movements,
+        initialThrow: true,
+        scored: [],
+        allowExtraBases: !(state.resolution.description?.toLowerCase().includes("one base only") ?? false),
+      };
+      return prepareRunnerThrow(state, batter, attempt, awayLineupSize, homeLineupSize, play, offensiveTeam);
+    }
+
+    // Probable Out grounders still need their force/DP target graph. Preserve
+    // the chart result rather than falling into the bases-empty first-base path.
     return {
       ...state,
       ballAt: attempt.ballAt,
@@ -818,6 +1144,7 @@ export function startNextPlateAppearance(state: GameState): GameState {
     ballAt: undefined,
     lastFielding: undefined,
     pendingFielding: undefined,
+    pendingRunnerPlay: undefined,
     pitchCount: 0,
     lastRoll: undefined,
     resolution: {

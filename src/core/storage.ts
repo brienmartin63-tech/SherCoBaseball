@@ -47,7 +47,23 @@ export async function loadGame(): Promise<GameState | undefined> {
 }
 
 export function migrateGameState(game: GameState | LegacyGameState): GameState {
-  if (game.schemaVersion === 4 && game.resolution && game.runners && game.activePitchers) return game;
+  if (game.schemaVersion === 4 && game.resolution && game.runners && game.activePitchers) {
+    const recoverableOccupiedHit = game.resolution.phase === "CHART_RESULT_PENDING"
+      && game.resolution.chartFamily === "PROBABLE_HIT"
+      && Boolean(game.pendingFielding)
+      && game.resolution.source?.includes("protected occupied-play boundary");
+    return recoverableOccupiedHit
+      ? {
+          ...game,
+          pendingRunnerPlay: undefined,
+          resolution: {
+            ...game.resolution,
+            phase: "BALL_IN_PLAY",
+            description: game.resolution.description?.replace(/ Defensive target and chart-locked runner sequence are queued.*$/, ""),
+          },
+        }
+      : game;
+  }
   return {
     ...game,
     schemaVersion: 4,

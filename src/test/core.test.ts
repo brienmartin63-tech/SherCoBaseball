@@ -3,7 +3,7 @@ import { rollOneDie, rollTwoDice, shercoNumber } from "../core/dice";
 import { createRandomSeed } from "../core/rng";
 import { applyTwoOutPreThrowAdvance, homeThrowChoices, leadRunnerDecisions, runnerDistance, runnerDistanceTone, twoOutHitAndRunDestination } from "../core/baserunning";
 import { basesEmptyErrorFielder, directPitchResult, effectivePowerRatings, moveBehindFielder, moveInFrontOfFielder, resolveBasesEmptyBattedBall, resolveBasesEmptyError, resolveBasesEmptySpecialEvent, resolveBasesEmptySuperiorError, specialEventPitcherRate, withinHomeRunRating } from "../core/chartResolution";
-import { createInitialGame, currentBaseState, resolveFielding, rollPitch, rollResolution, scoreDirectResult, selectPitcher, startNextPlateAppearance } from "../core/game";
+import { createInitialGame, currentBaseState, resolveFielding, rollPitch, rollResolution, scoreDirectResult, selectDefensiveTarget, selectPitcher, startNextPlateAppearance } from "../core/game";
 import { automaticUmpireCall, buildRatedDefense, createFieldingAttempt, pivotRulePenalty, resolveContinuousPlay, resolveThrow } from "../core/fielding";
 import { BASE_REFERENCE_SQUARES, directPath, distanceToBase, farthestInPlaySquare, HOME_PLATE_SQUARE, mirrorForLeftHandedBatter, nearestFielder, resolveGroundBallRicochet, squaresBetween } from "../core/geometry";
 import { classifyPitch, hitNumber, pitchResultLabel } from "../core/pitching";
@@ -290,6 +290,39 @@ describe("saved-game schema", () => {
     expect(migrated.runners).toEqual({});
     expect(migrated.activePitchers).toEqual({});
   });
+
+  it("reopens a 0.6.0 protected occupied hit so the new runner resolver can continue it", () => {
+    const locked = {
+      ...createInitialGame("test-park"),
+      runners: { first: "kc-porter" },
+      pendingFielding: {
+        batterId: "kc-hurdle",
+        ballAt: { row: 18, column: 6 },
+        battedBallType: "ground" as const,
+        fielderPosition: "RF" as const,
+        fielderName: "Bake McBride",
+        fielderAt: { row: 19, column: 8 },
+        arm: 8 as const,
+        range: 5 as const,
+        fieldingDistance: 2,
+        targetBase: "FIRST" as const,
+        targetDistance: 10,
+      },
+      resolution: {
+        phase: "CHART_RESULT_PENDING" as const,
+        baseState: "FIRST" as const,
+        chartFamily: "PROBABLE_HIT" as const,
+        battedBallType: "ground" as const,
+        ballAt: { row: 18, column: 6 },
+        description: "Grounder to 6-18. Defensive target and chart-locked runner sequence are queued for the occupied-play resolver.",
+        source: "1980 rulebook p.26; protected occupied-play boundary",
+      },
+    };
+    expect(migrateGameState(locked)).toMatchObject({
+      runners: { first: "kc-porter" },
+      resolution: { phase: "BALL_IN_PLAY", baseState: "FIRST", chartFamily: "PROBABLE_HIT" },
+    });
+  });
 });
 
 describe("bases-empty fielding and running", () => {
@@ -553,6 +586,93 @@ describe("bases-empty fielding and running", () => {
       resolution: { phase: "CHART_RESULT_PENDING", baseState: "FIRST" },
     });
     expect(protectedPlay.resolution.description).toContain("Defensive target");
+  });
+
+  it("plays Hurdle's 6-18 single through McBride with the lead runner as the equal-route target", () => {
+    const hurdle = kansasCity.lineup[7];
+    const porter = kansasCity.lineup[6];
+    const plotted = {
+      ...createInitialGame(park.id),
+      half: "bottom" as const,
+      homeBatterIndex: 7,
+      runners: { first: porter.id },
+      ballAt: { row: 18, column: 6 },
+      resolution: {
+        phase: "BALL_IN_PLAY" as const,
+        baseState: "FIRST" as const,
+        chartFamily: "PROBABLE_HIT" as const,
+        battedBallType: "ground" as const,
+        ballAt: { row: 18, column: 6 },
+        description: "Grounder to 6-18, mirrored for the left-handed batter.",
+      },
+    };
+
+    const readyToThrow = resolveFielding(plotted, hurdle, philadelphia.starter, park, philadelphia, 9, 9, kansasCity);
+    expect(readyToThrow).toMatchObject({
+      resolution: { phase: "RUNNER_ADVANCE", baseState: "FIRST" },
+      pendingFielding: {
+        fielderName: "Bake McBride",
+        fielderPosition: "RF",
+        fieldingDistance: 2,
+        targetBase: "SECOND",
+        targetDistance: 10,
+      },
+      pendingRunnerPlay: {
+        initialThrow: true,
+        targetRunnerId: porter.id,
+        movements: [
+          { runnerId: porter.id, from: "FIRST", to: "SECOND", routeDistance: 12 },
+          { runnerId: hurdle.id, from: "HOME", to: "FIRST", routeDistance: 12 },
+        ],
+      },
+    });
+    expect(readyToThrow.resolution.description).toContain("Equal routes—defense targets lead runner Darrell Porter");
+
+    const exactThrow = resolveFielding({ ...readyToThrow, seed: 13328 }, hurdle, philadelphia.starter, park, philadelphia, 9, 9, kansasCity);
+    expect(exactThrow).toMatchObject({
+      resolution: { phase: "UMPIRE_CHECK" },
+      lastRoll: { total: 12 },
+      ballAt: { row: 8, column: 8 },
+    });
+
+    const safeCall = resolveFielding({ ...exactThrow, seed: 2722 }, hurdle, philadelphia.starter, park, philadelphia, 9, 9, kansasCity);
+    expect(safeCall).toMatchObject({
+      resolution: { phase: "PLAY_COMPLETE", terminalOutcome: "SINGLE", baseState: "FIRST_SECOND" },
+      runners: { first: hurdle.id, second: porter.id },
+      home: { hits: 1 },
+      homeBatterIndex: 8,
+    });
+  });
+
+  it("offers defensive target buttons when reachable routes are not equal", () => {
+    const rose = philadelphia.lineup[0];
+    const schmidt = philadelphia.lineup[2];
+    const plotted = {
+      ...createInitialGame(park.id),
+      awayBatterIndex: 2,
+      runners: { first: rose.id },
+      ballAt: { row: 10, column: 4 },
+      resolution: {
+        phase: "BALL_IN_PLAY" as const,
+        baseState: "FIRST" as const,
+        chartFamily: "PROBABLE_HIT" as const,
+        battedBallType: "ground" as const,
+        ballAt: { row: 10, column: 4 },
+      },
+    };
+    const choice = resolveFielding(plotted, schmidt, kansasCity.starter, park, kansasCity, 9, 9, philadelphia);
+    expect(choice.resolution).toMatchObject({
+      phase: "DEFENSE_CHOICE",
+      defensiveOptions: [
+        { runnerId: rose.id, targetBase: "SECOND", routeDistance: 4 },
+        { runnerId: schmidt.id, targetBase: "FIRST", routeDistance: 2 },
+      ],
+    });
+    expect(selectDefensiveTarget(choice, schmidt.id)).toMatchObject({
+      resolution: { phase: "RUNNER_ADVANCE", defensiveOptions: undefined },
+      pendingRunnerPlay: { targetRunnerId: schmidt.id },
+      pendingFielding: { targetBase: "FIRST", targetDistance: 2 },
+    });
   });
 
   it("scores a bases-empty home run in the current inning", () => {

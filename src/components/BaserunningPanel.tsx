@@ -1,4 +1,4 @@
-import { leadRunnerDecisions, runnerDistance } from "../core/baserunning";
+import { leadRunnerDecisions, runnerDistance, runnerDistanceTone } from "../core/baserunning";
 import type { BaseName, Batter, BaseRunners, Coordinate } from "../core/types";
 
 interface Props {
@@ -6,6 +6,8 @@ interface Props {
   ballAt?: Coordinate;
   runners: BaseRunners;
   arm?: 8 | 9;
+  initialFieldingDistance?: number;
+  forcedInitialAdvance?: boolean;
 }
 
 const baseLabel: Record<BaseName, string> = {
@@ -15,7 +17,7 @@ const baseLabel: Record<BaseName, string> = {
   THIRD: "3B",
 };
 
-export function BaserunningPanel({ batter, ballAt, runners, arm }: Props) {
+export function BaserunningPanel({ batter, ballAt, runners, arm, initialFieldingDistance = 0, forcedInitialAdvance = false }: Props) {
   const runnerDecisions = ballAt && arm ? leadRunnerDecisions(ballAt, runners, arm) : [];
   const batterIsRunner = Object.values(runners).includes(batter.id);
   const candidates = ballAt ? [
@@ -40,20 +42,23 @@ export function BaserunningPanel({ batter, ballAt, runners, arm }: Props) {
         <div className="runner-distance-list">
           {candidates.map((candidate) => {
             const status = candidate.decision ?? runnerDistance(ballAt!, candidate.from, arm ?? 9);
+            const displayedDistance = status.distance + initialFieldingDistance;
+            const displayedTone = runnerDistanceTone(displayedDistance);
             const call = candidate.decision?.status === "BLOCKED"
               ? "BLOCK"
-              : candidate.decision?.status ?? (status.safeBeforeThrow ? "SAFE" : candidate.from === "HOME" ? "RUN" : arm ? status.mustAdvance ? "GO" : "HOLD" : "—");
+              : forcedInitialAdvance ? "RUN"
+                : candidate.decision?.status ?? (status.safeBeforeThrow ? "SAFE" : candidate.from === "HOME" ? "RUN" : arm ? status.mustAdvance ? "GO" : "HOLD" : "—");
             return (
-              <div className={`runner-distance tone-${status.tone}`} key={`${candidate.id}-${candidate.from}`}>
+              <div className={`runner-distance tone-${displayedTone}`} key={`${candidate.id}-${candidate.from}`}>
                 <div><strong>{candidate.name}</strong><small>{baseLabel[status.from]} → {baseLabel[status.to]}</small></div>
-                <b>{status.distance}</b>
+                <b>{displayedDistance}</b>
                 <span>{call}</span>
               </div>
             );
           })}
         </div>
       )}
-      <footer>Ball-to-destination only. Existing runners are read lead first; a HOLD blocks everyone behind him.</footer>
+      <footer>{initialFieldingDistance > 0 ? `Initial throw includes ${initialFieldingDistance} to field the ball. ` : "Ball-to-destination only. "}Existing runners are read lead first; a HOLD blocks everyone behind him.</footer>
     </section>
   );
 }

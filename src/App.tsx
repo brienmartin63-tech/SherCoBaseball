@@ -8,7 +8,7 @@ import { MatchupPanel } from "./components/MatchupPanel";
 import { PlayResolutionWing } from "./components/PlayResolutionWing";
 import { Scoreboard } from "./components/Scoreboard";
 import { Stadium } from "./components/Stadium";
-import { advanceTestBatter, createInitialGame, resolveFielding, rollPitch, rollResolution, scoreDirectResult, selectPark, selectPitcher, startNextPlateAppearance, toggleRulesProfile } from "./core/game";
+import { advanceTestBatter, createInitialGame, resolveFielding, rollPitch, rollResolution, scoreDirectResult, selectDefensiveTarget, selectPark, selectPitcher, startNextPlateAppearance, toggleRulesProfile } from "./core/game";
 import { buildRatedDefense, createFieldingAttempt } from "./core/fielding";
 import { loadGame, saveGame } from "./core/storage";
 import type { Park } from "./core/types";
@@ -55,6 +55,10 @@ export function App() {
   const displayBallAt = game.resolution.phase === "BALL_IN_PLAY" ? previewFielding?.ballAt ?? game.ballAt : game.ballAt;
   const runnerBallAt = game.resolution.phase === "BALL_IN_PLAY" || game.resolution.phase === "CHART_RESULT_PENDING" || game.resolution.phase === "RUNNER_ADVANCE" || game.resolution.phase === "UMPIRE_CHECK" ? displayBallAt : undefined;
   const fieldingArm = game.pendingFielding?.arm ?? previewFielding?.arm ?? game.lastFielding?.arm;
+  const occupiedHitPreview = game.resolution.phase === "BALL_IN_PLAY" && game.resolution.baseState !== "EMPTY" && game.resolution.chartFamily === "PROBABLE_HIT";
+  const initialFieldingDistance = game.pendingRunnerPlay?.initialThrow
+    ? game.pendingFielding?.fieldingDistance
+    : occupiedHitPreview ? previewFielding?.fieldingDistance : undefined;
   const profileName = game.rulesProfileId === "brien" ? "Brien's Rules" : "Official 1980";
 
   useEffect(() => {
@@ -96,7 +100,8 @@ export function App() {
       const activePitcher = [defensiveTeam.starter, ...defensiveTeam.bullpen].find((candidate) => candidate.id === currentPitcherId) ?? defensiveTeam.starter;
       if (current.resolution.phase === "PITCH") return rollPitch(current, activeBatter, activePitcher);
       if (current.resolution.phase === "BALL_IN_PLAY" || current.resolution.phase === "RUNNER_ADVANCE" || current.resolution.phase === "UMPIRE_CHECK") {
-        return resolveFielding(current, activeBatter, activePitcher, park, defensiveTeam, demoGame.away.lineup.length, demoGame.home.lineup.length);
+        const offensiveTeam = current.half === "top" ? demoGame.away : demoGame.home;
+        return resolveFielding(current, activeBatter, activePitcher, park, defensiveTeam, demoGame.away.lineup.length, demoGame.home.lineup.length, offensiveTeam);
       }
       if (current.resolution.phase === "DIRECT_RESULT") {
         return scoreDirectResult(current, activeBatter, demoGame.away.lineup.length, demoGame.home.lineup.length);
@@ -176,7 +181,7 @@ export function App() {
                 />
                 <div className="resolution-column">
                   <PlayResolutionWing game={game} away={demoGame.away} home={demoGame.home} />
-                  <BaserunningPanel batter={batter} ballAt={runnerBallAt} runners={game.runners} arm={fieldingArm} />
+                  <BaserunningPanel batter={batter} ballAt={runnerBallAt} runners={game.runners} arm={fieldingArm} initialFieldingDistance={initialFieldingDistance} forcedInitialAdvance={occupiedHitPreview || Boolean(game.pendingRunnerPlay?.initialThrow)} />
                 </div>
                 <Stadium
                   park={park}
@@ -186,7 +191,7 @@ export function App() {
                   actionPath={(game.pendingFielding ?? game.lastFielding)?.actionPath ?? previewFielding?.fieldingPath}
                 />
                 <div className="matchup-row">
-                  <MatchupPanel batter={batter} pitcher={pitcher} game={game} onAdvance={advanceResolution} onNextTestBatter={moveToNextTestBatter} onReset={resetDemo} />
+                  <MatchupPanel batter={batter} pitcher={pitcher} game={game} onAdvance={advanceResolution} onDefenseTarget={(runnerId) => setGame((current) => selectDefensiveTarget(current, runnerId))} onNextTestBatter={moveToNextTestBatter} onReset={resetDemo} />
                 </div>
                 <div className="audit-row"><DiceLog game={game} /></div>
               </div>
@@ -201,7 +206,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Rules-engine build 0.6.0 · Occupied-base chart book</span>
+        <span>Rules-engine build 0.6.1 · Occupied-hit first throws</span>
       </footer>
     </div>
   );

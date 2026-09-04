@@ -22,7 +22,7 @@ This inventory is the source-of-truth boundary between chart material that the p
 | Occupied PH/PO ball placement | 1980 rulebook, pp. 26–40 | All 280 non-error rolls have compiled ball rules; no runtime prose parsing |
 | Occupied pitch/chart routing | 1980 rulebook base-state charts | Current runners select the chart and remain on base for the next hitter |
 
-The current vertical slice resolves occupied home runs, walks, hit batters, and catchable airborne balls. It intentionally stops an occupied result requiring simultaneous runner movement or a defensive target choice. The interface preserves the exact entry, ball, nearest fielder, and distances instead of silently sending every play to first.
+The current vertical slice resolves occupied home runs, walks, hit batters, catchable airborne balls, and the initial simultaneous throw on occupied Probable Hits. First throws include fielder movement; later throws do not. Equal routes select the lead runner automatically, while unequal routes expose defensive target buttons. Occupied Probable Out force/DP graphs and chart-locked error advances still stop at an explicit boundary.
 
 ## Confirmed coordinate semantics
 
@@ -39,7 +39,7 @@ The current vertical slice resolves occupied home runs, walks, hit batters, and 
 
 | Area | Remaining work |
 | --- | --- |
-| Occupied play resolver | Defense-selected targets, simultaneous initial movement, further throws, and force/double/triple plays |
+| Occupied Probable Out resolver | Force targets, continuous double/triple plays, and Pivot Rule integration |
 | Occupied error branches | Superior checks and hard-coded movement for every Hit Error and Out Error result |
 | Baserunning | Apply the already-tested lead-runner and arm-threshold rules to occupied chart plays; chart-mandated steals |
 | Stealing and count pick-up | 1980 stealing rules plus Brien's automatic attempt profile; no `***` runner tier |

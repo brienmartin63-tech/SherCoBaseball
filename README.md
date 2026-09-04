@@ -4,9 +4,19 @@ A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, des
 
 The durable design decisions, confirmed house rules, scoring requirements, stadium-import conventions, and development priorities are preserved in [Project Checkpoint 0.1.7](docs/PROJECT_CHECKPOINT_0.1.7.md).
 
-## Rules-engine build 0.6.0
+## Rules-engine build 0.6.1
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
+
+### 0.6.1 occupied-hit first throws
+
+- Replaces the protected occupied Probable Hit boundary with a real simultaneous runner-and-fielder sequence.
+- Every initial route is `fielder to ball + ball to destination`; subsequent throws begin with the controlled ball and use only its current distance to the destination.
+- Required initial advancement ignores Brien's optional-extra-base threshold: every affected runner runs, even when the throw can produce an out or double play.
+- When reachable runners have equal routes, the defense automatically targets the lead runner. Unequal routes produce explicit defensive target buttons.
+- Permanently tests Hurdle's left-handed `6-18` result as literal `18-6`: Bake McBride moves two to field it, both Porter-to-second and Hurdle-to-first are 10 more, and the program selects Porter on the equal 12-square routes.
+- An exact 12 reaches second and uses Porter's speed on the Automatic Umpire chart; a safe call leaves Porter on second and Hurdle on first and advances the lineup exactly once.
+- Saved 0.6.0 occupied hits paused at the protected boundary reopen automatically in the new resolver. See [Project Checkpoint 0.6.1](docs/PROJECT_CHECKPOINT_0.6.1.md).
 
 ### 0.6.0 occupied-base chart book and persistent runners
 

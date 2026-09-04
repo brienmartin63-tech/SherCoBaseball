@@ -10,6 +10,7 @@ interface Props {
   pitcher: Pitcher;
   game: GameState;
   onAdvance: () => void;
+  onDefenseTarget: (runnerId: string) => void;
   onNextTestBatter: () => void;
   onReset: () => void;
 }
@@ -28,6 +29,7 @@ function nextAction(game: GameState): { label: string; disabled: boolean } {
     case "TRIPLE_DECISION": return { label: "Triple choice pending", disabled: true };
     case "CHART_RESULT_PENDING": return { label: "Chart-locked runner resolution pending", disabled: true };
     case "BALL_IN_PLAY": return { label: "Resolve fielding", disabled: false };
+    case "DEFENSE_CHOICE": return { label: "Choose defensive target", disabled: true };
     case "RUNNER_ADVANCE": return { label: `Throw to ${game.pendingFielding?.targetBase.toLowerCase() ?? "next base"}`, disabled: false };
     case "UMPIRE_CHECK": return { label: "Roll automatic umpire", disabled: false };
     case "DIRECT_RESULT": return { label: "Score play", disabled: false };
@@ -35,7 +37,7 @@ function nextAction(game: GameState): { label: string; disabled: boolean } {
   }
 }
 
-export function MatchupPanel({ batter, pitcher, game, onAdvance, onNextTestBatter, onReset }: Props) {
+export function MatchupPanel({ batter, pitcher, game, onAdvance, onDefenseTarget, onNextTestBatter, onReset }: Props) {
   const currentRate = game.activePitcherRate ?? pitcher.rate;
   const threshold = hitNumber(batter.offensiveGrade, currentRate);
   const powerRatings = effectivePowerRatings(batter, pitcher);
@@ -73,7 +75,15 @@ export function MatchupPanel({ batter, pitcher, game, onAdvance, onNextTestBatte
         </div>
       </div>
       <div className="matchup-actions">
-        {canTestAdvance
+        {game.resolution.phase === "DEFENSE_CHOICE" ? (
+          <div className="defense-target-actions">
+            {game.resolution.defensiveOptions?.map((option) => (
+              <button className="button primary" key={`${option.runnerId}-${option.targetBase}`} onClick={() => onDefenseTarget(option.runnerId)}>
+                Throw for {option.runnerName} at {option.targetBase.toLowerCase()} · {option.routeDistance}
+              </button>
+            ))}
+          </div>
+        ) : canTestAdvance
           ? <button className="button test-next" onClick={onNextTestBatter} title="Advance without scoring the unresolved play"><SkipForward size={16} /> Next test batter</button>
           : <button className="button primary" onClick={onAdvance} disabled={action.disabled}><Dices size={18} /> {action.label}</button>}
         <button className="button ghost" onClick={onReset}><RotateCcw size={16} /> Reset demo</button>

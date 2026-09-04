@@ -76,7 +76,7 @@ export interface Team {
 
 export type DiceKind = "pitch" | "chart" | "fielding" | "throw" | "steal" | "umpire";
 export type BaseState = "EMPTY" | "FIRST" | "SECOND" | "THIRD" | "FIRST_SECOND" | "FIRST_THIRD" | "SECOND_THIRD" | "LOADED";
-export type PlateAppearancePhase = "PITCH" | "BATTED_BALL_CHART" | "SPECIAL_EVENT" | "HIT_ERROR_CHECK" | "PITCHER_ERROR_CHECK" | "ERROR_CHART" | "SUPERIOR_ERROR_CHECK" | "BALL_CHECK" | "COUNT_PENDING" | "TRIPLE_DECISION" | "CHART_RESULT_PENDING" | "BALL_IN_PLAY" | "RUNNER_ADVANCE" | "UMPIRE_CHECK" | "DIRECT_RESULT" | "PLAY_COMPLETE";
+export type PlateAppearancePhase = "PITCH" | "BATTED_BALL_CHART" | "SPECIAL_EVENT" | "HIT_ERROR_CHECK" | "PITCHER_ERROR_CHECK" | "ERROR_CHART" | "SUPERIOR_ERROR_CHECK" | "BALL_CHECK" | "COUNT_PENDING" | "TRIPLE_DECISION" | "CHART_RESULT_PENDING" | "BALL_IN_PLAY" | "DEFENSE_CHOICE" | "RUNNER_ADVANCE" | "UMPIRE_CHECK" | "DIRECT_RESULT" | "PLAY_COMPLETE";
 export type ChartFamily = "PROBABLE_HIT" | "PROBABLE_OUT" | "SPECIAL_EVENT" | "HIT_ERROR" | "OUT_ERROR";
 export type TerminalOutcome = "OUT" | "SINGLE" | "DOUBLE" | "TRIPLE" | "HOME_RUN" | "WALK" | "STRIKEOUT" | "HIT_BY_PITCH" | "ERROR";
 
@@ -94,6 +94,7 @@ export interface PlateAppearanceResolution {
   errorChartRoll?: 1 | 2 | 3 | 4 | 5 | 6;
   errorFielderPosition?: FielderPosition;
   chartAdvancementLocked?: boolean;
+  defensiveOptions?: DefenseTargetOption[];
 }
 
 export interface DiceRoll {
@@ -115,6 +116,31 @@ export interface BaseRunners {
   first?: string;
   second?: string;
   third?: string;
+}
+
+export interface DefenseTargetOption {
+  runnerId: string;
+  runnerName: string;
+  targetBase: BaseName;
+  routeDistance: number;
+}
+
+export interface RunnerMovement {
+  runnerId: string;
+  runnerName: string;
+  from: BaseName;
+  to: BaseName;
+  isBatter: boolean;
+  routeDistance: number;
+}
+
+export interface PendingRunnerPlay {
+  kind: "HIT_ADVANCE";
+  movements: RunnerMovement[];
+  targetRunnerId?: string;
+  initialThrow: boolean;
+  scored: string[];
+  allowExtraBases: boolean;
 }
 
 export interface FieldingAttempt {
@@ -180,4 +206,5 @@ export interface GameState {
   runners: BaseRunners;
   pendingFielding?: FieldingAttempt;
   lastFielding?: FieldingAttempt;
+  pendingRunnerPlay?: PendingRunnerPlay;
 }
