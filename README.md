@@ -4,15 +4,25 @@ A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, des
 
 The durable design decisions, confirmed house rules, scoring requirements, stadium-import conventions, and development priorities are preserved in [Project Checkpoint 0.1.7](docs/PROJECT_CHECKPOINT_0.1.7.md).
 
-## Rules-engine build 0.5.3
+## Rules-engine build 0.6.0
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
+
+### 0.6.0 occupied-base chart book and persistent runners
+
+- Transcribes all 420 entries in the seven occupied-base situations: Probable Hit, Hit Error, Probable Out, Out Error, and Special Events.
+- Compiles all 280 non-error batted-ball placements into explicit coordinates, named-fielder offsets, handedness rules, and HR alternatives; the browser never interprets display prose to place a ball.
+- Routes every pitch and subsequent chart roll from actual base occupancy instead of stamping the play as bases empty.
+- Removes the temporary clear-bases transition. Runners persist into the next hitter and the button simply reads **Roll pitch**.
+- Scores all occupied runners on a home run and performs correct forced advancement on walks and hit batters, including a bases-loaded run.
+- Prevents unfinished occupied ground-ball sequences from falling into the old batter-only throw-to-first path. The exact chart result, ball, nearest fielder, movement, and runner distances remain visible at a protected integration boundary until defense-selected targets and chart-locked advances are connected.
+- Adds completeness, placement, routing, persistence, force-advance, grand-slam, and fallback-protection regressions. See [Project Checkpoint 0.6.0](docs/PROJECT_CHECKPOINT_0.6.0.md).
 
 ### 0.5.3 single-step batting rotation
 
 - Removes the redundant **Next batter** transition. A completed play has already advanced the lineup and displays the proper upcoming hitter.
 - The next action now reads **Roll pitch** and opens that visible hitter's plate appearance while rolling immediately.
-- At the temporary occupied-base boundary, the action reads **Clear bases & roll pitch** so test behavior remains explicit without an extra click.
+- The occupied-base clear operation was removed in 0.6.0; runners now persist into the next plate appearance.
 - Adds a lineup regression across outs, singles, doubles, triples, walks, hit batters, errors, and home runs. Completion advances exactly once; preparing and rolling the next pitch do not advance again.
 - Extends the Porter multi-throw regression to verify that his completed triple advances Kansas City's batting index from Porter to Hurdle exactly once.
 - The batting-rotation contract is recorded in [Project Checkpoint 0.5.3](docs/PROJECT_CHECKPOINT_0.5.3.md).
@@ -101,7 +111,7 @@ This checkpoint intentionally separates rules, game state, imported data, persis
 - Ground-ball fielding rolls use the conventional dice total, the greater of that total or the fielder's arm, and then subtract the fielder-to-ball movement before measuring the throw.
 - Exact-count plays at first route through the correct 84/85 or 94/95 Automatic Umpire table and the batter-runner's printed speed.
 - Completed outs, singles, walks, hit batters, home runs, and errors update the score line, base state, batting order, outs, and half-inning state.
-- A runner reaching first appears as a gray square. Until the occupied-base charts are executable, **Clear bases & roll pitch** explicitly returns the program to bases-empty validation and rolls for the already-displayed next batter.
+- A runner reaching first appears as a gray square and persists into the next plate appearance.
 
 ### 0.2.5 neutral triple placement
 
@@ -200,10 +210,10 @@ Pitch rolls now present the decisive result prominently as `33 — Probable Out`
 - The supplied Rose, McBride, and Schmidt statistical examples are retained as regression-tested demo values.
 - Wider lineup panels and a 480-pixel stadium reduce vertical scrolling while preserving the full three-column game workspace.
 
-Not yet implemented after 0.2.0:
+Not yet implemented after 0.6.0:
 
-- executable outcome tables for the seven occupied-base states;
-- occupied-base ball movement, throws beyond the first bases-empty phase, substitutions, and complete official scoring;
+- defense-selected occupied-base throw targets, simultaneous runner movement, chart-locked error advancement, and complete double/triple-play integration;
+- substitutions and complete official scoring;
 - live derived season/career statistics and all split accumulators;
 - roster/lineup imports and the six final USBL parks;
 - Rest Chart, full/limited re-rate qualification, initial player creation, rookie pool, and season-to-season SLOBS processing;

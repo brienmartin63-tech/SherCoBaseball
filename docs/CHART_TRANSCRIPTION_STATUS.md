@@ -2,7 +2,7 @@
 
 This inventory is the source-of-truth boundary between chart material that the program can execute and chart material that has only been supplied for later work. A chart is marked **executable** only when its entries are structured data, connected to game state, and covered by regression tests.
 
-## Executable in build 0.2.0
+## Executable and compiled in build 0.6.0
 
 | Rules material | Source | Coverage |
 | --- | --- | --- |
@@ -18,8 +18,11 @@ This inventory is the source-of-truth boundary between chart material that the p
 | Gopher-ball pitchers | 1980 rulebook, Rule 23 | `+` advances HR and triple ratings one SherCo number |
 | Triple-number option | 1980 rulebook, Rule 21 | Brien profile automatically selects a farthest legal square; official profile exposes a decision boundary |
 | Beyond-fence HR result | 1980 rulebook, Rules 5k and 5q | Fly target is checked against the selected park terrain |
+| Seven occupied-base chart sets | 1980 rulebook, pp. 26–41 | 420 entries: PH, Hit Error, PO, Out Error, and Special Events for every base state |
+| Occupied PH/PO ball placement | 1980 rulebook, pp. 26–40 | All 280 non-error rolls have compiled ball rules; no runtime prose parsing |
+| Occupied pitch/chart routing | 1980 rulebook base-state charts | Current runners select the chart and remain on base for the next hitter |
 
-The current vertical slice intentionally stops when a chart result requires fielding, runner movement, a count continuation, or another subsystem that has not yet been implemented. The interface labels that boundary instead of silently inventing a result.
+The current vertical slice resolves occupied home runs, walks, hit batters, and catchable airborne balls. It intentionally stops an occupied result requiring simultaneous runner movement or a defensive target choice. The interface preserves the exact entry, ball, nearest fielder, and distances instead of silently sending every play to first.
 
 ## Confirmed coordinate semantics
 
@@ -30,15 +33,15 @@ The current vertical slice intentionally stops when a chart result requires fiel
 - RF occupies `19-8`: one square in front is `18-8`, and one square behind is `20-8`.
 - Chart coordinates are written for right-handed batters and mirror across the row-column diagonal for left-handed batters. Thus chart `8-19` is a ball toward LF for a righty and becomes `19-8`, toward RF, for a lefty.
 - Results that name a fielder use the fixed defensive position above and do not undergo handedness mirroring.
-- Brien triple placement maximizes SherCo square-distance from home (`2-2`), excludes `beyondFence` terrain, and then maximizes radial distance among equal SherCo distances. Batting hand and pull field do not affect placement; stable row-column order resolves an otherwise exact tie.
+- Brien triple placement maximizes SherCo square-distance from home (`3-3`), excludes `beyondFence` terrain, and then maximizes radial distance among equal SherCo distances. Batting hand and pull field do not affect placement; stable row-column order resolves an otherwise exact tie.
 
 ## Supplied but not yet executable
 
 | Area | Remaining work |
 | --- | --- |
-| Occupied-base batting tables | Transcribe and test Probable Hit, Probable Out, Error, and Special Event results for each of the seven occupied-base states |
-| Fielding | Fly-ball range, ground-ball pickup, throws, assists, cutoffs, double plays, and Brien's tied-fielder rules |
-| Baserunning | Forced movement, optional extra bases, Brien's arm-distance thresholds, and chart-mandated steals |
+| Occupied play resolver | Defense-selected targets, simultaneous initial movement, further throws, and force/double/triple plays |
+| Occupied error branches | Superior checks and hard-coded movement for every Hit Error and Out Error result |
+| Baserunning | Apply the already-tested lead-runner and arm-threshold rules to occupied chart plays; chart-mandated steals |
 | Stealing and count pick-up | 1980 stealing rules plus Brien's automatic attempt profile; no `***` runner tier |
 | Bunts and special offense | Sacrifice, squeeze, and other manager-called plays |
 | Umpire and unusual events | Connect chart results while honoring the current ignore-injury/ejection setting |

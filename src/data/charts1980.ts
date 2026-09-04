@@ -8,6 +8,8 @@ export interface BallTargetRule {
   type: BattedBallType;
   coordinate?: Coordinate;
   fielder?: FielderPosition;
+  /** Park-dependent wall target used by the printed 3-? / 21-? chart entries. */
+  wallRow?: number;
   squaresInFront?: number;
   squaresBehind?: number;
   spray?: SprayRule;

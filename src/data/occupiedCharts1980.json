@@ -1,0 +1,3655 @@
+{
+  "FIRST": {
+    "probableHit": {
+      "11": {
+        "description": "Fly ball to 5-25. (If 11 is within batter’s HR Rating, fly to 5-28); If ball caught and Hit & Run, chance for a double play. Fielder throws first, runner returns to base, fielder throws again.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 5,
+            "column": 25
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 5,
+            "column": 28
+          }
+        }
+      },
+      "12": {
+        "description": "Fly ball to 12-24. (If 12 is within batter’s HR Rating, fly to 12-26); If ball caught and Hit & Run, chance for a double play. Fielder throws first, runner returns to base, fielder throws again.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 12,
+            "column": 24
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 12,
+            "column": 26
+          }
+        }
+      },
+      "13": {
+        "description": "Fly ball to 14-24. (If 13 is within batter’s HR Rating, fly to 16-27); If ball caught and Hit & Run, chance for a double play. Fielder throws first, runner returns to base, fielder throws again.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 14,
+            "column": 24
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 16,
+            "column": 27
+          }
+        }
+      },
+      "14": {
+        "description": "Grounder to 3-26. (If 14 is within batter’s HR Rating, fly to 3-28).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 26
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 3,
+            "column": 28
+          }
+        }
+      },
+      "15": {
+        "description": "Grounder to 3-25. (If 15 is within batter’s HR Rating, fly to 3-27).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 25
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 3,
+            "column": 27
+          }
+        }
+      },
+      "16": {
+        "description": "Grounder to 10-20. (If 16 is within batter’s HR Rating, fly to 10-27); in either case, ball goes to opposite field.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 10,
+            "column": 20
+          },
+          "spray": "opposite"
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 10,
+            "column": 27
+          },
+          "spray": "opposite"
+        }
+      },
+      "22": {
+        "description": "Grounder to 7-20. (If 22 is within batter’s HR Rating, fly to 7-27).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 7,
+            "column": 20
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 7,
+            "column": 27
+          }
+        }
+      },
+      "23": {
+        "description": "Grounder to 18-18. (If 23 is within batter's HR Rating, fly to 18-25); runner advances one base only, regardless of Hit & Run.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 18,
+            "column": 18
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 18,
+            "column": 25
+          }
+        }
+      },
+      "24": {
+        "description": "Grounder to 16-21.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 16,
+            "column": 21
+          }
+        }
+      },
+      "25": {
+        "description": "Grounder to 4-18.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 4,
+            "column": 18
+          }
+        }
+      },
+      "26": {
+        "description": "Grounder to 4-19.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 4,
+            "column": 19
+          }
+        }
+      },
+      "33": {
+        "description": "Grounder to 6-20.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 6,
+            "column": 20
+          }
+        }
+      },
+      "34": {
+        "description": "Grounder to 7-19 or 19-7, Offensive Manager’s option.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 7,
+            "column": 19
+          }
+        }
+      },
+      "35": {
+        "description": "Grounder to 5-20.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 5,
+            "column": 20
+          }
+        }
+      },
+      "36": {
+        "description": "Grounder to 6-18.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 6,
+            "column": 18
+          }
+        }
+      },
+      "44": {
+        "description": "Grounder off shortstop’s glove to 9-11; everyone safe. All runners advance one base only regardless of Hit & Run. If two outs, shortstop makes brilliant catch.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 9,
+            "column": 11
+          }
+        }
+      },
+      "45": {
+        "description": "Grounder off second baseman’s glove to 7-13; everyone sate. All runners advance one base only regardless of Hit & Run. If two outs, second baseman makes brilliant catch.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 7,
+            "column": 13
+          }
+        }
+      },
+      "46": {
+        "description": "Grounder to 10-18.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 10,
+            "column": 18
+          }
+        }
+      },
+      "55": {
+        "description": "Grounder to 9-16; runner advances one base only regardless of Hit & Run.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 9,
+            "column": 16
+          }
+        }
+      },
+      "56": {
+        "description": "Grounder to 5-18.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 5,
+            "column": 18
+          }
+        }
+      },
+      "66": {
+        "description": "Error; roll one die and see chart below.",
+        "route": "HIT_ERROR"
+      }
+    },
+    "hitError": {
+      "1": {
+        "description": "Ball drops in for single; right fielder throws wild to third base allowing runner to score; batter reaches second. If RF is Superior and no error, runner holds at third; batter safe at first on single."
+      },
+      "2": {
+        "description": "Center fielder drops ball; runner and batter advance two bases (runner on first scores if he's asterisked as fast, or ). If CF is Superior and no error, ball caught for an out. Runner holds at first."
+      },
+      "3": {
+        "description": "Ball gets behind left fielder and rolls to wall (square 7-?); runner scores; batter safe at second with option to try for extra bases (fielder moves to ball first, then runner moves, then fielder, etc). Score as a single and error. If LF is Superior and no error, batter safe on single; runner safe at third."
+      },
+      "4": {
+        "description": "Left fielder drops fly ball for two-base error; runner holds at third; batter safe at second. If LF is Superior and no error, batter out; runner holds at first."
+      },
+      "5": {
+        "description": "Left fielder drops shallow fly ball for error, runner holds at second; batter safe at first. If LF is Superior and no error, batter out; runner at first."
+      },
+      "6": {
+        "description": "Center fielder makes great catch but then throws wild attempting to double up runner on first. Batter is out and runner is safe at second on error. If CF is Superior and no error, double play!"
+      }
+    },
+    "probableOut": {
+      "11": {
+        "description": "High chopper to 4-7; fielder gets minimum number for DP regardless of Hit & Run.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 4,
+            "column": 7
+          }
+        }
+      },
+      "12": {
+        "description": "Towering high fly ball to center fielder. If Hit & Run, runner returns safely.",
+        "ball": {
+          "type": "fly",
+          "fielder": "CF",
+          "spray": "fixed"
+        }
+      },
+      "13": {
+        "description": "Grounder to one square in front of shortstop; if one out, automatic force out at second only.",
+        "ball": {
+          "type": "ground",
+          "fielder": "SS",
+          "spray": "fixed",
+          "squaresInFront": 1
+        }
+      },
+      "14": {
+        "description": "Ground ball hit hard to second baseman: if one out. only play is on batter.",
+        "ball": {
+          "type": "ground",
+          "fielder": "2B",
+          "spray": "fixed"
+        }
+      },
+      "15": {
+        "description": "High hopper to first baseman.",
+        "ball": {
+          "type": "ground",
+          "fielder": "1B",
+          "spray": "fixed"
+        }
+      },
+      "16": {
+        "description": "Grounder to 7-8; fielder gets minimum for DP regardless of Hit & Run. If runner on first is or , only play is a force out at second.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 7,
+            "column": 8
+          }
+        }
+      },
+      "22": {
+        "description": "Grounder to 7-8; fielder gets minimum for DP regardless of Hit & Run. i",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 7,
+            "column": 8
+          }
+        }
+      },
+      "23": {
+        "description": "Grounder to 8-10; only play is at second base; batter safe at first. Fielder gets minimum regardless of Hit & Run.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 10
+          }
+        }
+      },
+      "24": {
+        "description": "Grounder to 3-7; runner advances to second safely; if nearest fielder is playing in, everyone safe.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 7
+          }
+        }
+      },
+      "25": {
+        "description": "Grounder to 5-9; runner advances to second safely.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 5,
+            "column": 9
+          }
+        }
+      },
+      "26": {
+        "description": "One bounce grounder back to mound, 6-6; if none out, only play is on batter",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 6,
+            "column": 6
+          }
+        }
+      },
+      "33": {
+        "description": "Fly ball to 5-20; if Hit & Run and ball caught, runner returns safely.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 5,
+            "column": 20
+          }
+        }
+      },
+      "34": {
+        "description": "Soft liner to 18-18; if Hit & Run and ball caught, runner returns safely.",
+        "ball": {
+          "type": "line",
+          "coordinate": {
+            "row": 18,
+            "column": 18
+          }
+        }
+      },
+      "35": {
+        "description": "Fly ball to 6-20; if Hit & Run and ball caught, runner returns safely.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 6,
+            "column": 20
+          }
+        }
+      },
+      "36": {
+        "description": "High pop up to 3-11; if Hit & Run and ball caught, runner returns safely.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 3,
+            "column": 11
+          }
+        }
+      },
+      "44": {
+        "description": "Pop up to 8-11 or 11-8, Offensive Manager’s option. If Hit & Run and ball caught, runner returns safely.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 8,
+            "column": 11
+          }
+        }
+      },
+      "45": {
+        "description": "High pop up to 1-1; if Hit & Run and ball caught, runner returns safely.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 1,
+            "column": 1
+          }
+        }
+      },
+      "46": {
+        "description": "Grounder to 3-9; fielder gets minimum for DP regardless of Hit & Run if first play is made on runner going to second base; if batter is left-handed, only play is on batter or runner.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 9
+          }
+        }
+      },
+      "55": {
+        "description": "Ground ball hit to 5-10; only play is on batter or runner-fielder gets minimum, no DP.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 5,
+            "column": 10
+          }
+        }
+      },
+      "56": {
+        "description": "Ground ball hit to 6-10; if runner on first is , only player is at first.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 6,
+            "column": 10
+          }
+        }
+      },
+      "66": {
+        "description": "Error; roll one die and see chart below.",
+        "route": "OUT_ERROR"
+      }
+    },
+    "outError": {
+      "1": {
+        "description": "Third baseman forces runner at second; but first baseman drops throw allowing batter to be safe. If IB is Superior and no error, double play."
+      },
+      "2": {
+        "description": "Shortstop boots ball; runner and batter advance safely. If SS is Superior and no error, complete play by rolling dice."
+      },
+      "3": {
+        "description": "Pitcher throws ball into center field (square 18-18); runner and batter have option to try to gain another base. Begin action by CF fielding and throwing ball, then moving runner(s), then continuing throw, etc. If P is Superior and no error, complete play by rolling dice from square 6-6."
+      },
+      "4": {
+        "description": "Second baseman bobbles ball; runner and batter safe. If 2B is Superior and no error, complete play by rolling dice. If right-handed batter, error by 3B (ignore Superior rating); everyone safe."
+      },
+      "5": {
+        "description": "Second baseman bobbles ball; runner and batter safe. If 2B is Superior and no error, runner safe at second, batter is out."
+      },
+      "6": {
+        "description": "Shortstop lets ball go between his legs (six squares diagonally behind him); runner and batter have option to try for another base. Nearest outfielder fields and throws to start action. If SS is Superior and no error, runner safe at second; only play is on batter at first."
+      }
+    },
+    "specialEvent": {
+      "1": {
+        "description": "Base on balls."
+      },
+      "2": {
+        "description": "Wild pitch; roll one die - if 6, batter walks."
+      },
+      "3": {
+        "description": "Runner caught off first (A-P, PO-1B)."
+      },
+      "4": {
+        "description": "Balk."
+      },
+      "5": {
+        "description": "Hit by Pitch, batter takes first."
+      },
+      "6": {
+        "description": "Called third strike. If third out and team at bat is losing, catcher drops ball. Batter safe at first, runner safe at second."
+      }
+    }
+  },
+  "SECOND": {
+    "probableHit": {
+      "11": {
+        "description": "Fly ball to 21-23. (If 11 is within batter's HR Rating, fly to 21-26).",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 21,
+            "column": 23
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 21,
+            "column": 26
+          }
+        }
+      },
+      "12": {
+        "description": "Fly ball to three squares behind CF; if in stands, home run. (If 12 is within batter’s HR Rating, fly ball to five squares behind CF).",
+        "ball": {
+          "type": "fly",
+          "fielder": "CF",
+          "spray": "fixed",
+          "squaresBehind": 3
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "fielder": "CF",
+          "spray": "fixed",
+          "squaresBehind": 5
+        }
+      },
+      "13": {
+        "description": "Fly ball to 18-23. (If 13 is within batter's HR Rating, fly ball to 18-28).",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 18,
+            "column": 23
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 18,
+            "column": 28
+          }
+        }
+      },
+      "14": {
+        "description": "Fly ball to three squares behind LF; if in stands, home run. (If 14 is within batter’s HR Rating, fly ball to 13-28).",
+        "ball": {
+          "type": "fly",
+          "fielder": "LF",
+          "spray": "fixed",
+          "squaresBehind": 3
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 13,
+            "column": 28
+          }
+        }
+      },
+      "15": {
+        "description": "Fly ball to 12-24. (If 15 is within batter’s HR Rating, fly to 12-28).",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 12,
+            "column": 24
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 12,
+            "column": 28
+          }
+        }
+      },
+      "16": {
+        "description": "Grounder to 20-22. (If 16 is within batter’s HR Rating, fly to 24-27).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 20,
+            "column": 22
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 24,
+            "column": 27
+          }
+        }
+      },
+      "22": {
+        "description": "Grounder to 21-21. (If 22 is within batter's HR Rating, fly to 21-28).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 21,
+            "column": 21
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 21,
+            "column": 28
+          }
+        }
+      },
+      "23": {
+        "description": "Grounder to 16-21. (If 23 is within batter’s HR Rating, fly to 16-28).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 16,
+            "column": 21
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 16,
+            "column": 28
+          }
+        }
+      },
+      "24": {
+        "description": "Grounder to 13-21.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 13,
+            "column": 21
+          }
+        }
+      },
+      "25": {
+        "description": "Grounder to 15-18.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 15,
+            "column": 18
+          }
+        }
+      },
+      "26": {
+        "description": "Grounder to 13-19.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 13,
+            "column": 19
+          }
+        }
+      },
+      "33": {
+        "description": "Grounder to 9-18.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 9,
+            "column": 18
+          }
+        }
+      },
+      "34": {
+        "description": "Grounder to 8-18 or 18-8, Offensive Manager’s option.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 18
+          }
+        }
+      },
+      "35": {
+        "description": "Grounder to 16-16; runner advances one base only.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 16,
+            "column": 16
+          }
+        }
+      },
+      "36": {
+        "description": "Grounder to 18-18; runner advances one base only.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 18,
+            "column": 18
+          }
+        }
+      },
+      "44": {
+        "description": "Grounder to 10-16.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 10,
+            "column": 16
+          }
+        }
+      },
+      "45": {
+        "description": "Grounder to 9-17.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 9,
+            "column": 17
+          }
+        }
+      },
+      "46": {
+        "description": "Grounder to 8-18.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 18
+          }
+        }
+      },
+      "55": {
+        "description": "Grounder to 9-19.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 9,
+            "column": 19
+          }
+        }
+      },
+      "56": {
+        "description": "Grounder to 5-19; ball goes to opposite field.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 5,
+            "column": 19
+          },
+          "spray": "opposite"
+        }
+      },
+      "66": {
+        "description": "Error; roll one die and see chart below.",
+        "route": "HIT_ERROR"
+      }
+    },
+    "hitError": {
+      "1": {
+        "description": "First baseman lets ball get by and down the right field line for a two-base error; runner scores. If IB is Superior and no error, he snags ball on the same square upon which he is playing. Complete play by rolling dice."
+      },
+      "2": {
+        "description": "Left fielder drops ball for two-base error; runner scores. If LF is Superior and no error, ball caught. Complete play by rolling dice."
+      },
+      "3": {
+        "description": "Center fielder drops ball for two-base error; runner scores. If CF is Superior and no error, CF runs in to square 13-13 attempting a great catch. Instead, he misses. Ball gets by and rolls diagonally back to the wall. Runner scores and batter has chance for an inside-the-park home run. Start action by moving batter from first to second, then CF (or nearest outfielder) from 13-13 to the ball, then move batter to third, then fielder, etc."
+      },
+      "4": {
+        "description": "Right fielder drops ball for two-base error; runner scores. If RF is Superior and no error, ball caught. Complete play by rolling dice."
+      },
+      "5": {
+        "description": "Left fielder drops ball for two-base error; runner scores. If LF is Superior and no error, ball caught. Complete play by rolling dice."
+      },
+      "6": {
+        "description": "Center fielder and second baseman collide on square 14-14. Runner scores, batter reaches first. Roll die to see which fielder is unable to continue game. 1-3 = CF; 4-6 = 2B. Score as a base hit."
+      }
+    },
+    "probableOut": {
+      "11": {
+        "description": "Line drive right to left fielder.",
+        "ball": {
+          "type": "line",
+          "fielder": "LF",
+          "spray": "fixed"
+        }
+      },
+      "12": {
+        "description": "Line drive hit to one square behind right fielder.",
+        "ball": {
+          "type": "line",
+          "fielder": "RF",
+          "spray": "fixed",
+          "squaresBehind": 1
+        }
+      },
+      "13": {
+        "description": "High hopper over the mound to 9-9; runner advances to third safely. If two out, he may try for home.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 9,
+            "column": 9
+          }
+        }
+      },
+      "14": {
+        "description": "Ground ball hit sharply to second baseman.",
+        "ball": {
+          "type": "ground",
+          "fielder": "2B",
+          "spray": "fixed"
+        }
+      },
+      "15": {
+        "description": "Pop up to 7-12.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 7,
+            "column": 12
+          }
+        }
+      },
+      "16": {
+        "description": "Line drive right at shortstop; roll one die for possible DP. If roll is equal to or more than number of squares from second base, runner is out.",
+        "ball": {
+          "type": "line",
+          "fielder": "SS",
+          "spray": "fixed"
+        }
+      },
+      "22": {
+        "description": "Grounder to 6-10; runner advances to third safely.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 6,
+            "column": 10
+          }
+        }
+      },
+      "23": {
+        "description": "Ground to 3-8 (if ball hit to first baseman, runner advances to third safely).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 8
+          }
+        }
+      },
+      "24": {
+        "description": "Grounder to 6 <2>8 or 8-6; Offensive Manager’s option. Note: If wind blows ball to square 3-3, batter is out because of interference. Runner returns to second.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 6,
+            "column": 8
+          }
+        }
+      },
+      "25": {
+        "description": "Grounder to 4-9; runner advances to third safely.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 4,
+            "column": 9
+          }
+        }
+      },
+      "26": {
+        "description": "Fly ball to 8-19.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 8,
+            "column": 19
+          }
+        }
+      },
+      "33": {
+        "description": "Fly ball to 17-17.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 17,
+            "column": 17
+          }
+        }
+      },
+      "34": {
+        "description": "Fly ball to 7-18 or 18-7, Offensive Manager's option.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 7,
+            "column": 18
+          }
+        }
+      },
+      "35": {
+        "description": "Soft fly ball to 8-12.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 8,
+            "column": 12
+          }
+        }
+      },
+      "36": {
+        "description": "Soft pop up to 6-12.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 6,
+            "column": 12
+          }
+        }
+      },
+      "44": {
+        "description": "Pop up to 1-10; if two out, pop up to 2-2. Note: If wind blows ball to square 3-3, batter is out because of interference. Runner returns to second.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 1,
+            "column": 10
+          }
+        }
+      },
+      "45": {
+        "description": "Ground ball hit to one square in front of shortstop (horizontally).",
+        "ball": {
+          "type": "ground",
+          "fielder": "SS",
+          "spray": "fixed",
+          "squaresInFront": 1
+        }
+      },
+      "46": {
+        "description": "Fly ball to 7-24.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 7,
+            "column": 24
+          }
+        }
+      },
+      "55": {
+        "description": "One-bounce grounder to 5-6.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 5,
+            "column": 6
+          }
+        }
+      },
+      "56": {
+        "description": "Grounder to 5-10, if astroturf - otherwise, grounder to 5-8.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 5,
+            "column": 10
+          }
+        }
+      },
+      "66": {
+        "description": "Error; roll one die and see chart below.",
+        "route": "OUT_ERROR"
+      }
+    },
+    "outError": {
+      "1": {
+        "description": "Second baseman bobbles ball ; runner advances; batter safe. If 2B is Superior and no error, runner advances; batter out at first."
+      },
+      "2": {
+        "description": "Catcher throws wild to square 2-20; runner scores; batter safe at second. If catcher is Superior and no error, runner advances; batter out at first."
+      },
+      "3": {
+        "description": "Pitcher holds runner at second and then throws to first baseman pulling him off the bag; batter safe. If P is Superior and no error, runner holds at second; batter out at first."
+      },
+      "4": {
+        "description": "Shortstop boots ball; runner advances; batter safe at first. If SS is Superior and no error, runner holds at second; only play is at first. Complete play by rolling dice."
+      },
+      "5": {
+        "description": "Shortstop fields ball deflected by pitcher on square 5-9; runner advances to third safely; no play on the batter. Score as an infield hit. If P is Superior, runner holds at second; batter out. If SS is Superior he has option of rolling one die to get runner sliding into third, or rolling two dice to get batter at first."
+      },
+      "6": {
+        "description": "Third baseman bobbles ball; runner holds; batter safe. If 3B is Superior and no error, runner holds. Complete play at first by rolling dice."
+      }
+    },
+    "specialEvent": {
+      "1": {
+        "description": "Base on balls."
+      },
+      "2": {
+        "description": "Wild pitch; roll one die -- if 6, batter walks."
+      },
+      "3": {
+        "description": "Runner caught off second (A-C, PO-2B), credit batter with a ball (pitch out)."
+      },
+      "4": {
+        "description": "Hit by pitch, batter takes first."
+      },
+      "5": {
+        "description": "Called third strike."
+      },
+      "6": {
+        "description": "Runner steals third; goes home on wild throw by catcher (error). If catcher is Superior, there is no error. Runner steals third only. In either case, credit batter with a called strike."
+      }
+    }
+  },
+  "THIRD": {
+    "probableHit": {
+      "11": {
+        "description": "Fly ball to 8-25. (If 11 is within batter's HR Rating, fly to 8-28).",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 8,
+            "column": 25
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 8,
+            "column": 28
+          }
+        }
+      },
+      "12": {
+        "description": "Fly ball to 8-26. (If 12 is within batter's HR Rating, fly to 8-28).",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 8,
+            "column": 26
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 8,
+            "column": 28
+          }
+        }
+      },
+      "13": {
+        "description": "Fly ball to three squares behind RF; if in stands, home run. (If 13 is within batter’s HR Rating, fly ball to five squares behind RF).",
+        "ball": {
+          "type": "fly",
+          "fielder": "RF",
+          "spray": "fixed",
+          "squaresBehind": 3
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "fielder": "RF",
+          "spray": "fixed",
+          "squaresBehind": 5
+        }
+      },
+      "14": {
+        "description": "Fly ball to three squares behind LF; if in stands, home run. (If 14 is within batter’s HR Rating, fly ball to six squares behind RF or LF, depending on how batter pulls).",
+        "ball": {
+          "type": "fly",
+          "fielder": "LF",
+          "spray": "fixed",
+          "squaresBehind": 3
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "fielder": "RF",
+          "spray": "fixed",
+          "squaresBehind": 6
+        }
+      },
+      "15": {
+        "description": "Fly ball to four squares behind LF; if in stands, home run. (If 15 is within batter’s HR Rating, fly ball to 6-28).",
+        "ball": {
+          "type": "fly",
+          "fielder": "LF",
+          "spray": "fixed",
+          "squaresBehind": 4
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 6,
+            "column": 28
+          }
+        }
+      },
+      "16": {
+        "description": "Grounder to 3-21. (If 16 is within batter’s HR Rating, fly ball to 3-28); in either case, ball goes to opposite field.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 21
+          },
+          "spray": "opposite"
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 3,
+            "column": 28
+          },
+          "spray": "opposite"
+        }
+      },
+      "22": {
+        "description": "Grounder to 3-20. (If 22 is within batter’s HR Rating, fly ball to 3-26).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 20
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 3,
+            "column": 26
+          }
+        }
+      },
+      "23": {
+        "description": "Grounder to 7-19. (If 23 is within batter's HR Rating, fly ball to 7-26).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 7,
+            "column": 19
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 7,
+            "column": 26
+          }
+        }
+      },
+      "24": {
+        "description": "Grounder to 6-19.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 6,
+            "column": 19
+          }
+        }
+      },
+      "25": {
+        "description": "Grounder to 10-19.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 10,
+            "column": 19
+          }
+        }
+      },
+      "26": {
+        "description": "Grounder to 9-19.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 9,
+            "column": 19
+          }
+        }
+      },
+      "33": {
+        "description": "Grounder to 13-20.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 13,
+            "column": 20
+          }
+        }
+      },
+      "34": {
+        "description": "Grounder to 8-20.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 20
+          }
+        }
+      },
+      "35": {
+        "description": "Liner to 17-17 drops in fora base hit. If pitcher is Superior, he catches ball on square 6-6; runner holds.",
+        "ball": {
+          "type": "line",
+          "coordinate": {
+            "row": 17,
+            "column": 17
+          }
+        }
+      },
+      "36": {
+        "description": "Grounder to 15-18 or 18-15, Offensive Manager’s option.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 15,
+            "column": 18
+          }
+        }
+      },
+      "44": {
+        "description": "Grounder to 9-16.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 9,
+            "column": 16
+          }
+        }
+      },
+      "45": {
+        "description": "Grounder to 8-17.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 17
+          }
+        }
+      },
+      "46": {
+        "description": "Grounder to 7-20.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 7,
+            "column": 20
+          }
+        }
+      },
+      "55": {
+        "description": "Grounder to 9-20.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 9,
+            "column": 20
+          }
+        }
+      },
+      "56": {
+        "description": "Grounder to 17-19.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 17,
+            "column": 19
+          }
+        }
+      },
+      "66": {
+        "description": "Error; roll one die and see chart below.",
+        "route": "HIT_ERROR"
+      }
+    },
+    "hitError": {
+      "1": {
+        "description": "Center fielder misjudges fly ball for two-base error; runner scores. If CF is Superior, there is no error. He catches it and completes play by rolling dice."
+      },
+      "2": {
+        "description": "Batter singles and is safe at second base when shortstop drops center fielder's throw; runner on third scores. If SS is Superior, there is no error. Batter is out at second base. Run still scores."
+      },
+      "3": {
+        "description": "Ball gets by center fielder and rolls to wall (square 21-?). Runner scores; batter safe at second with option to try for extra bases. Start action by moving CF or nearest outfielder to ball; then advance runner; then continue throw, etc. If CF is Superior, there is no error. Credit batter with single; runner scores."
+      },
+      "4": {
+        "description": "Ball caught by left fielder, but bad throw allows runner on third to score if not third out. If LF is Superior, there is no error. Ball is caught and a good throw holds runner at third."
+      },
+      "5": {
+        "description": "Same as above except if LF is Superior, there is no error. Ball is caught and a great throw gets the runner trying to score - double play!"
+      },
+      "6": {
+        "description": "Right fielder makes diving attempt to catch ball but instead traps it. Runner scores; batter safe at first with single. If RF is Superior, he catches ball. Runner on third may attempt to score. Begin action by moving runner first and then throwing ball from square 5-14."
+      }
+    },
+    "probableOut": {
+      "11": {
+        "description": "High fly ball to 4-20.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 4,
+            "column": 20
+          }
+        }
+      },
+      "12": {
+        "description": "High fly ball to 5-24.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 5,
+            "column": 24
+          }
+        }
+      },
+      "13": {
+        "description": "Grounder to two squares in front of shortstop (horizontally).",
+        "ball": {
+          "type": "ground",
+          "fielder": "SS",
+          "spray": "fixed",
+          "squaresInFront": 2
+        }
+      },
+      "14": {
+        "description": "Grounder to third baseman.",
+        "ball": {
+          "type": "ground",
+          "fielder": "3B",
+          "spray": "fixed"
+        }
+      },
+      "15": {
+        "description": "Grounder to 4-10 if nearest fielder is playing deep; grounder to 4-8 and runner running if nearest fielder is playing in.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 4,
+            "column": 10
+          }
+        }
+      },
+      "16": {
+        "description": "Grounder to 7-10 if nearest fielder is playing deep; grounder to 6-8 and runner is running if nearest fielder is playing in.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 7,
+            "column": 10
+          }
+        }
+      },
+      "22": {
+        "description": "Soft fly ball to 7-15 or 15-7, Offensive Manager’s option.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 7,
+            "column": 15
+          }
+        }
+      },
+      "23": {
+        "description": "Grounder to 8-9, if astroturf - otherwise, grounder to 5-6.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 9
+          }
+        }
+      },
+      "24": {
+        "description": "Line drive right at third baseman; double play if he’s playing on bag.",
+        "ball": {
+          "type": "line",
+          "fielder": "3B",
+          "spray": "fixed"
+        }
+      },
+      "25": {
+        "description": "Grounder to 3-9 if nearest fielder is playing deep; grounder to 3-19 if nearest fielder is playing in, base hit.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 9
+          }
+        }
+      },
+      "26": {
+        "description": "Grounder to 3-8, runner out at home; batter goes to second base on the run down. If two outs, play at first base only.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 8
+          }
+        }
+      },
+      "33": {
+        "description": "Grounder to 8-9, runner scores; only play is at first base.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 9
+          }
+        }
+      },
+      "34": {
+        "description": "Little dribbler to 4-5. If one or two outs, high hopper to 5-7 fielded by nearest fielder other than pitcher.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 4,
+            "column": 5
+          }
+        }
+      },
+      "35": {
+        "description": "Fly ball to 4-23 or 23-4, Offensive Manager’s option.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 4,
+            "column": 23
+          }
+        }
+      },
+      "36": {
+        "description": "Fly ball to 19-22, if none out; fly ball to 16-22 if one out; fly ball to 16-19 if two outs.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 19,
+            "column": 22
+          }
+        }
+      },
+      "44": {
+        "description": "High fly ball to 7-19 or 19-7, Offensive Manager’s option.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 7,
+            "column": 19
+          }
+        }
+      },
+      "45": {
+        "description": "Pop up 4-5.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 4,
+            "column": 5
+          }
+        }
+      },
+      "46": {
+        "description": "Pop up to 3-12 or 12-3, Offensive Manager’s option.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 3,
+            "column": 12
+          }
+        }
+      },
+      "55": {
+        "description": "Towering fly ball to 7-22.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 7,
+            "column": 22
+          }
+        }
+      },
+      "56": {
+        "description": "Fly ball to 9-23.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 9,
+            "column": 23
+          }
+        }
+      },
+      "66": {
+        "description": "Error; roll one die and see chart below.",
+        "route": "OUT_ERROR"
+      }
+    },
+    "outError": {
+      "1": {
+        "description": "Shortstop fumbles grounder; runner holds; batter safe. If SS is Superior and no error, complete play by rolling dice."
+      },
+      "2": {
+        "description": "First baseman drops throw from shortstop; runner holds; batter safe. If IB is Superior and no error, batter is out."
+      },
+      "3": {
+        "description": "Pitcher tries to get runner scrambling back to third but throws ball into dugout. Runner scores; batter reaches second. If P is Superior and no error, he has option of rolling one die to get runner scrambling back or rolling both dice to get batter out at first base."
+      },
+      "4": {
+        "description": "Second baseman boots ball; runner scores; batter safe. If 2B is Superior and no error, complete play by rolling dice."
+      },
+      "5": {
+        "description": "Second baseman can't find the handle; runner scores; batter safe. If 2B is Superior and no error, complete play by rolling dice."
+      },
+      "6": {
+        "description": "Catcher muffs foul pop; runner holds; batter still batting. If C is Superior and no error, catcher makes great catch leaning into stands behind home plate. Runner holds."
+      }
+    },
+    "specialEvent": {
+      "1": {
+        "description": "Base on balls."
+      },
+      "2": {
+        "description": "Wild pitch, runner scores; roll one die -- if 6, batter walks."
+      },
+      "3": {
+        "description": "Runner caught off third (A-C, PO-3B), credit batter with ball (pitch out)."
+      },
+      "4": {
+        "description": "Hit by pitch, batter takes first."
+      },
+      "5": {
+        "description": "Called third strike."
+      },
+      "6": {
+        "description": "Runner steals home, catcher is injured - unable to play next three games. Credit batter with a caned strike."
+      }
+    }
+  },
+  "FIRST_SECOND": {
+    "probableHit": {
+      "11": {
+        "description": "Fly ball to 5-25. (If 11 is within batter’s HR Rating, fly to 5-28); in either case, ball goes to opposite field.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 5,
+            "column": 25
+          },
+          "spray": "opposite"
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 5,
+            "column": 28
+          },
+          "spray": "opposite"
+        }
+      },
+      "12": {
+        "description": "Fly ball to 3-24. (If 12 is within batter’s HR Rating, fly to 3-26).",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 3,
+            "column": 24
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 3,
+            "column": 26
+          }
+        }
+      },
+      "13": {
+        "description": "Fly ball to three squares behind RF; if in stands, home run. (If 13 is within batter's HR Rating, fly ball to six squares behind RF).",
+        "ball": {
+          "type": "fly",
+          "fielder": "RF",
+          "spray": "fixed",
+          "squaresBehind": 3
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "fielder": "RF",
+          "spray": "fixed",
+          "squaresBehind": 6
+        }
+      },
+      "14": {
+        "description": "Fly ball to three squares behind RF; if in stands, home run. (If 14 is within batter’s HR Rating, fly ball to 4-27 - to the field to which the batter pulls).",
+        "ball": {
+          "type": "fly",
+          "fielder": "RF",
+          "spray": "fixed",
+          "squaresBehind": 3
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 4,
+            "column": 27
+          }
+        }
+      },
+      "15": {
+        "description": "Fly ball to 9-25. (If 15 is within the batter’s HR Rating, fly to 9-28).",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 9,
+            "column": 25
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 9,
+            "column": 28
+          }
+        }
+      },
+      "16": {
+        "description": "Grounder to 8-21. (If 16 is within the batter's HR Rating, fly to 8-28).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 21
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 8,
+            "column": 28
+          }
+        }
+      },
+      "22": {
+        "description": "Grounder to 4-21. (If 22 is within the batter’s HR Rating, fly to 4-28).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 4,
+            "column": 21
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 4,
+            "column": 28
+          }
+        }
+      },
+      "23": {
+        "description": "Grounder to 20-21. (If 23 is within the batter’s HR Rating, fly to 20-28).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 20,
+            "column": 21
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 20,
+            "column": 28
+          }
+        }
+      },
+      "24": {
+        "description": "Grounder to 19-21.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 19,
+            "column": 21
+          }
+        }
+      },
+      "25": {
+        "description": "Grounder to 16-18.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 16,
+            "column": 18
+          }
+        }
+      },
+      "26": {
+        "description": "Grounder to 11-18 or 18-11, Offensive Manager's option.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 11,
+            "column": 18
+          }
+        }
+      },
+      "33": {
+        "description": "Grounder to 9-20.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 9,
+            "column": 20
+          }
+        }
+      },
+      "34": {
+        "description": "Grounder to 10-20.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 10,
+            "column": 20
+          }
+        }
+      },
+      "35": {
+        "description": "Grounder to 7-16.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 7,
+            "column": 16
+          }
+        }
+      },
+      "36": {
+        "description": "Grounder to 7-17.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 7,
+            "column": 17
+          }
+        }
+      },
+      "44": {
+        "description": "Grounder off shortstop's glove to 7-13; everyone safe. Ball must be fielded by nearest outfielder; runners have option to try for extra base. Start action by moving fielder to ball, then runner(s), etc.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 7,
+            "column": 13
+          }
+        }
+      },
+      "45": {
+        "description": "Grounder off second baseman’s glove to 9-11; everyone safe one base.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 9,
+            "column": 11
+          }
+        }
+      },
+      "46": {
+        "description": "Grounder to 16-17.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 16,
+            "column": 17
+          }
+        }
+      },
+      "55": {
+        "description": "Grounder to 14-17.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 14,
+            "column": 17
+          }
+        }
+      },
+      "56": {
+        "description": "Slow roller stays fair to 3-7; everyone safe.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 7
+          }
+        }
+      },
+      "66": {
+        "description": "Error; roll one die and see chart below.",
+        "route": "HIT_ERROR"
+      }
+    },
+    "hitError": {
+      "1": {
+        "description": "Left fielder drops shallow fly ball; runners advance one. If two outs, advance runners two bases; batter safe at first. If LF is Superior and no error, he catches ball. Runners hold."
+      },
+      "2": {
+        "description": "Same as above, except if LF is Superior, there is no error. Ball caught, runners hold."
+      },
+      "3": {
+        "description": "Batter singles to right; fielder makes bad throw home allowing runner on second to score; runner on first moves to third and batter reaches second. If RF is Superior and no error, a good throw home makes runner hold at third. Bases loaded."
+      },
+      "4": {
+        "description": "Batter singles to right; all runners advance two bases; no error. If RF is Superior, he fields ball quickly and throws out lead runner at home. Batter reaches second, other runner goes to third."
+      },
+      "5": {
+        "description": "Batter singles to right; ball gets by and rolls to wall vertically behind where fielder is playing. Batter has chance for inside-the-park home run. Start action by moving batter from first to second, then fielder to ball, etc. If RF is Superior, he fields ball and makes great throw to home to get lead runner. Second runner is then thrown out at third to complete a double play. Batter ends up at second base. Score as a base hit and 9-2-5."
+      },
+      "6": {
+        "description": "Center fielder misjudges high fly which drops in for a base hit four squares diagonally in front of him. Situation (unless two outs): runner on second, and runner and batter both on first. Complete play by runners (not batter) moving first, then CF throwing (counting all moves to the ball). If two outs, runners advance two bases; award batter a single. If CF is Superior, he catches ball on 19-19. Complete play by rolling dice."
+      }
+    },
+    "probableOut": {
+      "11": {
+        "description": "Grounder to 7-10; runner advances safely to third.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 7,
+            "column": 10
+          }
+        }
+      },
+      "12": {
+        "description": "Fly ball to 17-21 or 21-17, Offensive Manager’s option.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 17,
+            "column": 21
+          }
+        }
+      },
+      "13": {
+        "description": "Bad bounce grounder to 11-16; ball must be fielded by nearest ftelder; if one out, grounder to 4- 10.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 11,
+            "column": 16
+          }
+        }
+      },
+      "14": {
+        "description": "Slow roller to 3-6; runners advance safely.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 6
+          }
+        }
+      },
+      "15": {
+        "description": "Ground ball hit right to second baseman.",
+        "ball": {
+          "type": "ground",
+          "fielder": "2B",
+          "spray": "fixed"
+        }
+      },
+      "16": {
+        "description": "Grounder to third baseman; if he’s playing off the bag, only play is on batter.",
+        "ball": {
+          "type": "ground",
+          "fielder": "3B",
+          "spray": "fixed"
+        }
+      },
+      "22": {
+        "description": "One-bounce grounder hit right back to the mound, 6-6.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 6,
+            "column": 6
+          }
+        }
+      },
+      "23": {
+        "description": "Grounder to 7-9; if no outs, force out at second only.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 7,
+            "column": 9
+          }
+        }
+      },
+      "24": {
+        "description": "Grounder to 7-9, ball goes to opposite field; if one out, force out at second only.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 7,
+            "column": 9
+          },
+          "spray": "opposite"
+        }
+      },
+      "25": {
+        "description": "Pop up to 6-11.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 6,
+            "column": 11
+          }
+        }
+      },
+      "26": {
+        "description": "Slow bounder to 4-7; runners advance safely.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 4,
+            "column": 7
+          }
+        }
+      },
+      "33": {
+        "description": "High hopper over the box to 10-10, if astroturf - otherwise, high hopper to 9-9.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 10,
+            "column": 10
+          }
+        }
+      },
+      "34": {
+        "description": "Grounder to 6-8.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 6,
+            "column": 8
+          }
+        }
+      },
+      "35": {
+        "description": "Fly ball to 6-18.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 6,
+            "column": 18
+          }
+        }
+      },
+      "36": {
+        "description": "Fly ball to 17-19 or 15-21, Offensive Manager’s option.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 17,
+            "column": 19
+          }
+        }
+      },
+      "44": {
+        "description": "Fly ball to 9-18.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 9,
+            "column": 18
+          }
+        }
+      },
+      "45": {
+        "description": "Pop up to 6-12..",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 6,
+            "column": 12
+          }
+        }
+      },
+      "46": {
+        "description": "Pop up to 3-10 or 10-3, Offensive Manager’s option.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 3,
+            "column": 10
+          }
+        }
+      },
+      "55": {
+        "description": "Line drive smash to 5-11; roll two dice for possible triple play. If roll is equal to or more than number of squares needed to move to ball and throw to either or both bases, batter and runner(s) are out.",
+        "ball": {
+          "type": "line",
+          "coordinate": {
+            "row": 5,
+            "column": 11
+          }
+        }
+      },
+      "56": {
+        "description": "Pop up to 1-5; if two outs, pop up to 7-7.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 1,
+            "column": 5
+          }
+        }
+      },
+      "66": {
+        "description": "Error; roll one die and see chart below.",
+        "route": "OUT_ERROR"
+      }
+    },
+    "outError": {
+      "1": {
+        "description": "Third baseman fumbles ball; all runners advance; batter safe. If 3B is Superior and no error, complete play by rolling dice."
+      },
+      "2": {
+        "description": "Second baseman forces runner at second but shortstop throws slightly wide to first, and first baseman drops the ball. Runner on second safe at third: batter safe at first. Roll die to see who is charged with error: 1-3= SS;4-6= IB. If SS (or IB) is Superior and no error, double play. Runner advances to third."
+      },
+      "3": {
+        "description": "Shortstop forces runner at second but second baseman throws wide to first. Runner on second scores; batter goes to second. If 2B is superior and no error, runner out at second only; no play at first. Other runner holds third."
+      },
+      "4": {
+        "description": "Second baseman bobbles ball; everyone safe. If 2B is Superior and no error, complete play by rolling dice."
+      },
+      "5": {
+        "description": "Third baseman bobbles ball; everyone safe. If 3B is Superior and no error, complete play by rolling dice."
+      },
+      "6": {
+        "description": "Catcher’s throw hits batter in back; everyone safe. If C is Superior and no error, batter out at first; everyone else advances one base safely."
+      }
+    },
+    "specialEvent": {
+      "1": {
+        "description": "Base on balls."
+      },
+      "2": {
+        "description": "Passed ball; roll one die -- if 6, batter walks; runners advance one base only."
+      },
+      "3": {
+        "description": "Ball; roll one die -- if 6, batter walks. In any event, pitcher and catcher dispute call; roll one die to see who is ejected: 1-3 = P; 4-6 = C."
+      },
+      "4": {
+        "description": "Hit by pitcher."
+      },
+      "5": {
+        "description": "Called third strike. Batter protests call; roll one die to see if he is ejected from game: 1-3 = Ejected; 4-5 = Not ejected; 6 = rhubarb occurs, batter and any one Offensive player in dugout ejected (Defensive Manager’s option)."
+      },
+      "6": {
+        "description": "Foul tip; catcher splits thumb; out for five games. Batter still batting. If one or two outs, foul tip; catcher injured but stays in game -- add 2 to dice on all runners attempting to steal against him for rest of the game."
+      }
+    }
+  },
+  "FIRST_THIRD": {
+    "probableHit": {
+      "11": {
+        "description": "Fly ball to 7-25. (If 11 is within batter’s HR Rating, fly to 7-28); If ball caught and Hit & Run, chance for a double play. Fielder throws first; runner returns to base; fielder throws again.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 7,
+            "column": 25
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 7,
+            "column": 28
+          }
+        }
+      },
+      "12": {
+        "description": "Fly ball to 5-23. (If 12 is within batter's HR Rating, fly to 5-28); If ball caught and Hit & Run, chance for a double play. Fielder throws first; runner returns to base; fielder throws again.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 5,
+            "column": 23
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 5,
+            "column": 28
+          }
+        }
+      },
+      "13": {
+        "description": "Fly ball to 10-23. (If 13 is within batter’s HR Rating, fly to 10-27); If ball caught and Hit & Run, chance for a double play. Fielder throws first; runner returns to base, fielder throws again.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 10,
+            "column": 23
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 10,
+            "column": 27
+          }
+        }
+      },
+      "14": {
+        "description": "Grounder to 3-26. (If 14 is within batter's HR Rating, fly to 3-28).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 26
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 3,
+            "column": 28
+          }
+        }
+      },
+      "15": {
+        "description": "Grounder to 3-25. (If 15 is within batter's HR Rating, fly to 3-27).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 25
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 3,
+            "column": 27
+          }
+        }
+      },
+      "16": {
+        "description": "Grounder to 4-21. (If 16 is within batter’s HR Rating, fly to 4-28).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 4,
+            "column": 21
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 4,
+            "column": 28
+          }
+        }
+      },
+      "22": {
+        "description": "Grounder to 8-21. (If 22 is within batter’s HR Rating, fly to 8-28).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 21
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 8,
+            "column": 28
+          }
+        }
+      },
+      "23": {
+        "description": "Grounder to 18-21. (If 23 is within batter’s HR Rating, fly to 24-25).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 18,
+            "column": 21
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 24,
+            "column": 25
+          }
+        }
+      },
+      "24": {
+        "description": "Grounder to 5-19.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 5,
+            "column": 19
+          }
+        }
+      },
+      "25": {
+        "description": "Grounder to 18-18; advance one base only regardless of Hit & Run.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 18,
+            "column": 18
+          }
+        }
+      },
+      "26": {
+        "description": "Grounder to 8-19.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 19
+          }
+        }
+      },
+      "33": {
+        "description": "Grounder to 16-20.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 16,
+            "column": 20
+          }
+        }
+      },
+      "34": {
+        "description": "Grounder to 15-20.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 15,
+            "column": 20
+          }
+        }
+      },
+      "35": {
+        "description": "Grounder to 3-20.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 20
+          }
+        }
+      },
+      "36": {
+        "description": "Line drive base hit ever first base to square 3-19 in right field.",
+        "ball": {
+          "type": "line",
+          "coordinate": {
+            "row": 3,
+            "column": 19
+          }
+        }
+      },
+      "44": {
+        "description": "Ground ball off second baseman’s or shortstop's glove to 6-13 (depending on how batter pulls), everyone safe. Advance one base regardless of Hit & Run.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 6,
+            "column": 13
+          }
+        }
+      },
+      "45": {
+        "description": "Line drive off first baseman’s glove to 3-11; everyone safe. Advance one base only regardless of Hit & Run.",
+        "ball": {
+          "type": "line",
+          "coordinate": {
+            "row": 3,
+            "column": 11
+          }
+        }
+      },
+      "46": {
+        "description": "Ground ball to 16-16, if astroturf - otherwise, high chopper to 10-10.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 16,
+            "column": 16
+          }
+        }
+      },
+      "55": {
+        "description": "Line drive base hit over third to 3-20 in left field; if two outs, foul ball - pitch again.",
+        "ball": {
+          "type": "line",
+          "coordinate": {
+            "row": 3,
+            "column": 20
+          }
+        }
+      },
+      "56": {
+        "description": "Grounder to 10-19 or 19-10, Offensive Manager’s option.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 10,
+            "column": 19
+          }
+        }
+      },
+      "66": {
+        "description": "Error; roll one die and see chart below.",
+        "route": "HIT_ERROR"
+      }
+    },
+    "hitError": {
+      "1": {
+        "description": "Ball drops in for a single; center fielder throws wild allowing runner on first to reach third; other runner scores; batter holds at first. If CF is Superior and no error, batter singles and runner on third scores. Good throw, however, keeps runner on first from going to third. Situation now runners on 1st and 2nd."
+      },
+      "2": {
+        "description": "Ball drops in for a single; center fielder throws wild allowing both runners to score and batter to reach second. If CF is Superior and no error, runner on third scores and batter reaches second when runner is thrown out at third base."
+      },
+      "3": {
+        "description": "Same as above except if CF is Superior, there is no error. Runner on third scores; other runner holds second; batter safe at first."
+      },
+      "4": {
+        "description": "Same as above except if CF is Superior, there is no error. Runner on third scores; other runner reaches third; batter safe at first."
+      },
+      "5": {
+        "description": "Right fielder lets ball get by him. Runner on third scores; runner on first goes to third; batter reaches second. Score as a single and an error. If RF is Superior and no error, runner on third scores; runner on first goes to third; batter holds at first with single."
+      },
+      "6": {
+        "description": "Right fielder drops shallow fly ball; all runners advance one base safely. If RF is Superior, there is no error. Ball is caught on square 3-19. Complete play by rolling dice."
+      }
+    },
+    "probableOut": {
+      "11": {
+        "description": "Grounder to 5-11 if nearest fielder is playing deep; 5-17 if nearest fielder is playing in, base hit.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 5,
+            "column": 11
+          }
+        }
+      },
+      "12": {
+        "description": "Fly ball to one square behind left fielder. If Hit & Run, runners return safely.",
+        "ball": {
+          "type": "fly",
+          "fielder": "LF",
+          "spray": "fixed",
+          "squaresBehind": 1
+        }
+      },
+      "13": {
+        "description": "High fly ball to 20-20. If Hit & Run, runners return safely.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 20,
+            "column": 20
+          }
+        }
+      },
+      "14": {
+        "description": "Grounder to third baseman. If he's playing in, runner out at home; batter safe at first; other safe at second. If he's playing deep, runner on third scores; only play is at first or second.",
+        "ball": {
+          "type": "ground",
+          "fielder": "3B",
+          "spray": "fixed"
+        }
+      },
+      "15": {
+        "description": "Grounder to second baseman. If he’s playing in, runner on third holds; other runner safe at second, only play at first. If he’s playing deep, runner on third scores; only play is at first or second.",
+        "ball": {
+          "type": "ground",
+          "fielder": "2B",
+          "spray": "fixed"
+        }
+      },
+      "16": {
+        "description": "Grounder to 5-10; if a double play is attempted, runner on third scores.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 5,
+            "column": 10
+          }
+        }
+      },
+      "22": {
+        "description": "Grounder to 6-9; if a double play is attempted, runner on third scores.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 6,
+            "column": 9
+          }
+        }
+      },
+      "23": {
+        "description": "Grounder to 7-10; if a double play is attempted, runner on third scores.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 7,
+            "column": 10
+          }
+        }
+      },
+      "24": {
+        "description": "Grounder to 3-8; runner safe at second.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 8
+          }
+        }
+      },
+      "25": {
+        "description": "Grounder to 5-8; runner safe at second.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 5,
+            "column": 8
+          }
+        }
+      },
+      "26": {
+        "description": "Grounder to 4-7.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 4,
+            "column": 7
+          }
+        }
+      },
+      "33": {
+        "description": "High fly ball to 3-19. If Hit & Run, runners return safely.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 3,
+            "column": 19
+          }
+        }
+      },
+      "34": {
+        "description": "High fly ball to 15-19 or 19-15, Offensive Manager’s option. If Hit & Run, runners return safely.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 15,
+            "column": 19
+          }
+        }
+      },
+      "35": {
+        "description": "High fly ball to 5-18. If Hit & Run, runners return safely.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 5,
+            "column": 18
+          }
+        }
+      },
+      "36": {
+        "description": "Pop up to 7-13. If Hit & Run, runners return safely.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 7,
+            "column": 13
+          }
+        }
+      },
+      "44": {
+        "description": "Pop up to 3-11. If Hit & Run, runners return safely.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 3,
+            "column": 11
+          }
+        }
+      },
+      "45": {
+        "description": "Pop up to 2-14. If Hit & Run, runners return safely.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 2,
+            "column": 14
+          }
+        }
+      },
+      "46": {
+        "description": "Pop up to 10-10. If Hit & Run, runners return safely.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 10,
+            "column": 10
+          }
+        }
+      },
+      "55": {
+        "description": "Grounder to 6-10; if a double play is attempted, runner on third scores.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 6,
+            "column": 10
+          }
+        }
+      },
+      "56": {
+        "description": "Grounder to 6-9; if a double play is attempted, runner on third scores.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 6,
+            "column": 9
+          }
+        }
+      },
+      "66": {
+        "description": "Error; roll one die and see chart below.",
+        "route": "OUT_ERROR"
+      }
+    },
+    "outError": {
+      "1": {
+        "description": "Shortstop forces runner at second; runner on third scores; batter safe when first baseman drops the throw. If IB is Superior and no error, batter out."
+      },
+      "2": {
+        "description": "Shortstop boots ball; runners advance; batter safe. If SS is Superior and no error, complete play by rolling dice."
+      },
+      "3": {
+        "description": "Third baseman boots ball; runners advance; batter safe. If 3B is Superior and no error, complete play by rolling dice. Runner on third safe at home."
+      },
+      "4": {
+        "description": "Second baseman fumbles ball; runners advance; batter safe. If 2B is Superior and no error, complete play by rolling dice. Runner on third safe at home."
+      },
+      "5": {
+        "description": "Second baseman boots ball; runners advance; batter safe. If 2B is Superior, there is no error. Complete play by rolling dice. Runner on third safe at home."
+      },
+      "6": {
+        "description": "Third baseman boots ball; runners advance; batter safe. If 3B is Superior and no error, runner on third thrown out at home; everyone else is safe. (NOTE: If runner on third is asterisked as being a fast runner, or , he is safe at home)."
+      }
+    },
+    "specialEvent": {
+      "1": {
+        "description": "Base on balls."
+      },
+      "2": {
+        "description": "Balk."
+      },
+      "3": {
+        "description": "Runner on first steals second; no attempt to throw him out-credit batter with a called strike."
+      },
+      "4": {
+        "description": "Hit by pitch, batter takes first."
+      },
+      "5": {
+        "description": "Called third strike."
+      },
+      "6": {
+        "description": "Game called because of rain. If game is being played in domed stadium, a one-hour power failure occurs. Pitchers regain full starting strength when the game resumes."
+      }
+    }
+  },
+  "SECOND_THIRD": {
+    "probableHit": {
+      "11": {
+        "description": "Fly ball to 20-22. (If 11 is within batter’s HR Rating, fly to 20-25).",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 20,
+            "column": 22
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 20,
+            "column": 25
+          }
+        }
+      },
+      "12": {
+        "description": "Fly ball to 10-25. (If 12 is within batter’s HR Rating, fly to 10-28).",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 10,
+            "column": 25
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 10,
+            "column": 28
+          }
+        }
+      },
+      "13": {
+        "description": "Fly ball to 5-24. (If 13 is within batter’s HR Rating, fly to 5-27).",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 5,
+            "column": 24
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 5,
+            "column": 27
+          }
+        }
+      },
+      "14": {
+        "description": "Grounder to 3-26. (If 14 is within batter’s HR Rating, fly to 3-28).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 26
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 3,
+            "column": 28
+          }
+        }
+      },
+      "15": {
+        "description": "Grounder to 4-26. (If 15 is within batter's HR Rating, fly to 4-28).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 4,
+            "column": 26
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 4,
+            "column": 28
+          }
+        }
+      },
+      "16": {
+        "description": "Grounder to 4-20. (If 16 is within batter’s HR Rating, fly to 4-27).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 4,
+            "column": 20
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 4,
+            "column": 27
+          }
+        }
+      },
+      "22": {
+        "description": "Grounder to 8-21. (If 22 is within batter’s HR Rating, fly to 8-28).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 21
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 8,
+            "column": 28
+          }
+        }
+      },
+      "23": {
+        "description": "Grounder to 17-23. (If 23 is within batter's HR Rating, fly to 24-25).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 17,
+            "column": 23
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 24,
+            "column": 25
+          }
+        }
+      },
+      "24": {
+        "description": "Grounder to 18-22.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 18,
+            "column": 22
+          }
+        }
+      },
+      "25": {
+        "description": "Grounder to 5-19.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 5,
+            "column": 19
+          }
+        }
+      },
+      "26": {
+        "description": "Grounder to 8-19.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 19
+          }
+        }
+      },
+      "33": {
+        "description": "Grounder to 16-20 or 20-16, Offensive Manager’s option.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 16,
+            "column": 20
+          }
+        }
+      },
+      "34": {
+        "description": "Grounder to 15-20 or 13-20, Offensive Manager’s option.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 15,
+            "column": 20
+          }
+        }
+      },
+      "35": {
+        "description": "Line drive base hit over first base to 3-20 in right field; if two out, foul-pitch again.",
+        "ball": {
+          "type": "line",
+          "coordinate": {
+            "row": 3,
+            "column": 20
+          }
+        }
+      },
+      "36": {
+        "description": "Grounder to 3-19.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 19
+          }
+        }
+      },
+      "44": {
+        "description": "Grounder off second baseman’s glove to 6-13; runners advance one base, batter safe at first.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 6,
+            "column": 13
+          }
+        }
+      },
+      "45": {
+        "description": "High hopper to 10-10; runners advance one base; only play is at first.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 10,
+            "column": 10
+          }
+        }
+      },
+      "46": {
+        "description": "Line drive base hit over third base to wall, square 3-? in left field.",
+        "ball": {
+          "type": "line",
+          "wallRow": 3,
+          "spray": "fixed"
+        }
+      },
+      "55": {
+        "description": "Grounder to 3-18; if none or one out, foul ball — pitch again.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 18
+          }
+        }
+      },
+      "56": {
+        "description": "Grounder to 10-19.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 10,
+            "column": 19
+          }
+        }
+      },
+      "66": {
+        "description": "Error; roll one die and see chart below.",
+        "route": "HIT_ERROR"
+      }
+    },
+    "hitError": {
+      "1": {
+        "description": "Center fielder drops line drive for two-base error; runners score; batter safe at second. If CF is Superior and no error, ball is caught. Complete play by rolling dice and beginning throw from two squares in front of CF."
+      },
+      "2": {
+        "description": "Same as above except if CF is Superior, there is no error. Ball is caught on square 18-18. Complete play by rolling dice."
+      },
+      "3": {
+        "description": "Same as above except if CF is Superior, there is no error. Ball is caught on square 18-21. Complete play by rolling dice."
+      },
+      "4": {
+        "description": "Right fielder drops fly ball for two-base error; runners score; batter safe at second or (if asterisked as) safe at third. If RF is Superior and no error, fly ball caught on square 7-20 in right field. Complete play by rolling dice."
+      },
+      "5": {
+        "description": "Same as above except if RF is Superior, there is no error. Instead, ball is a base hit grounder to 7-18 in right field. Complete play by rolling dice normally."
+      },
+      "6": {
+        "description": "Ball drops in for a single; right (or left) fielder (depending on how batter pulls) throws wild allowing runners to score and batter to reach second. Roll one die again to see if batter is caught over-running second base: 1-3 = Out; 4-6 = Safe at second. If RF (or LF) is Superior and no error, runners score but batter is thrown out at second base. Score 9 or 7-4-6."
+      }
+    },
+    "probableOut": {
+      "11": {
+        "description": "Line drive hit to two squares diagonally to right of center fielder.",
+        "ball": {
+          "type": "line",
+          "fielder": "CF",
+          "spray": "fixed"
+        }
+      },
+      "12": {
+        "description": "Grounder hit to shortstop. If he’s playing in, batter safe at first; runner is out at home; other advances safely to third. If he’s playing deep, all runners are running but only play is at first.",
+        "ball": {
+          "type": "ground",
+          "fielder": "SS",
+          "spray": "fixed"
+        }
+      },
+      "13": {
+        "description": "Grounder hit to second baseman. If he’s playing in, batter safe at first; runner is out at home; other advances safely to third. If he’s playing deep, all runners are running but only play is at first.",
+        "ball": {
+          "type": "ground",
+          "fielder": "2B",
+          "spray": "fixed"
+        }
+      },
+      "14": {
+        "description": "Grounder to 5-10.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 5,
+            "column": 10
+          }
+        }
+      },
+      "15": {
+        "description": "Grounder to 3-7.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 7
+          }
+        }
+      },
+      "16": {
+        "description": "Grounder to shortstop. Runner on second is hit by the ball and is out. Batter is safe on a single; other holds third.",
+        "ball": {
+          "type": "ground",
+          "fielder": "SS",
+          "spray": "fixed"
+        }
+      },
+      "22": {
+        "description": "Line drive to shortstop; roll one die for possible double play. If roll is equal to or more than number of squares from second or third base, that runner is out.",
+        "ball": {
+          "type": "line",
+          "fielder": "SS",
+          "spray": "fixed"
+        }
+      },
+      "23": {
+        "description": "Fly ball to 9-20.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 9,
+            "column": 20
+          }
+        }
+      },
+      "24": {
+        "description": "Grounder tapped back to mound, 5-5.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 5,
+            "column": 5
+          }
+        }
+      },
+      "25": {
+        "description": "Grounder to 8-8; all runners advance safely; only play is at first base.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 8
+          }
+        }
+      },
+      "26": {
+        "description": "Pop up to 1-13; if caught, runner out trying for home; other runner advances to third base.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 1,
+            "column": 13
+          }
+        }
+      },
+      "33": {
+        "description": "Fly ball to 17-18 or 16-19, Offensive Manager’s option.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 17,
+            "column": 18
+          }
+        }
+      },
+      "34": {
+        "description": "Fly ball to 9-20.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 9,
+            "column": 20
+          }
+        }
+      },
+      "35": {
+        "description": "Pop up to 4-12.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 4,
+            "column": 12
+          }
+        }
+      },
+      "36": {
+        "description": "Pop up to 7-13.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 7,
+            "column": 13
+          }
+        }
+      },
+      "44": {
+        "description": "Pop up to 1-9; if two outs, pop up to 2-10 and roll one die to see if fielder drops it (l=error).",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 1,
+            "column": 9
+          }
+        }
+      },
+      "45": {
+        "description": "Line drive to third baseman; one out only - no chance for double play.",
+        "ball": {
+          "type": "line",
+          "fielder": "3B",
+          "spray": "fixed"
+        }
+      },
+      "46": {
+        "description": "Soft liner to 6-14.",
+        "ball": {
+          "type": "line",
+          "coordinate": {
+            "row": 6,
+            "column": 14
+          }
+        }
+      },
+      "55": {
+        "description": "Grounder to 8-9; all runners advance safely; only play is at first base.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 9
+          }
+        }
+      },
+      "56": {
+        "description": "Sinking liner to four squares in front of centerfielder who makes a shoestring catch. Roll two dice for possible triple play. Begin action by throwing from where ball is caught. If roll is equal to or more than number of squares from second and/or third base, that runner(s) is also out.",
+        "ball": {
+          "type": "line",
+          "fielder": "CF",
+          "spray": "fixed",
+          "squaresInFront": 4
+        }
+      },
+      "66": {
+        "description": "Error; roll one die and see chart below.",
+        "route": "OUT_ERROR"
+      }
+    },
+    "outError": {
+      "1": {
+        "description": "Shortstop throws wild to first; everyone scores; batter reaches second base. If SS is Superior and no error, all runners advance but batter out."
+      },
+      "2": {
+        "description": "Same as above except if SS is Superior and no error, runner on third scores; runner on second holds; only play is at first."
+      },
+      "3": {
+        "description": "Ball goes through third baseman's legs (five squares behind him); runners advance one base; batter safe; everyone has option to try for an extra base. Start action by fielding ball with nearest outfielder. If 3B is Superior and no error, ball is deflected to shortstop. Everyone advances one base. Batter safe on infield single."
+      },
+      "4": {
+        "description": "First baseman bobbles high hopper; runners advance; batter safe. If IB is Superior, no error; runners advance safely; batter is out. If IB is playing in at the time, and no error, runner on third is out at home; batter and other runner safely advance."
+      },
+      "5": {
+        "description": "Third baseman throws wild to first; runners advance one base; batter safe at first. If 3B is Superior and no error, runners advance but batter is out."
+      },
+      "6": {
+        "description": "Same as above but if 3B is Superior and no error, runner thrown out at home. Batter safe at first; other safe at third."
+      }
+    },
+    "specialEvent": {
+      "1": {
+        "description": "Base on balls."
+      },
+      "2": {
+        "description": "Passed ball; roil one die - if 6, batter walks; runners advance one base only."
+      },
+      "3": {
+        "description": "Called third strike."
+      },
+      "4": {
+        "description": "Balk."
+      },
+      "5": {
+        "description": "Hit by pitch, batter takes first."
+      },
+      "6": {
+        "description": "Strike out; catcher drops called third strike; tags batter out. Both runners may attempt to steal and add four to their dice roll."
+      }
+    }
+  },
+  "LOADED": {
+    "probableHit": {
+      "11": {
+        "description": "Fly ball to 17-25. (If 11 is within batter’s HR Rating, fly to 17-27).",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 17,
+            "column": 25
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 17,
+            "column": 27
+          }
+        }
+      },
+      "12": {
+        "description": "Grounder to 3-26. (If 12 is within batter’s HR Rating, fly to 3-28).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 26
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 3,
+            "column": 28
+          }
+        }
+      },
+      "13": {
+        "description": "Grounder to 3-25. (If 13 is within batter’s HR Rating, fly to 5-27).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 25
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 5,
+            "column": 27
+          }
+        }
+      },
+      "14": {
+        "description": "Grounder to 6-26. (If 14 is within batter’s HR Rating, fly to 6-28).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 6,
+            "column": 26
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 6,
+            "column": 28
+          }
+        }
+      },
+      "15": {
+        "description": "Grounder to 8-25. (If 15 is within batter’s HR Rating, fly to 8-27).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 25
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 8,
+            "column": 27
+          }
+        }
+      },
+      "16": {
+        "description": "Grounder to 4-21. (If 16 is within batter's HR Rating, fly to 4-28).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 4,
+            "column": 21
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 4,
+            "column": 28
+          }
+        }
+      },
+      "22": {
+        "description": "Grounder to 4-20. (If 22 is within batter’s HR Rating, fly to 8-28).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 4,
+            "column": 20
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 8,
+            "column": 28
+          }
+        }
+      },
+      "23": {
+        "description": "Grounder to 14-19. (If 23 is within batter’s HR Rating, fly to 14-26).",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 14,
+            "column": 19
+          }
+        },
+        "homeRunBall": {
+          "type": "fly",
+          "coordinate": {
+            "row": 14,
+            "column": 26
+          }
+        }
+      },
+      "24": {
+        "description": "Grounder to 11-19.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 11,
+            "column": 19
+          }
+        }
+      },
+      "25": {
+        "description": "Grounder to 10-18.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 10,
+            "column": 18
+          }
+        }
+      },
+      "26": {
+        "description": "Grounder to 3-18; ball goes to opposite field.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 18
+          },
+          "spray": "opposite"
+        }
+      },
+      "33": {
+        "description": "Grounder to 17-18.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 17,
+            "column": 18
+          }
+        }
+      },
+      "34": {
+        "description": "Grounder to 16-19 or 14-19, Offensive Manager’s option.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 16,
+            "column": 19
+          }
+        }
+      },
+      "35": {
+        "description": "Grounder to 17-17; advance one base only regardless of Hit & Run.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 17,
+            "column": 17
+          }
+        }
+      },
+      "36": {
+        "description": "Grounder to 18-18.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 18,
+            "column": 18
+          }
+        }
+      },
+      "44": {
+        "description": "Grounder to 8-17.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 17
+          }
+        }
+      },
+      "45": {
+        "description": "Grounder to 8-16. •",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 16
+          }
+        }
+      },
+      "46": {
+        "description": "Grounder to 3-17 or 17-3, Offensive Manager’s option.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 17
+          }
+        }
+      },
+      "55": {
+        "description": "Grounder to 3-16 or 16-3, Offensive Manager’s option.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 16
+          }
+        }
+      },
+      "56": {
+        "description": "Grounder to 15-15.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 15,
+            "column": 15
+          }
+        }
+      },
+      "66": {
+        "description": "Error; roll one die and see chart below.",
+        "route": "HIT_ERROR"
+      }
+    },
+    "hitError": {
+      "1": {
+        "description": "Left fielder drops shallow fly ball; all runners advance one. If LF is Superior and no error, ball is caught on square 7-16 in left field. Complete play by rolling dice."
+      },
+      "2": {
+        "description": "Same as above but third baseman is knocked out when he collides with left fielder and is out for the rest of the game - even if the ball is caught."
+      },
+      "3": {
+        "description": "Fly ball dropped by left fielder on square 6-22. Runners, who had been holding, now may attempt to advance. Start action by beginning throw from square 6-22; then move runners; continue throw; etc. If LF is Superior, there is no error. Ball is caught on square 6-22. Complete play by rolling dice."
+      },
+      "4": {
+        "description": "Center fielder drops fly ball for error; runners advance two; batter safe at first. If CF is Superior, there is no error. Ball is caught but runner on third scores. All others hold."
+      },
+      "5": {
+        "description": "Right fielder drops ball when he collides with center fielder; all runners score; batter reaches third. Roll one die to see extent of injuries: 1-3 = both fielders shaken up but can continue to play; 4 = RF out for the game; 5 = CF out for the game; 6 = RF and CF out for the game. If RF is Superior, no error, He catches the ball despite collision. All runners advance two bases. Roll one die to determine extent of injuries. (See chart above)."
+      },
+      "6": {
+        "description": "Right fielder catches ball for out but throws wild to home plate allowing all runners to advance one base. If RF is Superior, there is no error. A good throw keeps runners from advancing."
+      }
+    },
+    "probableOut": {
+      "11": {
+        "description": "High bouncer to 8-10 if nearest fielder is playing deep; grounder to 8-16 if nearest field is playing in, base hit.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 8,
+            "column": 10
+          }
+        }
+      },
+      "12": {
+        "description": "High fly to one square behind center fielder.",
+        "ball": {
+          "type": "fly",
+          "fielder": "CF",
+          "spray": "fixed",
+          "squaresBehind": 1
+        }
+      },
+      "13": {
+        "description": "Grounder to shortstop.",
+        "ball": {
+          "type": "ground",
+          "fielder": "SS",
+          "spray": "fixed"
+        }
+      },
+      "14": {
+        "description": "Line drive to shortstop; roll one die for possible double play. If roll is equal to or more than number of squares from second or third base, that runner is out.",
+        "ball": {
+          "type": "line",
+          "fielder": "SS",
+          "spray": "fixed"
+        }
+      },
+      "15": {
+        "description": "Sharp grounder to third baseman; if not on bag, no play at third.",
+        "ball": {
+          "type": "ground",
+          "fielder": "3B",
+          "spray": "fixed"
+        }
+      },
+      "16": {
+        "description": "Grounder to 5-8.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 5,
+            "column": 8
+          }
+        }
+      },
+      "22": {
+        "description": "One bounce grounder back to the box; roll for possible error (1- error by pitcher)",
+        "ball": {
+          "type": "ground",
+          "fielder": "P",
+          "spray": "fixed"
+        }
+      },
+      "23": {
+        "description": "Grounder to 9-10; runners on second and third advance safely. If nearest fielder nearest fielder is nearest fielder is",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 9,
+            "column": 10
+          }
+        }
+      },
+      "24": {
+        "description": "Slow dribbler to 3-6; only play is at home and / or batter if nearest fielder is playing in is playing deep, only play is on runner going to second and/or batter.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 3,
+            "column": 6
+          }
+        }
+      },
+      "25": {
+        "description": "Grounder to 6-8; only play is at home and / or batter if nearest fielder is playing in. If playing deep, only play is on runner going to second and/or batter.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 6,
+            "column": 8
+          }
+        }
+      },
+      "26": {
+        "description": "Grounder to 5-8; only play is at home and / or batter if nearest fielder is playing in. If playing deep, only play is on runner going'to second and/or batter.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 5,
+            "column": 8
+          }
+        }
+      },
+      "33": {
+        "description": "Grounder to 7-9; runners on second and third advance safely.",
+        "ball": {
+          "type": "ground",
+          "coordinate": {
+            "row": 7,
+            "column": 9
+          }
+        }
+      },
+      "34": {
+        "description": "Towering fly ballto 6-23.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 6,
+            "column": 23
+          }
+        }
+      },
+      "35": {
+        "description": "Towering fly ball to 19-22.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 19,
+            "column": 22
+          }
+        }
+      },
+      "36": {
+        "description": "Soft fly ball to 16-16.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 16,
+            "column": 16
+          }
+        }
+      },
+      "44": {
+        "description": "Fly ball to 9-23.",
+        "ball": {
+          "type": "fly",
+          "coordinate": {
+            "row": 9,
+            "column": 23
+          }
+        }
+      },
+      "45": {
+        "description": "Line drive to 4-9; one out only - no chance for double play.",
+        "ball": {
+          "type": "line",
+          "coordinate": {
+            "row": 4,
+            "column": 9
+          }
+        }
+      },
+      "46": {
+        "description": "Pop up to 6-9 or 9-6, Offensive Manager’s option.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 6,
+            "column": 9
+          }
+        }
+      },
+      "55": {
+        "description": "Deep drive (fly ball) to three squares diagonally behind centerfielder. If in stands, ignore and move ball back only as far as it can go on playing field, regardless of wind factor.",
+        "ball": {
+          "type": "fly",
+          "fielder": "CF",
+          "spray": "fixed"
+        }
+      },
+      "56": {
+        "description": "Pop up to 6-10.",
+        "ball": {
+          "type": "pop",
+          "coordinate": {
+            "row": 6,
+            "column": 10
+          }
+        }
+      },
+      "66": {
+        "description": "Error; roll one die and see chart below.",
+        "route": "OUT_ERROR"
+      }
+    },
+    "outError": {
+      "1": {
+        "description": "Pitcher bobbles ball and then falls; everyone safe. If P is Superior and no error, complete play by rolling dice."
+      },
+      "2": {
+        "description": "Catcher drops throw from shortstop; everyone safe. If C is Superior and no error, runner out at home."
+      },
+      "3": {
+        "description": "Catcher drops throw from second baseman; everyone safe. If C is Superior and no error, runner out at home."
+      },
+      "4": {
+        "description": "Third baseman boots ball; everyone safe. If 3B is Superior and no error, complete play by rolling dice; but no play at third unless fielder is on the base."
+      },
+      "5": {
+        "description": "Ball gets by first baseman; everyone safe. If IB is Superior and no error, complete play by rolling dice."
+      },
+      "6": {
+        "description": "Catcher drops pop up near the plate in foul territory; runners hold; batter still batting. If C is Superior and no error, he catches ball for an out."
+      }
+    },
+    "specialEvent": {
+      "1": {
+        "description": "Base on balls."
+      },
+      "2": {
+        "description": "Wild pitch; everyone advances; roll one dice - if 6, batter walks."
+      },
+      "3": {
+        "description": "Runner picked off first (A-C, P0-1B)."
+      },
+      "4": {
+        "description": "Called strike out."
+      },
+      "5": {
+        "description": "Hit by pitch, batter takes first."
+      },
+      "6": {
+        "description": "Called third strike; batter ejected for disputing call."
+      }
+    }
+  }
+}

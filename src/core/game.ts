@@ -5,6 +5,7 @@ import { automaticUmpireCall, buildRatedDefense, createFieldingAttempt, isAirbor
 import { runnerDistance } from "./baserunning";
 import { distanceToBase } from "./geometry";
 import { createRandomSeed } from "./rng";
+import { isOccupiedBaseState, resolveOccupiedBattedBall, resolveOccupiedOneDie } from "./occupiedChartResolution";
 import type { BaseName, BaseRunners, BaseState, Batter, DiceRoll, FieldingAttempt, GameState, Park, Pitcher, PlateAppearanceResolution, PlayEvent, ScoreLine, Team, TerminalOutcome } from "./types";
 
 export function createInitialGame(selectedParkId: string, seed = createRandomSeed()): GameState {
@@ -60,13 +61,14 @@ export function rollPitch(state: GameState, batter: Batter, pitcher: Pitcher): G
     resultLabel,
     resultTone: adjustedRate ? "event" as const : directResult === "WALK" ? "hit" as const : directResult === "STRIKEOUT" ? "out" as const : classification === "PROBABLE_HIT" ? "hit" as const : classification === "SPECIAL_EVENT" ? "event" as const : "out" as const,
   };
+  const baseState = baseStateFromRunners(state.runners);
   const resolution: PlateAppearanceResolution = adjustedRate
-    ? { phase: "PITCH", baseState: "EMPTY", description: `Pitcher rate changed from ${currentRate} to ${adjustedRate}; pitch again.`, source: "1980 rulebook p.25 Special Events note" }
+    ? { phase: "PITCH", baseState, description: `Pitcher rate changed from ${currentRate} to ${adjustedRate}; pitch again.`, source: "1980 rulebook Special Events note" }
     : directResult
-    ? { phase: "DIRECT_RESULT", baseState: "EMPTY", terminalOutcome: directResult, description: directResult === "WALK" ? "Base on balls." : "Strikeout.", source: "1980 rulebook Rule 5h" }
+    ? { phase: "DIRECT_RESULT", baseState, terminalOutcome: directResult, description: directResult === "WALK" ? "Base on balls." : "Strikeout.", source: "1980 rulebook Rule 5h" }
     : classification === "SPECIAL_EVENT"
-      ? { phase: "SPECIAL_EVENT", baseState: "EMPTY", chartFamily: "SPECIAL_EVENT", description: "Roll one die on the Bases Empty Special Events Chart.", source: "1980 rulebook Rule 5n and p.25" }
-      : { phase: "BATTED_BALL_CHART", baseState: "EMPTY", chartFamily: classification, description: `Roll on the Bases Empty ${pitchResultLabel(classification)} chart.`, source: classification === "PROBABLE_HIT" ? "1980 rulebook p.24" : "1980 rulebook p.25" };
+      ? { phase: "SPECIAL_EVENT", baseState, chartFamily: "SPECIAL_EVENT", description: `Roll one die on the ${baseState === "EMPTY" ? "Bases Empty" : baseState.replace("_", " & ")} Special Events Chart.`, source: "1980 rulebook Rule 5n" }
+      : { phase: "BATTED_BALL_CHART", baseState, chartFamily: classification, description: `Roll on the ${baseState === "EMPTY" ? "Bases Empty" : baseState.replace("_", " & ")} ${pitchResultLabel(classification)} chart.`, source: "1980 rulebook base-state charts" };
   const officialText = adjustedRate
     ? `${pitcher.name}'s rate changes from ${currentRate} to ${adjustedRate}; pitch again.`
     : directResult === "WALK"
@@ -121,11 +123,14 @@ export function rollResolution(state: GameState, batter: Batter, pitcher: Pitche
   const { phase, chartFamily } = state.resolution;
   if (phase === "BATTED_BALL_CHART" && (chartFamily === "PROBABLE_HIT" || chartFamily === "PROBABLE_OUT")) {
     const result = rollTwoDice(state.seed, "chart", `${chartFamily === "PROBABLE_HIT" ? "Probable Hit" : "Probable Out"} chart roll`);
-    let resolution = resolveBasesEmptyBattedBall(chartFamily, result.roll.sherco, batter, pitcher, park, state.outs, state.rulesProfileId === "brien");
+    const baseState = baseStateFromRunners(state.runners);
+    let resolution = isOccupiedBaseState(baseState)
+      ? resolveOccupiedBattedBall(baseState, chartFamily, result.roll.sherco, batter, pitcher, park, state.rulesProfileId === "brien")
+      : resolveBasesEmptyBattedBall(chartFamily, result.roll.sherco, batter, pitcher, park, state.outs, state.rulesProfileId === "brien");
     const currentRate = state.activePitcherRate ?? pitcher.rate;
     const adjustedRate = resolution.phase === "SPECIAL_EVENT" ? specialEventPitcherRate(currentRate) : undefined;
     if (adjustedRate) {
-      resolution = { phase: "PITCH", baseState: "EMPTY", description: `No Special Event: pitcher rate changed from ${currentRate} to ${adjustedRate}; pitch again.`, source: "1980 rulebook p.25 Special Events note" };
+      resolution = { phase: "PITCH", baseState, description: `No Special Event: pitcher rate changed from ${currentRate} to ${adjustedRate}; pitch again.`, source: "1980 rulebook Special Events note" };
     }
     const roll: DiceRoll = {
       ...result.roll,
@@ -139,7 +144,10 @@ export function rollResolution(state: GameState, batter: Batter, pitcher: Pitche
 
   if (phase === "SPECIAL_EVENT") {
     const result = rollOneDie(state.seed, "chart", "Special Event roll");
-    const resolution = resolveBasesEmptySpecialEvent(result.roll.sherco as 1 | 2 | 3 | 4 | 5 | 6, batter, pitcher, park);
+    const baseState = baseStateFromRunners(state.runners);
+    const resolution = isOccupiedBaseState(baseState)
+      ? resolveOccupiedOneDie(baseState, "SPECIAL_EVENT", result.roll.sherco as 1 | 2 | 3 | 4 | 5 | 6)
+      : resolveBasesEmptySpecialEvent(result.roll.sherco as 1 | 2 | 3 | 4 | 5 | 6, batter, pitcher, park);
     const roll: DiceRoll = {
       ...result.roll,
       explanation: resolution.description ?? "Special Event",
@@ -173,6 +181,17 @@ export function rollResolution(state: GameState, batter: Batter, pitcher: Pitche
   if (phase === "ERROR_CHART" && (chartFamily === "HIT_ERROR" || chartFamily === "OUT_ERROR")) {
     const result = rollOneDie(state.seed, "chart", `${chartFamily === "HIT_ERROR" ? "Probable Hit" : "Probable Out"} error roll`);
     const errorRoll = result.roll.sherco as 1 | 2 | 3 | 4 | 5 | 6;
+    const baseState = baseStateFromRunners(state.runners);
+    if (isOccupiedBaseState(baseState)) {
+      const resolution = resolveOccupiedOneDie(baseState, chartFamily, errorRoll);
+      const roll: DiceRoll = {
+        ...result.roll,
+        explanation: resolution.description!,
+        resultLabel: "Error chart",
+        resultTone: "error",
+      };
+      return appendRollEvent(state, roll, resolution.description!, resolution, result.state);
+    }
     const errorFielderPosition = basesEmptyErrorFielder(chartFamily, errorRoll, batter, pitcher);
     const superior = errorFielderPosition === "P"
       ? Boolean(pitcher.defense.superior)
@@ -230,6 +249,11 @@ function baseStateFromRunners(runners: BaseRunners): BaseState {
   if (second) return "SECOND";
   if (third) return "THIRD";
   return "EMPTY";
+}
+
+/** Public because every chart family and persistence boundary must agree on base occupancy. */
+export function currentBaseState(runners: BaseRunners): BaseState {
+  return baseStateFromRunners(runners);
 }
 
 function updateLine(line: ScoreLine, inning: number, changes: Partial<Pick<ScoreLine, "runs" | "hits" | "errors">>): ScoreLine {
@@ -296,9 +320,22 @@ function finishPlateAppearance(
   if (result === "OUT") {
     outs += 1;
   } else if (result === "HOME_RUN") {
-    next = withBattingLine(next, { hits: 1, runs: 1 });
+    const runs = 1 + Number(Boolean(runners.first)) + Number(Boolean(runners.second)) + Number(Boolean(runners.third));
+    runners = {};
+    next = withBattingLine(next, { hits: 1, runs });
   } else {
-    if (result === "DOUBLE" || (result === "ERROR" && errorAward?.base === "SECOND")) runners.second = batter.id;
+    if (result === "WALK" || result === "HIT_BY_PITCH") {
+      let forcedRuns = 0;
+      if (runners.first) {
+        if (runners.second) {
+          if (runners.third) forcedRuns += 1;
+          runners.third = runners.second;
+        }
+        runners.second = runners.first;
+      }
+      runners.first = batter.id;
+      if (forcedRuns) next = withBattingLine(next, { runs: forcedRuns });
+    } else if (result === "DOUBLE" || (result === "ERROR" && errorAward?.base === "SECOND")) runners.second = batter.id;
     else if (result === "TRIPLE" || (result === "ERROR" && errorAward?.base === "THIRD")) runners.third = batter.id;
     else runners.first = batter.id;
     if (result === "SINGLE" || result === "DOUBLE" || result === "TRIPLE") next = withBattingLine(next, { hits: 1 });
@@ -663,6 +700,24 @@ export function resolveFielding(
     ? catchAttempt
     : { ...createFieldingAttempt(batter, park, defense, state.resolution.ballAt, "ground"), battedBallType: state.resolution.battedBallType };
 
+  // Occupied-base throws require a defense-selected target plus simultaneous
+  // runner movement. Until that state machine is attached, stop on the exact
+  // chart placement instead of incorrectly forcing every play to first.
+  if (state.resolution.baseState !== "EMPTY") {
+    return {
+      ...state,
+      ballAt: attempt.ballAt,
+      pendingFielding: attempt,
+      resolution: {
+        ...state.resolution,
+        phase: "CHART_RESULT_PENDING",
+        ballAt: attempt.ballAt,
+        description: `${state.resolution.description ?? "Occupied-base ball in play"} ${attempt.fielderName} is the nearest fielder, ${attempt.fieldingDistance} square${attempt.fieldingDistance === 1 ? "" : "s"} from the ball. Defensive target and chart-locked runner sequence are queued for the occupied-play resolver.`,
+        source: `${state.resolution.source ?? "1980 base-state chart"}; protected occupied-play boundary`,
+      },
+    };
+  }
+
   const result = rollTwoDice(state.seed, "fielding", `${attempt.fielderPosition} fielding throw`);
   const thrown = resolveThrow(attempt, result.roll.total);
   const updatedAttempt = {
@@ -754,9 +809,9 @@ export function canStartNextPlateAppearance(state: GameState): boolean {
   return state.resolution.phase === "PLAY_COMPLETE";
 }
 
-export function startNextPlateAppearance(state: GameState, clearBasesForTesting = false): GameState {
+export function startNextPlateAppearance(state: GameState): GameState {
   if (!canStartNextPlateAppearance(state)) return state;
-  const runners = clearBasesForTesting ? {} : state.runners;
+  const runners = state.runners;
   return {
     ...state,
     runners,
@@ -768,8 +823,6 @@ export function startNextPlateAppearance(state: GameState, clearBasesForTesting 
     resolution: {
       phase: "PITCH",
       baseState: baseStateFromRunners(runners),
-      description: clearBasesForTesting ? "Bases cleared for continued bases-empty testing." : undefined,
-      source: clearBasesForTesting ? "Temporary bases-empty validation loop" : undefined,
     },
   };
 }

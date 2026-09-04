@@ -3,7 +3,7 @@ import { rollOneDie, rollTwoDice, shercoNumber } from "../core/dice";
 import { createRandomSeed } from "../core/rng";
 import { applyTwoOutPreThrowAdvance, homeThrowChoices, leadRunnerDecisions, runnerDistance, runnerDistanceTone, twoOutHitAndRunDestination } from "../core/baserunning";
 import { basesEmptyErrorFielder, directPitchResult, effectivePowerRatings, moveBehindFielder, moveInFrontOfFielder, resolveBasesEmptyBattedBall, resolveBasesEmptyError, resolveBasesEmptySpecialEvent, resolveBasesEmptySuperiorError, specialEventPitcherRate, withinHomeRunRating } from "../core/chartResolution";
-import { createInitialGame, resolveFielding, rollPitch, rollResolution, scoreDirectResult, selectPitcher, startNextPlateAppearance } from "../core/game";
+import { createInitialGame, currentBaseState, resolveFielding, rollPitch, rollResolution, scoreDirectResult, selectPitcher, startNextPlateAppearance } from "../core/game";
 import { automaticUmpireCall, buildRatedDefense, createFieldingAttempt, pivotRulePenalty, resolveContinuousPlay, resolveThrow } from "../core/fielding";
 import { BASE_REFERENCE_SQUARES, directPath, distanceToBase, farthestInPlaySquare, HOME_PLATE_SQUARE, mirrorForLeftHandedBatter, nearestFielder, resolveGroundBallRicochet, squaresBetween } from "../core/geometry";
 import { classifyPitch, hitNumber, pitchResultLabel } from "../core/pitching";
@@ -16,6 +16,7 @@ import type { Park } from "../core/types";
 import rawParks from "../data/parks.json";
 import { kansasCity, philadelphia } from "../data/demo";
 import { BASES_EMPTY_PROBABLE_HIT, BASES_EMPTY_PROBABLE_OUT, SHERCO_CHART_ROLLS } from "../data/charts1980";
+import { OCCUPIED_CHARTS_1980, resolveOccupiedBattedBall, resolveOccupiedOneDie } from "../core/occupiedChartResolution";
 
 describe("SherCo dice", () => {
   it("starts each new game from a fresh nonzero seed while allowing exact test seeds", () => {
@@ -206,6 +207,79 @@ describe("1980 bases-empty chart engine", () => {
   });
 });
 
+describe("1980 occupied-base chart engine", () => {
+  const park = rawParks[0] as unknown as Park;
+  const occupiedStates = ["FIRST", "SECOND", "THIRD", "FIRST_SECOND", "FIRST_THIRD", "SECOND_THIRD", "LOADED"] as const;
+
+  it("contains all 420 printed occupied-base results", () => {
+    for (const baseState of occupiedStates) {
+      const tables = OCCUPIED_CHARTS_1980[baseState];
+      expect(Object.keys(tables.probableHit).map(Number)).toEqual(SHERCO_CHART_ROLLS);
+      expect(Object.keys(tables.probableOut).map(Number)).toEqual(SHERCO_CHART_ROLLS);
+      expect(Object.keys(tables.hitError).map(Number)).toEqual([1, 2, 3, 4, 5, 6]);
+      expect(Object.keys(tables.outError).map(Number)).toEqual([1, 2, 3, 4, 5, 6]);
+      expect(Object.keys(tables.specialEvent).map(Number)).toEqual([1, 2, 3, 4, 5, 6]);
+    }
+  });
+
+  it("compiles a placement for every non-error PH and PO result", () => {
+    for (const baseState of occupiedStates) {
+      for (const family of ["probableHit", "probableOut"] as const) {
+        for (const [roll, entry] of Object.entries(OCCUPIED_CHARTS_1980[baseState][family])) {
+          if (roll !== "66") expect(entry.ball, `${baseState} ${family} ${roll}`).toBeDefined();
+        }
+      }
+    }
+  });
+
+  it("routes the next pitch from actual runner occupancy", () => {
+    const state = {
+      ...createInitialGame(park.id, 2722),
+      runners: { first: philadelphia.lineup[0].id },
+      resolution: { phase: "PITCH" as const, baseState: "FIRST" as const },
+    };
+    const pitched = rollPitch(state, philadelphia.lineup[1], kansasCity.starter);
+    expect(pitched.lastRoll?.sherco).toBe(26);
+    expect(pitched.resolution).toMatchObject({ phase: "BATTED_BALL_CHART", baseState: "FIRST", chartFamily: "PROBABLE_OUT" });
+  });
+
+  it("plots occupied-chart pull and opposite-field coordinates correctly", () => {
+    const pulledByLefty = resolveOccupiedBattedBall("FIRST", "PROBABLE_HIT", 34, philadelphia.lineup[1], kansasCity.starter, park, true);
+    expect(pulledByLefty).toMatchObject({ phase: "BALL_IN_PLAY", baseState: "FIRST", ballAt: { row: 19, column: 7 } });
+
+    const noPowerSchmidt = { ...philadelphia.lineup[2], homeRun: undefined, triple: undefined };
+    const oppositeByRighty = resolveOccupiedBattedBall("FIRST", "PROBABLE_HIT", 16, noPowerSchmidt, kansasCity.starter, park, true);
+    expect(oppositeByRighty.ballAt).toEqual({ row: 20, column: 10 });
+  });
+
+  it("sends occupied-chart 66 directly to its matching error table", () => {
+    expect(resolveOccupiedBattedBall("SECOND_THIRD", "PROBABLE_HIT", 66, philadelphia.lineup[2], kansasCity.starter, park, true)).toMatchObject({
+      phase: "ERROR_CHART",
+      baseState: "SECOND_THIRD",
+      chartFamily: "HIT_ERROR",
+    });
+    expect(resolveOccupiedBattedBall("LOADED", "PROBABLE_OUT", 66, philadelphia.lineup[2], kansasCity.starter, park, true)).toMatchObject({
+      phase: "ERROR_CHART",
+      baseState: "LOADED",
+      chartFamily: "OUT_ERROR",
+    });
+  });
+
+  it("uses occupied Special Event and error entries instead of bases-empty fallbacks", () => {
+    expect(resolveOccupiedOneDie("FIRST_SECOND", "SPECIAL_EVENT", 1)).toMatchObject({
+      phase: "DIRECT_RESULT",
+      baseState: "FIRST_SECOND",
+      terminalOutcome: "WALK",
+    });
+    expect(resolveOccupiedOneDie("FIRST", "HIT_ERROR", 5)).toMatchObject({
+      phase: "CHART_RESULT_PENDING",
+      baseState: "FIRST",
+      chartFamily: "HIT_ERROR",
+    });
+    expect(resolveOccupiedOneDie("FIRST", "HIT_ERROR", 5).description).toContain("Left fielder drops shallow fly ball");
+  });
+});
+
 describe("saved-game schema", () => {
   it("migrates a 0.1.x game into the version-four game-day state", () => {
     const current = createInitialGame("test-park");
@@ -360,7 +434,7 @@ describe("bases-empty fielding and running", () => {
       home: { hits: 1 },
       homeBatterIndex: 7,
     });
-    const hurdleReady = startNextPlateAppearance(toThird, true);
+    const hurdleReady = startNextPlateAppearance(toThird);
     const hurdlePitch = rollPitch(hurdleReady, kansasCity.lineup[7], philadelphia.starter);
     expect(hurdlePitch.homeBatterIndex).toBe(7);
 
@@ -402,7 +476,7 @@ describe("bases-empty fielding and running", () => {
       const completed = scoreDirectResult(state, philadelphia.lineup[0], 9, 9);
       expect(completed.awayBatterIndex, `${outcome} completion`).toBe(1);
 
-      const ready = startNextPlateAppearance(completed, completed.resolution.baseState !== "EMPTY");
+      const ready = startNextPlateAppearance(completed);
       expect(ready.awayBatterIndex, `${outcome} ready state`).toBe(1);
 
       const nextPitch = rollPitch(ready, philadelphia.lineup[1], kansasCity.starter);
@@ -410,14 +484,75 @@ describe("bases-empty fielding and running", () => {
     }
   });
 
-  it("places a batter on first and can clear the bases only for continued testing", () => {
+  it("places a batter on first and preserves him for the next plate appearance", () => {
     const direct = { ...createInitialGame(park.id), resolution: { phase: "DIRECT_RESULT" as const, baseState: "EMPTY" as const, terminalOutcome: "WALK" as const } };
     const scored = scoreDirectResult(direct, philadelphia.lineup[0], 9, 9);
     expect(scored.runners.first).toBe(philadelphia.lineup[0].id);
     expect(scored.resolution.baseState).toBe("FIRST");
-    const continued = startNextPlateAppearance(scored, true);
-    expect(continued.runners).toEqual({});
-    expect(continued.resolution).toMatchObject({ phase: "PITCH", baseState: "EMPTY" });
+    const continued = startNextPlateAppearance(scored);
+    expect(continued.runners).toEqual({ first: philadelphia.lineup[0].id });
+    expect(continued.resolution).toMatchObject({ phase: "PITCH", baseState: "FIRST" });
+  });
+
+  it("forces runners on walks and hit batters without disturbing unforced runners", () => {
+    const rose = philadelphia.lineup[0];
+    const mcBride = philadelphia.lineup[1];
+    const schmidt = philadelphia.lineup[2];
+    const luzinski = philadelphia.lineup[3];
+    const loaded = {
+      ...createInitialGame(park.id),
+      runners: { first: rose.id, second: mcBride.id, third: schmidt.id },
+      resolution: { phase: "DIRECT_RESULT" as const, baseState: "LOADED" as const, terminalOutcome: "WALK" as const },
+    };
+    const forced = scoreDirectResult(loaded, luzinski, 9, 9);
+    expect(forced.runners).toEqual({ first: luzinski.id, second: rose.id, third: mcBride.id });
+    expect(forced.away.runs).toBe(1);
+    expect(currentBaseState(forced.runners)).toBe("LOADED");
+
+    const corners = {
+      ...createInitialGame(park.id),
+      runners: { first: rose.id, third: schmidt.id },
+      resolution: { phase: "DIRECT_RESULT" as const, baseState: "FIRST_THIRD" as const, terminalOutcome: "HIT_BY_PITCH" as const },
+    };
+    const hbp = scoreDirectResult(corners, mcBride, 9, 9);
+    expect(hbp.runners).toEqual({ first: mcBride.id, second: rose.id, third: schmidt.id });
+    expect(hbp.away.runs).toBe(0);
+  });
+
+  it("scores every occupied runner on a home run", () => {
+    const state = {
+      ...createInitialGame(park.id),
+      runners: { first: "runner-1", second: "runner-2", third: "runner-3" },
+      resolution: { phase: "DIRECT_RESULT" as const, baseState: "LOADED" as const, terminalOutcome: "HOME_RUN" as const },
+    };
+    const scored = scoreDirectResult(state, philadelphia.lineup[2], 9, 9);
+    expect(scored.away).toMatchObject({ runs: 4, hits: 1, innings: [4] });
+    expect(scored.runners).toEqual({});
+  });
+
+  it("protects an occupied ground ball from the old throw-everything-to-first path", () => {
+    const rose = philadelphia.lineup[0];
+    const mcBride = philadelphia.lineup[1];
+    const state = {
+      ...createInitialGame(park.id),
+      runners: { first: rose.id },
+      ballAt: { row: 7, column: 9 },
+      resolution: {
+        phase: "BALL_IN_PLAY" as const,
+        baseState: "FIRST" as const,
+        chartFamily: "PROBABLE_OUT" as const,
+        battedBallType: "ground" as const,
+        ballAt: { row: 7, column: 9 },
+        description: "Grounder to 7-9.",
+      },
+    };
+    const protectedPlay = resolveFielding(state, mcBride, kansasCity.starter, park, kansasCity, 9, 9);
+    expect(protectedPlay).toMatchObject({
+      runners: { first: rose.id },
+      awayBatterIndex: 0,
+      resolution: { phase: "CHART_RESULT_PENDING", baseState: "FIRST" },
+    });
+    expect(protectedPlay.resolution.description).toContain("Defensive target");
   });
 
   it("scores a bases-empty home run in the current inning", () => {

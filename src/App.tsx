@@ -53,7 +53,7 @@ export function App() {
     }
   }, [batter, game.ballAt, game.resolution.battedBallType, game.resolution.phase, park, pitcher, pitchingTeam]);
   const displayBallAt = game.resolution.phase === "BALL_IN_PLAY" ? previewFielding?.ballAt ?? game.ballAt : game.ballAt;
-  const runnerBallAt = game.resolution.phase === "BALL_IN_PLAY" || game.resolution.phase === "RUNNER_ADVANCE" || game.resolution.phase === "UMPIRE_CHECK" ? displayBallAt : undefined;
+  const runnerBallAt = game.resolution.phase === "BALL_IN_PLAY" || game.resolution.phase === "CHART_RESULT_PENDING" || game.resolution.phase === "RUNNER_ADVANCE" || game.resolution.phase === "UMPIRE_CHECK" ? displayBallAt : undefined;
   const fieldingArm = game.pendingFielding?.arm ?? previewFielding?.arm ?? game.lastFielding?.arm;
   const profileName = game.rulesProfileId === "brien" ? "Brien's Rules" : "Official 1980";
 
@@ -102,8 +102,15 @@ export function App() {
         return scoreDirectResult(current, activeBatter, demoGame.away.lineup.length, demoGame.home.lineup.length);
       }
       if (current.resolution.phase === "PLAY_COMPLETE") {
-        const started = startNextPlateAppearance(current, current.resolution.baseState !== "EMPTY");
-        return rollPitch(started, activeBatter, activePitcher);
+        const started = startNextPlateAppearance(current);
+        const nextBatter = started.half === "top"
+          ? demoGame.away.lineup[started.awayBatterIndex]
+          : demoGame.home.lineup[started.homeBatterIndex];
+        const nextPitchingSide = started.half === "top" ? "home" : "away";
+        const nextDefensiveTeam = demoGame[nextPitchingSide];
+        const nextPitcherId = started.activePitchers[nextPitchingSide];
+        const nextPitcher = [nextDefensiveTeam.starter, ...nextDefensiveTeam.bullpen].find((candidate) => candidate.id === nextPitcherId) ?? nextDefensiveTeam.starter;
+        return rollPitch(started, nextBatter, nextPitcher);
       }
       return rollResolution(current, activeBatter, activePitcher, park, defensiveTeam);
     });
@@ -194,7 +201,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Rules-engine build 0.5.3 · Single-step batting rotation</span>
+        <span>Rules-engine build 0.6.0 · Occupied-base chart book</span>
       </footer>
     </div>
   );

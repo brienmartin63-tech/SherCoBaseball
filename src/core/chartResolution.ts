@@ -100,8 +100,20 @@ export function moveBehindFielder(coordinate: Coordinate, squares: number): Coor
   };
 }
 
-function targetCoordinate(rule: BallTargetRule, batter: Batter, pitcher: Pitcher, park: Park): Coordinate | undefined {
-  const base = rule.coordinate ?? park.fielders.find((fielder) => fielder.position === rule.fielder)?.at;
+function wallSquareOnRow(park: Park, row: number): Coordinate | undefined {
+  const legal: Coordinate[] = [];
+  for (let column = 1; column <= 28; column += 1) {
+    const at = { row, column };
+    const terrain = parkTerrainAt(park, at);
+    if (terrain === "field" || terrain === "dirt") legal.push(at);
+  }
+  return legal.sort((left, right) => squaresBetween(HOME_PLATE_SQUARE, right) - squaresBetween(HOME_PLATE_SQUARE, left))[0];
+}
+
+export function targetCoordinate(rule: BallTargetRule, batter: Batter, pitcher: Pitcher, park: Park): Coordinate | undefined {
+  const base = rule.coordinate
+    ?? (rule.wallRow ? wallSquareOnRow(park, rule.wallRow) : undefined)
+    ?? park.fielders.find((fielder) => fielder.position === rule.fielder)?.at;
   if (!base) return undefined;
   const relative = rule.squaresInFront
     ? moveInFrontOfFielder(base, rule.squaresInFront)

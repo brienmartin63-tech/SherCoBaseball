@@ -26,11 +26,12 @@ function nextAction(game: GameState): { label: string; disabled: boolean } {
     case "BALL_CHECK": return { label: "Roll ball check", disabled: false };
     case "COUNT_PENDING": return { label: "Count continuation pending", disabled: true };
     case "TRIPLE_DECISION": return { label: "Triple choice pending", disabled: true };
+    case "CHART_RESULT_PENDING": return { label: "Chart-locked runner resolution pending", disabled: true };
     case "BALL_IN_PLAY": return { label: "Resolve fielding", disabled: false };
     case "RUNNER_ADVANCE": return { label: `Throw to ${game.pendingFielding?.targetBase.toLowerCase() ?? "next base"}`, disabled: false };
     case "UMPIRE_CHECK": return { label: "Roll automatic umpire", disabled: false };
     case "DIRECT_RESULT": return { label: "Score play", disabled: false };
-    case "PLAY_COMPLETE": return { label: game.resolution.baseState === "EMPTY" ? "Roll pitch" : "Clear bases & roll pitch", disabled: false };
+    case "PLAY_COMPLETE": return { label: "Roll pitch", disabled: false };
   }
 }
 
