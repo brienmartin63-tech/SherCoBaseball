@@ -17,6 +17,17 @@ import rawParks from "../data/parks.json";
 import { kansasCity, philadelphia } from "../data/demo";
 import { BASES_EMPTY_PROBABLE_HIT, BASES_EMPTY_PROBABLE_OUT, SHERCO_CHART_ROLLS } from "../data/charts1980";
 import { OCCUPIED_CHARTS_1980, resolveOccupiedBattedBall, resolveOccupiedOneDie } from "../core/occupiedChartResolution";
+import { APP_VERSION } from "../data/release";
+import packageJson from "../../package.json";
+import packageLock from "../../package-lock.json";
+
+describe("release metadata", () => {
+  it("keeps runtime and package versions synchronized", () => {
+    expect(APP_VERSION).toBe(packageJson.version);
+    expect(packageLock.version).toBe(packageJson.version);
+    expect(packageLock.packages[""].version).toBe(packageJson.version);
+  });
+});
 
 describe("SherCo dice", () => {
   it("starts each new game from a fresh nonzero seed while allowing exact test seeds", () => {
@@ -672,6 +683,47 @@ describe("bases-empty fielding and running", () => {
       resolution: { phase: "RUNNER_ADVANCE", defensiveOptions: undefined },
       pendingRunnerPlay: { targetRunnerId: schmidt.id },
       pendingFielding: { targetBase: "FIRST", targetDistance: 2 },
+    });
+  });
+
+  it("keeps Willie Wilson's runners-at-the-corners PH 16 as a grounder and requires a defensive throw", () => {
+    const wilson = kansasCity.lineup[0];
+    const hurdle = kansasCity.lineup[7];
+    const porter = kansasCity.lineup[6];
+    const chartResult = resolveOccupiedBattedBall("FIRST_THIRD", "PROBABLE_HIT", 16, wilson, philadelphia.starter, park, true);
+    expect(chartResult).toMatchObject({
+      phase: "BALL_IN_PLAY",
+      baseState: "FIRST_THIRD",
+      battedBallType: "ground",
+      ballAt: { row: 4, column: 21 },
+      terminalOutcome: undefined,
+    });
+
+    const plotted = {
+      ...createInitialGame(park.id),
+      half: "bottom" as const,
+      runners: { first: hurdle.id, third: porter.id },
+      ballAt: chartResult.ballAt,
+      resolution: chartResult,
+    };
+    const throwRequired = resolveFielding(plotted, wilson, philadelphia.starter, park, philadelphia, 9, 9, kansasCity);
+    expect(throwRequired).toMatchObject({
+      home: { runs: 0, hits: 0 },
+      runners: { first: hurdle.id, third: porter.id },
+      resolution: {
+        phase: "DEFENSE_CHOICE",
+        baseState: "FIRST_THIRD",
+        terminalOutcome: undefined,
+        defensiveOptions: [
+          { runnerId: porter.id, targetBase: "HOME", routeDistance: 22 },
+          { runnerId: hurdle.id, targetBase: "SECOND", routeDistance: 17 },
+          { runnerId: wilson.id, targetBase: "FIRST", routeDistance: 22 },
+        ],
+      },
+    });
+    expect(selectDefensiveTarget(throwRequired, hurdle.id)).toMatchObject({
+      resolution: { phase: "RUNNER_ADVANCE" },
+      pendingFielding: { targetBase: "SECOND", targetDistance: 13, fieldingDistance: 4 },
     });
   });
 

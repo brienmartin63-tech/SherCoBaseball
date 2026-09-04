@@ -15,6 +15,7 @@ import type { Park } from "./core/types";
 import { demoGame } from "./data/demo";
 import rawParks from "./data/parks.json";
 import shercoLogo from "./assets/sherco-logo-2026.png";
+import { APP_RELEASE_NAME, APP_VERSION } from "./data/release";
 
 type View = "game" | "box" | "pbp" | "stats" | "league";
 const parks = rawParks as unknown as Park[];
@@ -206,7 +207,7 @@ export function App() {
       </main>
       <footer>
         <span><ShieldCheck size={15} /> Deterministic game seed: {game.seed}</span>
-        <span>Rules-engine build 0.6.1 · Occupied-hit first throws</span>
+        <span>Rules-engine build {APP_VERSION} · {APP_RELEASE_NAME}</span>
       </footer>
     </div>
   );

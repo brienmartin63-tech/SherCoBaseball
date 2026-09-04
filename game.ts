@@ -608,7 +608,6 @@ function applyRunnerMovements(runners: BaseRunners, movements: RunnerMovement[],
 
 function targetOptions(movements: RunnerMovement[]): DefenseTargetOption[] {
   return movements
-    .filter((movement) => movement.routeDistance <= 12)
     .map(({ runnerId, runnerName: name, to, routeDistance }) => ({ runnerId, runnerName: name, targetBase: to, routeDistance }));
 }
 

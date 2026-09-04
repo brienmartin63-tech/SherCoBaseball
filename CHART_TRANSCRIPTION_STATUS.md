@@ -2,7 +2,7 @@
 
 This inventory is the source-of-truth boundary between chart material that the program can execute and chart material that has only been supplied for later work. A chart is marked **executable** only when its entries are structured data, connected to game state, and covered by regression tests.
 
-## Executable and compiled in build 0.6.0
+## Current executable coverage in build 0.6.2
 
 | Rules material | Source | Coverage |
 | --- | --- | --- |

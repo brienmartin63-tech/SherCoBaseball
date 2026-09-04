@@ -1,14 +1,15 @@
 {
   "name": "sherco-grand-slam",
   "private": true,
-  "version": "0.6.1",
+  "version": "0.6.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "npm run test && npm run build"
+    "verify:release": "node tools/verify_release_version.mjs",
+    "check": "npm run verify:release && npm run test && npm run build"
   },
   "dependencies": {
     "@vitejs/plugin-react": "6.1.1",

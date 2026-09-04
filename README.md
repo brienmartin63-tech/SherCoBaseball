@@ -4,9 +4,17 @@ A browser-based implementation of the 1980 SherCo Grand Slam Baseball rules, des
 
 The durable design decisions, confirmed house rules, scoring requirements, stadium-import conventions, and development priorities are preserved in [Project Checkpoint 0.1.7](docs/PROJECT_CHECKPOINT_0.1.7.md).
 
-## Rules-engine build 0.6.1
+## Rules-engine build 0.6.2
 
 This checkpoint intentionally separates rules, game state, imported data, persistence, and the interface so later requirements can extend working code instead of replacing it.
+
+### 0.6.2 automatic-safe advances still produce a throw
+
+- Corrects occupied hits on which every initial route exceeds the maximum allowance of 12. The runners are safe on that leg, but the defense still selects a target, rolls, and moves the ball toward the chosen base.
+- Prevents the stationary-ball loop that incorrectly let runners circle the bases without any defensive throws.
+- Adds the exact runners-at-first-and-third Willie Wilson PH `16` regression: the non-HR grounder stays at `4-21` and opens defensive target selection instead of becoming a three-run home run.
+- Introduces an automated release-metadata gate. A build now fails if `package.json`, `package-lock.json`, the runtime version, README heading, chart-status heading, or checkpoint filename disagree.
+- See [Project Checkpoint 0.6.2](docs/PROJECT_CHECKPOINT_0.6.2.md).
 
 ### 0.6.1 occupied-hit first throws
 
@@ -220,7 +228,7 @@ Pitch rolls now present the decisive result prominently as `33 — Probable Out`
 - The supplied Rose, McBride, and Schmidt statistical examples are retained as regression-tested demo values.
 - Wider lineup panels and a 480-pixel stadium reduce vertical scrolling while preserving the full three-column game workspace.
 
-Not yet implemented after 0.6.0:
+Not yet implemented after 0.6.2:
 
 - defense-selected occupied-base throw targets, simultaneous runner movement, chart-locked error advancement, and complete double/triple-play integration;
 - substitutions and complete official scoring;
